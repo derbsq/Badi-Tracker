@@ -1,0 +1,3434 @@
+{
+  "pool": "Hallenbad City Schwimmerbecken",
+  "valid_from": "2026-01-01",
+  "total_lanes": 6,
+  "legend": {
+    "1": "Öffentlichkeit",
+    "2": "Schulen",
+    "3": "Aquatic Masters Team",
+    "4": "Sportaktiv",
+    "5": "My Sport",
+    "6": "Trigether",
+    "7": "Schwimmverein Zürileu",
+    "8": "ASVZ",
+    "9": "Swimatic"
+  },
+  "note": "Nur Dauerbelegungen. Kurzfristige bewilligte Belegungen nicht abgebildet.",
+  "schedule": {
+    "Monday": {
+      "06:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "06:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "My Sport": 1
+        },
+        "raw_codes": [
+          5,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "07:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "My Sport": 1
+        },
+        "raw_codes": [
+          5,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "07:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "08:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "08:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "09:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "09:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "10:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "10:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "11:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "11:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "12:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Aquatic Masters Team": 1
+        },
+        "raw_codes": [
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "12:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Aquatic Masters Team": 1
+        },
+        "raw_codes": [
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "13:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Aquatic Masters Team": 1
+        },
+        "raw_codes": [
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "13:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "14:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "14:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "15:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "15:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "16:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "16:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "17:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "17:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "18:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          1,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "18:30": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Aquatic Masters Team": 1,
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          3,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "19:00": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Aquatic Masters Team": 1,
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          3,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "19:30": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Aquatic Masters Team": 1,
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          3,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "20:00": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Sportaktiv": 2
+        },
+        "raw_codes": [
+          4,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "20:30": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Sportaktiv": 2
+        },
+        "raw_codes": [
+          4,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "21:00": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Sportaktiv": 2
+        },
+        "raw_codes": [
+          4,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "21:30": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Sportaktiv": 2
+        },
+        "raw_codes": [
+          4,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    "Tuesday": {
+      "06:00": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "ASVZ": 1,
+          "Swimatic": 1
+        },
+        "raw_codes": [
+          8,
+          9,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "06:30": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "ASVZ": 1,
+          "Swimatic": 1
+        },
+        "raw_codes": [
+          8,
+          9,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "07:00": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "ASVZ": 1,
+          "Swimatic": 1
+        },
+        "raw_codes": [
+          8,
+          9,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "07:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "ASVZ": 1
+        },
+        "raw_codes": [
+          8,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "08:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "ASVZ": 1
+        },
+        "raw_codes": [
+          8,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "08:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "ASVZ": 1
+        },
+        "raw_codes": [
+          8,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "09:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "09:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "10:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "10:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "11:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "11:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "12:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Aquatic Masters Team": 1
+        },
+        "raw_codes": [
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "12:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Aquatic Masters Team": 1
+        },
+        "raw_codes": [
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "13:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Aquatic Masters Team": 1
+        },
+        "raw_codes": [
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "13:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "14:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "14:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "15:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "15:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "16:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "16:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "17:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          1,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "17:30": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Schwimmverein Zürileu": 1,
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          7,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "18:00": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Schwimmverein Zürileu": 1,
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          7,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "18:30": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Schwimmverein Zürileu": 1,
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          7,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "19:00": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Schwimmverein Zürileu": 1,
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          7,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "19:30": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Schwimmverein Zürileu": 1,
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          7,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "20:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          1,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "20:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          1,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "21:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "21:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    "Wednesday": {
+      "06:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "ASVZ": 1
+        },
+        "raw_codes": [
+          8,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "06:30": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "ASVZ": 1,
+          "Trigether": 1
+        },
+        "raw_codes": [
+          8,
+          6,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "07:00": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "ASVZ": 1,
+          "Trigether": 1
+        },
+        "raw_codes": [
+          8,
+          6,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "07:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "ASVZ": 1
+        },
+        "raw_codes": [
+          8,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "08:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "ASVZ": 1
+        },
+        "raw_codes": [
+          8,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "08:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "ASVZ": 1
+        },
+        "raw_codes": [
+          8,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "09:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "09:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "10:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "10:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "11:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "11:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "12:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Aquatic Masters Team": 1
+        },
+        "raw_codes": [
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "12:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Aquatic Masters Team": 1
+        },
+        "raw_codes": [
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "13:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Aquatic Masters Team": 1
+        },
+        "raw_codes": [
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "13:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "14:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "14:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "15:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "15:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "16:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "16:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "17:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "17:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "18:00": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Schwimmverein Zürileu": 1,
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          7,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "18:30": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Schwimmverein Zürileu": 1,
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          7,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "19:00": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Schwimmverein Zürileu": 1,
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          7,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "19:30": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Schwimmverein Zürileu": 1,
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          7,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "20:00": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Schwimmverein Zürileu": 1,
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          7,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "20:30": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Schwimmverein Zürileu": 1,
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          7,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "21:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schwimmverein Zürileu": 1
+        },
+        "raw_codes": [
+          7,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "21:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schwimmverein Zürileu": 1
+        },
+        "raw_codes": [
+          7,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    "Thursday": {
+      "06:00": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "ASVZ": 1,
+          "Swimatic": 1
+        },
+        "raw_codes": [
+          8,
+          9,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "06:30": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "ASVZ": 1,
+          "Swimatic": 1
+        },
+        "raw_codes": [
+          8,
+          9,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "07:00": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "ASVZ": 1,
+          "Swimatic": 1
+        },
+        "raw_codes": [
+          8,
+          9,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "07:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "ASVZ": 1
+        },
+        "raw_codes": [
+          8,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "08:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "ASVZ": 1
+        },
+        "raw_codes": [
+          8,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "08:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "ASVZ": 1
+        },
+        "raw_codes": [
+          8,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "09:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "09:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "10:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "10:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "11:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "11:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "12:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Aquatic Masters Team": 1
+        },
+        "raw_codes": [
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "12:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Aquatic Masters Team": 1
+        },
+        "raw_codes": [
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "13:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Aquatic Masters Team": 1
+        },
+        "raw_codes": [
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "13:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "14:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "14:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "15:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "15:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "16:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "16:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "17:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "17:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "18:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          4,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "18:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          4,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "19:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          4,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "19:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          4,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "20:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          4,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "20:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          4,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "21:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          4,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "21:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          4,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    "Friday": {
+      "06:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "ASVZ": 1
+        },
+        "raw_codes": [
+          1,
+          8,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "06:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "ASVZ": 1
+        },
+        "raw_codes": [
+          1,
+          8,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "07:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "ASVZ": 1
+        },
+        "raw_codes": [
+          1,
+          8,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "07:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "ASVZ": 1
+        },
+        "raw_codes": [
+          1,
+          8,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "08:00": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Schulen": 1,
+          "ASVZ": 1
+        },
+        "raw_codes": [
+          2,
+          8,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "08:30": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Schulen": 1,
+          "ASVZ": 1
+        },
+        "raw_codes": [
+          2,
+          8,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "09:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "09:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "10:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "10:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "11:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "11:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "12:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Aquatic Masters Team": 1
+        },
+        "raw_codes": [
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "12:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Aquatic Masters Team": 1
+        },
+        "raw_codes": [
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "13:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Aquatic Masters Team": 1
+        },
+        "raw_codes": [
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "13:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "14:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "14:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "15:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Schulen": 1
+        },
+        "raw_codes": [
+          2,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "15:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "16:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "16:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "17:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "17:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "18:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          1,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "18:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          1,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "19:00": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Aquatic Masters Team": 1,
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          3,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "19:30": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Aquatic Masters Team": 1,
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          3,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "20:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          1,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "20:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          1,
+          4,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "21:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "21:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    "Saturday": {
+      "06:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "06:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "07:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "07:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          4,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "08:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          4,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "08:30": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Sportaktiv": 1,
+          "Trigether": 1
+        },
+        "raw_codes": [
+          4,
+          6,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "09:00": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Sportaktiv": 1,
+          "Trigether": 1
+        },
+        "raw_codes": [
+          4,
+          6,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "09:30": {
+        "public_lanes": 4,
+        "total_lanes": 6,
+        "public_ratio": 0.6667,
+        "occupants": {
+          "Sportaktiv": 1,
+          "Trigether": 1
+        },
+        "raw_codes": [
+          4,
+          6,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "10:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          4,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "10:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          4,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "11:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          4,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "11:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Sportaktiv": 1
+        },
+        "raw_codes": [
+          4,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "12:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Aquatic Masters Team": 1
+        },
+        "raw_codes": [
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "12:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Aquatic Masters Team": 1
+        },
+        "raw_codes": [
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "13:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Aquatic Masters Team": 1
+        },
+        "raw_codes": [
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "13:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "14:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "14:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "15:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "15:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "16:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "16:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "17:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "17:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "18:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "18:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "19:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "19:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "20:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "20:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "21:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "21:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    "Sunday": {
+      "06:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "06:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "07:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "07:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "08:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "08:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "09:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "09:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "10:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "10:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "11:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "11:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "12:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Aquatic Masters Team": 1
+        },
+        "raw_codes": [
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "12:30": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Aquatic Masters Team": 1
+        },
+        "raw_codes": [
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "13:00": {
+        "public_lanes": 5,
+        "total_lanes": 6,
+        "public_ratio": 0.8333,
+        "occupants": {
+          "Aquatic Masters Team": 1
+        },
+        "raw_codes": [
+          3,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "13:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "14:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "14:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "15:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "15:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "16:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "16:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "17:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "17:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "18:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "18:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "19:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "19:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "20:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "20:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "21:00": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "21:30": {
+        "public_lanes": 6,
+        "total_lanes": 6,
+        "public_ratio": 1.0,
+        "occupants": {},
+        "raw_codes": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      }
+    }
+  }
+}
