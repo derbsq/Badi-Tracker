@@ -1,0 +1,51 @@
+name: Track Badi Auslastung
+
+on:
+  schedule:
+    # Alle 10 Minuten (UTC). Cron versteht keine Zeitzonen.
+    - cron: "*/10 * * * *"
+  workflow_dispatch:  # Erlaubt manuelles Ausloesen via UI
+
+# Verhindert, dass parallele Runs die CSV gleichzeitig committen
+concurrency:
+  group: tracker
+  cancel-in-progress: false
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # Damit der Job zurueck ins Repo committen darf
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run tracker
+        run: python scripts/track.py
+
+      - name: Commit data
+        run: |
+          git config user.name "badi-tracker-bot"
+          git config user.email "actions@github.com"
+          git add data/
+          if git diff --staged --quiet; then
+            echo "Keine Aenderungen"
+          else
+            git commit -m "data: snapshot $(date -u +'%Y-%m-%dT%H:%MZ')"
+            # Retry bei Push-Konflikt (parallele Runs)
+            for i in 1 2 3; do
+              git pull --rebase origin main && git push && break
+              echo "Push-Versuch $i fehlgeschlagen, retry..."
+              sleep 5
+            done
+          fi
