@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0c2030" />
+  <title>Badi-Tracker Zürich</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Ctext x='0' y='14' font-size='14'%3E🏊%3C/text%3E%3C/svg%3E" />
+  <style>
+    :root {
+      --bg: #0c1620;
+      --bg-card: #15222e;
+      --bg-soft: #1c2c3a;
+      --border: rgba(255,255,255,0.08);
+      --border-strong: rgba(255,255,255,0.16);
+      --text: #e6edf3;
+      --text-muted: #8b96a3;
+      --text-dim: #5a6573;
+      --accent: #4a9eff;
+      --green-bg: #1a3a2e; --green-fg: #5dcaa5;
+      --amber-bg: #3a2f1a; --amber-fg: #ef9f27;
+      --coral-bg: #3a241a; --coral-fg: #f0997b;
+      --red-bg: #3a1a1a;   --red-fg: #f09595;
+    }
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f5f6f8;
+        --bg-card: #ffffff;
+        --bg-soft: #eef0f3;
+        --border: rgba(0,0,0,0.08);
+        --border-strong: rgba(0,0,0,0.16);
+        --text: #1a2330;
+        --text-muted: #5a6573;
+        --text-dim: #8b96a3;
+        --accent: #185fa5;
+        --green-bg: #E1F5EE; --green-fg: #085041;
+        --amber-bg: #FAEEDA; --amber-fg: #633806;
+        --coral-bg: #FAECE7; --coral-fg: #712B13;
+        --red-bg: #FCEBEB;   --red-fg: #791F1F;
+      }
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: var(--bg); color: var(--text);
+      font-size: 15px; line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+    }
+    .wrap { max-width: 900px; margin: 0 auto; padding: 1.25rem 1rem 4rem; }
+
+    header {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-bottom: 1.25rem; flex-wrap: wrap; gap: 8px;
+    }
+    h1 { margin: 0; font-size: 22px; font-weight: 500; }
+    h2 { margin: 1.5rem 0 0.75rem; font-size: 16px; font-weight: 500; }
+    .status {
+      font-size: 12px; color: var(--text-muted);
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); }
+    .dot.live { background: #5dcaa5; box-shadow: 0 0 6px rgba(93,202,165,0.5); }
+    .dot.err { background: #f09595; }
+
+    .cards {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 10px; margin-bottom: 1.25rem;
+    }
+    .card { padding: 14px 16px; border-radius: 12px; background: var(--bg-soft); }
+    .card.green { background: var(--green-bg); color: var(--green-fg); }
+    .card.amber { background: var(--amber-bg); color: var(--amber-fg); }
+    .card.coral { background: var(--coral-bg); color: var(--coral-fg); }
+    .card.red   { background: var(--red-bg);   color: var(--red-fg); }
+    .card-label { font-size: 13px; font-weight: 500; margin-bottom: 6px; opacity: 0.9; }
+    .card-num { display: flex; align-items: baseline; gap: 6px; }
+    .card-num .big { font-size: 26px; font-weight: 500; }
+    .card-num .small { font-size: 13px; opacity: 0.7; }
+    .card-bar { margin-top: 8px; height: 4px; background: rgba(0,0,0,0.18); border-radius: 2px; overflow: hidden; }
+    .card-bar > span { display: block; height: 100%; background: currentColor; opacity: 0.85; }
+    .card-meta { margin-top: 6px; font-size: 11px; opacity: 0.85; }
+
+    .panel {
+      background: var(--bg-card); border-radius: 12px;
+      border: 1px solid var(--border); padding: 14px 16px;
+    }
+
+    .lanes-now {
+      padding: 12px 14px; background: var(--bg-soft); border-radius: 10px;
+      font-size: 13px; margin-bottom: 1rem;
+    }
+    .lanes-now strong { font-weight: 500; }
+    .lanes-now .muted { color: var(--text-muted); }
+
+    .controls {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 0.75rem;
+    }
+    select {
+      background: var(--bg-card); color: var(--text);
+      border: 1px solid var(--border-strong);
+      padding: 6px 10px; border-radius: 8px; font-size: 13px;
+      font-family: inherit;
+    }
+
+    .chart-wrap { position: relative; width: 100%; height: 320px; }
+    @media (max-width: 600px) { .chart-wrap { height: 280px; } }
+
+    table.lanes {
+      border-collapse: collapse; font-size: 11px; width: 100%;
+      font-variant-numeric: tabular-nums;
+    }
+    table.lanes th {
+      padding: 4px 6px; text-align: center;
+      color: var(--text-muted); font-weight: 500;
+      position: sticky; top: 0; background: var(--bg-card);
+    }
+    table.lanes th.time-col, table.lanes td.time-col {
+      text-align: left; color: var(--text-dim);
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    }
+    table.lanes td {
+      padding: 3px 6px; text-align: center; font-weight: 500;
+      border-radius: 3px;
+    }
+    table.lanes td.l-6 { background: var(--green-bg); color: var(--green-fg); }
+    table.lanes td.l-5 { background: var(--green-bg); color: var(--green-fg); opacity: 0.85; }
+    table.lanes td.l-4 { background: var(--amber-bg); color: var(--amber-fg); }
+    table.lanes td.l-3 { background: var(--coral-bg); color: var(--coral-fg); }
+    table.lanes td.l-2 { background: var(--red-bg); color: var(--red-fg); }
+    table.lanes td.l-1 { background: var(--red-bg); color: var(--red-fg); opacity: 0.85; }
+    .lane-table-wrap { overflow-x: auto; }
+
+    .note {
+      margin-top: 1.5rem; padding: 12px 14px;
+      background: var(--bg-soft); border-radius: 10px;
+      font-size: 12px; color: var(--text-muted);
+    }
+    .note strong { color: var(--text); font-weight: 500; }
+
+    .legend-pills {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
+      font-size: 11px;
+    }
+    .pill {
+      padding: 2px 8px; border-radius: 999px;
+      background: var(--bg-soft); color: var(--text-muted);
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Badi-Tracker Zürich 🏊</h1>
+    <span class="status"><span class="dot" id="status-dot"></span><span id="status-text">Verbinde…</span></span>
+  </header>
+
+  <div id="cards" class="cards"></div>
+
+  <div id="lanes-now" class="lanes-now hidden"></div>
+
+  <div class="panel">
+    <h2 style="margin-top: 0;">Verlauf</h2>
+    <div class="controls">
+      <select id="bad-select"></select>
+      <select id="view-select">
+        <option value="heatmap">Heatmap (Wochentag × Stunde)</option>
+        <option value="line">Verlauf (chronologisch)</option>
+        <option value="weekday">Mittel pro Wochentag</option>
+      </select>
+    </div>
+    <div id="hist-status" style="font-size: 12px; color: var(--text-muted); margin-bottom: 0.5rem;">Lade…</div>
+    <div class="chart-wrap"><canvas id="histChart"></canvas></div>
+  </div>
+
+  <div id="lane-section" class="panel hidden" style="margin-top: 1rem;">
+    <h2 style="margin-top: 0;">Bahnen-Belegung Hallenbad City</h2>
+    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
+      Zahl = öffentliche Bahnen von 6. Hover für Vereins-Details.
+    </div>
+    <div class="lane-table-wrap"><div id="lane-grid"></div></div>
+    <div id="lane-legend" class="legend-pills"></div>
+  </div>
+
+  <div class="note">
+    <strong>Hinweis:</strong> Live-Auslastung kommt direkt vom Crowdmonitor-WebSocket.
+    Historische Daten werden alle 10 Min via GitHub Action gesammelt — Heatmap braucht ein paar Tage zum Füllen.
+    Bahnen-Plan ab 01.01.2026, nur Dauerbelegungen — kurzfristige Reservationen nicht enthalten.
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1/dist/chartjs-chart-matrix.min.js"></script>
+<script>
+(function() {
+  const TARGETS = [
+    { key: "city",       label: "Hallenbad City",     match: ["city"],       hasLanes: true },
+    { key: "letzigraben",label: "Freibad Letzigraben",match: ["letzigraben"], hasLanes: false },
+    { key: "utoquai",    label: "Seebad Utoquai",     match: ["utoquai"],    hasLanes: false }
+  ];
+  const WS_URL = "wss://badi-public.crowdmonitor.ch:9591/api";
+  const DATA_BASE = "data/"; // relative zum HTML, da GitHub Pages alles aus /Badi-Tracker/ ausliefert
+  const DAY_KEYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const DAY_LABELS = ["So","Mo","Di","Mi","Do","Fr","Sa"];
+
+  const state = {
+    live: {},
+    history: [],
+    bahnen: null,
+    selectedBad: localStorage.getItem("badi:bad") || "city",
+    selectedView: localStorage.getItem("badi:view") || "heatmap",
+  };
+
+  const $ = id => document.getElementById(id);
+
+  function findEntry(arr, target) {
+    return arr.find(e => target.match.some(m => (e.name || "").toLowerCase().includes(m)));
+  }
+  function classify(r) {
+    if (r < 0.3) return { cls: "green", label: "leer" };
+    if (r < 0.6) return { cls: "amber", label: "mässig" };
+    if (r < 0.85) return { cls: "coral", label: "voll" };
+    return { cls: "red", label: "überfüllt" };
+  }
+  function currentSlot() {
+    const d = new Date();
+    return {
+      dayKey: DAY_KEYS[d.getDay()],
+      slot: `${String(d.getHours()).padStart(2,"0")}:${d.getMinutes() < 30 ? "00" : "30"}`
+    };
+  }
+
+  function renderCards() {
+    $("cards").innerHTML = TARGETS.map(t => {
+      const e = state.live[t.key];
+      if (!e) return `<div class="card"><div class="card-label">${t.label}</div><div class="card-num"><span class="small">—</span></div></div>`;
+      const fill = parseInt(e.currentfill) || 0;
+      const max = parseInt(e.maxspace) || 1;
+      const ratio = fill / max;
+      const c = classify(ratio);
+      const pct = Math.round(ratio * 100);
+      return `<div class="card ${c.cls}">
+        <div class="card-label">${t.label}</div>
+        <div class="card-num"><span class="big">${fill}</span><span class="small">/ ${max}</span></div>
+        <div class="card-bar"><span style="width: ${Math.min(pct,100)}%"></span></div>
+        <div class="card-meta">${pct}% · ${c.label}</div>
+      </div>`;
+    }).join("");
+  }
+
+  function renderLanesNow() {
+    if (!state.bahnen) return;
+    const { dayKey, slot } = currentSlot();
+    const entry = state.bahnen.schedule?.[dayKey]?.[slot];
+    const el = $("lanes-now");
+    if (!entry) { el.classList.add("hidden"); return; }
+    el.classList.remove("hidden");
+    const occ = Object.entries(entry.occupants || {});
+    const occText = occ.length === 0 ? "alle 6 Bahnen öffentlich" : occ.map(([n,c]) => `${c}× ${n}`).join(" · ");
+    el.innerHTML = `<span class="muted">Bahnen jetzt im City (${slot}):</span> <strong>${entry.public_lanes}/${entry.total_lanes} öffentlich</strong> <span class="muted">— ${occText}</span>`;
+  }
+
+  function setStatus(text, cls) {
+    $("status-text").textContent = text;
+    const dot = $("status-dot");
+    dot.className = "dot" + (cls ? " " + cls : "");
+  }
+
+  function connectLive() {
+    let ws;
+    try { ws = new WebSocket(WS_URL); }
+    catch (e) { setStatus("WS nicht verfügbar", "err"); return; }
+    ws.onopen = () => { setStatus("Live", "live"); ws.send("1 all"); };
+    ws.onmessage = (msg) => {
+      try {
+        const arr = JSON.parse(msg.data);
+        if (!Array.isArray(arr)) return;
+        TARGETS.forEach(t => {
+          const e = findEntry(arr, t);
+          if (e) state.live[t.key] = e;
+        });
+        const now = new Date();
+        setStatus("Live · " + now.toLocaleTimeString("de-CH", {hour:"2-digit", minute:"2-digit"}), "live");
+        renderCards();
+        renderLanesNow();
+      } catch (e) {}
+    };
+    ws.onerror = () => setStatus("Verbindungsfehler", "err");
+    ws.onclose = () => { setStatus("Reconnect…", "err"); setTimeout(connectLive, 5000); };
+  }
+
+  function parseCSV(text) {
+    const lines = text.trim().split("\n");
+    if (lines.length < 2) return [];
+    const headers = lines[0].split(",");
+    return lines.slice(1).map(line => {
+      const vals = line.split(",");
+      const row = {};
+      headers.forEach((h, i) => row[h] = vals[i]);
+      return row;
+    });
+  }
+
+  async function loadData() {
+    try {
+      const r = await fetch(DATA_BASE + "auslastung.csv", { cache: "no-store" });
+      if (r.ok) {
+        state.history = parseCSV(await r.text());
+        $("hist-status").textContent = `${state.history.length} Datenpunkte`;
+      } else throw new Error("CSV " + r.status);
+    } catch (e) {
+      $("hist-status").textContent = "Noch keine historischen Daten";
+    }
+    try {
+      const r = await fetch(DATA_BASE + "bahnen_city.json", { cache: "no-store" });
+      if (r.ok) {
+        state.bahnen = await r.json();
+        renderLanesNow();
+        renderLaneGrid();
+      }
+    } catch (e) {}
+    populateBadSelector();
+    renderChart();
+  }
+
+  function populateBadSelector() {
+    const bs = $("bad-select");
+    bs.innerHTML = TARGETS.map(t => `<option value="${t.key}">${t.label}</option>`).join("");
+    bs.value = state.selectedBad;
+    bs.onchange = () => {
+      state.selectedBad = bs.value;
+      localStorage.setItem("badi:bad", bs.value);
+      renderChart(); toggleLaneSection();
+    };
+    const vs = $("view-select");
+    vs.value = state.selectedView;
+    vs.onchange = () => {
+      state.selectedView = vs.value;
+      localStorage.setItem("badi:view", vs.value);
+      renderChart();
+    };
+    toggleLaneSection();
+  }
+
+  function toggleLaneSection() {
+    const t = TARGETS.find(t => t.key === state.selectedBad);
+    $("lane-section").classList.toggle("hidden", !(t.hasLanes && state.bahnen));
+  }
+
+  let chart = null;
+
+  function filterHistory() {
+    const t = TARGETS.find(t => t.key === state.selectedBad);
+    return state.history.filter(r => t.match.some(m => (r.name || "").toLowerCase().includes(m)));
+  }
+
+  function renderChart() {
+    if (chart) { chart.destroy(); chart = null; }
+    if (state.history.length === 0) return;
+    const data = filterHistory();
+    if (data.length === 0) {
+      $("hist-status").textContent = "Noch keine Daten für dieses Bad";
+      return;
+    }
+    if (state.selectedView === "heatmap") renderHeatmap(data);
+    else if (state.selectedView === "weekday") renderWeekday(data);
+    else renderLine(data);
+  }
+
+  function renderHeatmap(data) {
+    const dayMap = {Sunday:0,Monday:1,Tuesday:2,Wednesday:3,Thursday:4,Friday:5,Saturday:6};
+    const buckets = {};
+    data.forEach(r => {
+      const d = dayMap[r.weekday];
+      const h = parseInt(r.hour);
+      const ratio = parseFloat(r.fill_ratio);
+      if (d === undefined || isNaN(h) || isNaN(ratio)) return;
+      const k = d + "_" + h;
+      if (!buckets[k]) buckets[k] = { sum: 0, count: 0 };
+      buckets[k].sum += ratio; buckets[k].count++;
+    });
+    const matrixData = [];
+    for (let d = 0; d < 7; d++) for (let h = 5; h <= 23; h++) {
+      const b = buckets[d + "_" + h];
+      matrixData.push({ x: h, y: d, v: b ? b.sum / b.count : null });
+    }
+    const maxV = Math.max(...matrixData.map(d => d.v ?? 0), 0.1);
+    chart = new Chart($("histChart").getContext("2d"), {
+      type: "matrix",
+      data: { datasets: [{
+        label: "Auslastung", data: matrixData,
+        backgroundColor: c => {
+          const v = c.raw.v;
+          if (v === null) return "rgba(150,150,150,0.06)";
+          const r = v / maxV;
+          if (r < 0.25) return "#5dcaa5";
+          if (r < 0.5) return "#ef9f27";
+          if (r < 0.75) return "#f0997b";
+          return "#f09595";
+        },
+        borderColor: "rgba(0,0,0,0.05)", borderWidth: 1,
+        width: c => (c.chart.chartArea || {}).width / 19 - 2,
+        height: c => (c.chart.chartArea || {}).height / 7 - 2
+      }]},
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: {
+          title: () => "",
+          label: c => `${DAY_LABELS[c.raw.y]} ${c.raw.x}:00 · ${c.raw.v === null ? "—" : Math.round(c.raw.v * 100) + "%"}`
+        }}},
+        scales: {
+          x: { type: "linear", min: 5, max: 23, ticks: { stepSize: 1, callback: v => v + ":00" }, grid: { display: false } },
+          y: { type: "linear", min: -0.5, max: 6.5, reverse: true, ticks: { stepSize: 1, callback: v => DAY_LABELS[v] }, grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  function renderLine(data) {
+    const sorted = data.slice().sort((a,b) => a.timestamp_utc.localeCompare(b.timestamp_utc));
+    const points = sorted.map(r => ({ x: new Date(r.timestamp_utc), y: parseFloat(r.fill_ratio) * 100 }));
+    chart = new Chart($("histChart").getContext("2d"), {
+      type: "line",
+      data: { datasets: [{
+        label: "%", data: points,
+        borderColor: "#4a9eff", backgroundColor: "rgba(74,158,255,0.12)",
+        pointRadius: 1.2, pointHoverRadius: 4, borderWidth: 1.5, tension: 0.2, fill: true
+      }]},
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { type: "time", time: { unit: "day" } },
+          y: { min: 0, max: 100, ticks: { callback: v => v + "%" } }
+        }
+      }
+    });
+  }
+
+  function renderWeekday(data) {
+    const dayMap = {Monday:1,Tuesday:2,Wednesday:3,Thursday:4,Friday:5,Saturday:6,Sunday:0};
+    const buckets = {};
+    data.forEach(r => {
+      const d = dayMap[r.weekday];
+      const ratio = parseFloat(r.fill_ratio);
+      if (d === undefined || isNaN(ratio)) return;
+      if (!buckets[d]) buckets[d] = { sum: 0, count: 0 };
+      buckets[d].sum += ratio; buckets[d].count++;
+    });
+    const labels = ["Mo","Di","Mi","Do","Fr","Sa","So"];
+    const order = [1,2,3,4,5,6,0];
+    const values = order.map(d => buckets[d] ? Math.round((buckets[d].sum / buckets[d].count) * 100) : 0);
+    chart = new Chart($("histChart").getContext("2d"), {
+      type: "bar",
+      data: { labels, datasets: [{
+        label: "Mittel %", data: values,
+        backgroundColor: "#4a9eff"
+      }]},
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { min: 0, max: 100, ticks: { callback: v => v + "%" } } }
+      }
+    });
+  }
+
+  function renderLaneGrid() {
+    if (!state.bahnen) return;
+    const sched = state.bahnen.schedule;
+    const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+    const dl = ["Mo","Di","Mi","Do","Fr","Sa","So"];
+    const slots = Object.keys(sched.Monday).sort();
+    let html = `<table class="lanes"><thead><tr><th class="time-col">Zeit</th>${dl.map(d=>`<th>${d}</th>`).join("")}</tr></thead><tbody>`;
+    slots.forEach(slot => {
+      html += `<tr><td class="time-col">${slot}</td>`;
+      days.forEach(day => {
+        const s = sched[day][slot];
+        const occ = Object.entries(s.occupants || {}).map(([n,c]) => `${c}× ${n}`).join(", ");
+        const title = `${dl[days.indexOf(day)]} ${slot}: ${s.public_lanes}/6 öffentlich${occ ? " · " + occ : ""}`;
+        html += `<td class="l-${s.public_lanes}" title="${title}">${s.public_lanes}</td>`;
+      });
+      html += `</tr>`;
+    });
+    html += `</tbody></table>`;
+    $("lane-grid").innerHTML = html;
+    const allOcc = new Set();
+    days.forEach(d => slots.forEach(s => Object.keys(sched[d][s].occupants || {}).forEach(o => allOcc.add(o))));
+    $("lane-legend").innerHTML = [...allOcc].sort().map(o => `<span class="pill">${o}</span>`).join("");
+  }
+
+  // Init
+  renderCards();
+  connectLive();
+  loadData();
+})();
+</script>
+</body>
+</html>
