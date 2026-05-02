@@ -1,0 +1,45 @@
+name: Einmalig CSV bereinigen
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Filter CSV auf 8 Baeder
+        run: |
+          python3 << 'PYEOF'
+          from pathlib import Path
+
+          TRACKED_UIDS = {
+              "flb6939","flb6940","fb012","LETZI-1",
+              "SSD-11","SSD-4","SSD-7","SSD-10"
+          }
+
+          csv = Path("data/auslastung.csv")
+          text = csv.read_text(encoding="utf-8").replace("\r","")
+          lines = text.strip().split("\n")
+          header = lines[0]
+          rows = [l for l in lines[1:] if len(l.split(",")) > 7 and l.split(",")[7] in TRACKED_UIDS]
+          csv.write_text("\n".join([header] + rows) + "\n", encoding="utf-8")
+          print(f"OK: {len(rows)} Zeilen behalten (von {len(lines)-1})")
+          PYEOF
+
+      - name: Commit
+        run: |
+          git config user.name "badi-tracker-bot"
+          git config user.email "actions@github.com"
+          git add data/auslastung.csv
+          if git diff --staged --quiet; then
+            echo "Keine Aenderungen"
+          else
+            git commit -m "cleanup: filter CSV auf 8 Baeder"
+            git push
+          fi
