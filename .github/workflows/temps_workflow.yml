@@ -1,0 +1,47 @@
+name: Update Wassertemperaturen
+
+on:
+  schedule:
+    # 08:00, 12:00, 18:00 Schweizer Zeit = 06:00, 10:00, 16:00 UTC (Sommerzeit)
+    - cron: "0 6 * * *"
+    - cron: "0 10 * * *"
+    - cron: "0 16 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: temperatures
+  cancel-in-progress: false
+
+jobs:
+  temperatures:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Fetch temperatures
+        run: python scripts/fetch_temps.py
+
+      - name: Commit
+        run: |
+          git config user.name "badi-tracker-bot"
+          git config user.email "actions@github.com"
+          git add data/temperatures.json
+          if git diff --staged --quiet; then
+            echo "Keine Aenderungen"
+          else
+            git commit -m "temps: update $(date -u +'%Y-%m-%dT%H:%MZ')"
+            git pull --rebase origin main && git push
+          fi
