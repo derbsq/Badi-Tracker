@@ -51,7 +51,7 @@
 
     header {
       display: flex; align-items: baseline; justify-content: space-between;
-      margin-bottom: 1.25rem; flex-wrap: wrap; gap: 8px;
+      margin-bottom: 0.5rem; flex-wrap: wrap; gap: 8px;
     }
     h1 { margin: 0; font-size: 22px; font-weight: 500; }
     h2 { margin: 1.5rem 0 0.75rem; font-size: 16px; font-weight: 500; }
@@ -62,6 +62,16 @@
     .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); }
     .dot.live { background: #5dcaa5; box-shadow: 0 0 6px rgba(93,202,165,0.5); }
     .dot.err { background: #f09595; }
+
+    .day-banner {
+      font-size: 13px; color: var(--text-muted); margin-bottom: 1.25rem;
+    }
+    .day-banner .holiday {
+      display: inline-block; margin-left: 6px;
+      padding: 2px 8px; border-radius: 999px;
+      background: var(--amber-bg); color: var(--amber-fg);
+      font-size: 11px; font-weight: 500;
+    }
 
     .cards {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -79,11 +89,13 @@
     .card-bar { margin-top: 8px; height: 4px; background: rgba(0,0,0,0.18); border-radius: 2px; overflow: hidden; }
     .card-bar > span { display: block; height: 100%; background: currentColor; opacity: 0.85; }
     .card-meta { margin-top: 6px; font-size: 11px; opacity: 0.85; }
+    .card-temp { font-size: 11px; opacity: 0.8; margin-top: 3px; }
 
     .panel {
       background: var(--bg-card); border-radius: 12px;
       border: 1px solid var(--border); padding: 14px 16px;
     }
+    .panel + .panel, .panel + details { margin-top: 1rem; }
 
     .lanes-now {
       padding: 12px 14px; background: var(--bg-soft); border-radius: 10px;
@@ -105,6 +117,27 @@
     .chart-wrap { position: relative; width: 100%; height: 320px; }
     @media (max-width: 600px) { .chart-wrap { height: 280px; } }
 
+    details summary {
+      cursor: pointer; list-style: none;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; background: var(--bg-card);
+      border-radius: 12px; border: 1px solid var(--border);
+      font-size: 16px; font-weight: 500;
+      user-select: none;
+    }
+    details[open] summary { border-radius: 12px 12px 0 0; border-bottom: none; }
+    details summary::-webkit-details-marker { display: none; }
+    details summary::after {
+      content: "▸"; color: var(--text-muted);
+      transition: transform 0.2s ease;
+    }
+    details[open] summary::after { transform: rotate(90deg); }
+    details .panel-body {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-top: none; border-radius: 0 0 12px 12px;
+      padding: 14px 16px;
+    }
+
     table.lanes {
       border-collapse: collapse; font-size: 11px; width: 100%;
       font-variant-numeric: tabular-nums;
@@ -114,9 +147,14 @@
       color: var(--text-muted); font-weight: 500;
       position: sticky; top: 0; background: var(--bg-card);
     }
+    table.lanes th.today, table.lanes td.today {
+      background: var(--bg-soft);
+    }
+    table.lanes th.today { color: var(--accent); }
     table.lanes th.time-col, table.lanes td.time-col {
       text-align: left; color: var(--text-dim);
       font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      padding: 3px 6px;
     }
     table.lanes td {
       padding: 3px 6px; text-align: center; font-weight: 500;
@@ -128,6 +166,9 @@
     table.lanes td.l-3 { background: var(--coral-bg); color: var(--coral-fg); }
     table.lanes td.l-2 { background: var(--red-bg); color: var(--red-fg); }
     table.lanes td.l-1 { background: var(--red-bg); color: var(--red-fg); opacity: 0.85; }
+    table.lanes td.now-row {
+      box-shadow: inset 0 0 0 2px var(--accent);
+    }
     .lane-table-wrap { overflow-x: auto; }
 
     .note {
@@ -145,7 +186,7 @@
       padding: 2px 8px; border-radius: 999px;
       background: var(--bg-soft); color: var(--text-muted);
     }
-    .hidden { display: none; }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
@@ -155,6 +196,7 @@
     <h1>Badi-Tracker Zürich 🏊</h1>
     <span class="status"><span class="dot" id="status-dot"></span><span id="status-text">Verbinde…</span></span>
   </header>
+  <div id="day-banner" class="day-banner"></div>
 
   <div id="cards" class="cards"></div>
 
@@ -174,19 +216,22 @@
     <div class="chart-wrap"><canvas id="histChart"></canvas></div>
   </div>
 
-  <div id="lane-section" class="panel hidden" style="margin-top: 1rem;">
-    <h2 style="margin-top: 0;">Bahnen-Belegung Hallenbad City</h2>
-    <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
-      Zahl = öffentliche Bahnen von 6. Hover für Vereins-Details.
+  <details id="lane-section" class="hidden">
+    <summary>Bahnen-Belegung Hallenbad City</summary>
+    <div class="panel-body">
+      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
+        Zahl = öffentliche Bahnen von 6. Heute links. 🎉 Feiertag · 🏖 Schulferien (Schul-Belegungen ausgeblendet).
+      </div>
+      <div class="lane-table-wrap"><div id="lane-grid"></div></div>
+      <div id="lane-legend" class="legend-pills"></div>
     </div>
-    <div class="lane-table-wrap"><div id="lane-grid"></div></div>
-    <div id="lane-legend" class="legend-pills"></div>
-  </div>
+  </details>
 
   <div class="note">
     <strong>Hinweis:</strong> Live-Auslastung kommt direkt vom Crowdmonitor-WebSocket.
-    Historische Daten werden alle 10 Min via GitHub Action gesammelt — Heatmap braucht ein paar Tage zum Füllen.
-    Bahnen-Plan ab 01.01.2026, nur Dauerbelegungen — kurzfristige Reservationen nicht enthalten.
+    Historische Daten alle 10 Min via GitHub Action — Heatmap braucht ein paar Tage.
+    An Feiertagen und in Schulferien werden Schul-Belegungen ausgeblendet (Vereine/Clubs trainieren mglw. trotzdem; nicht offiziell bestätigt).
+    Wassertemperaturen sind statisch / typische Werte; Live-Daten folgen.
   </div>
 
 </div>
@@ -197,23 +242,55 @@
 <script>
 (function() {
   const TARGETS = [
-    { key: "city",       label: "Hallenbad City",     match: ["city"],       hasLanes: true },
-    { key: "letzigraben",label: "Freibad Letzigraben",match: ["letzigraben"], hasLanes: false },
-    { key: "utoquai",    label: "Seebad Utoquai",     match: ["utoquai"],    hasLanes: false }
+    { key: "city", label: "Hallenbad City", match: ["city"], hasLanes: true,
+      tempInfo: "🌡 28°C / 32°C / 29°C" },
+    { key: "letzigraben", label: "Freibad Letzigraben", match: ["letzigraben"], hasLanes: false,
+      tempInfo: "🌡 saisonal, ~20–25°C" },
+    { key: "utoquai", label: "Seebad Utoquai", match: ["utoquai"], hasLanes: false,
+      tempInfo: "🌡 Seewasser, saisonal" }
   ];
   const WS_URL = "wss://badi-public.crowdmonitor.ch:9591/api";
-  const DATA_BASE = "data/"; // relative zum HTML, da GitHub Pages alles aus /Badi-Tracker/ ausliefert
+  const DATA_BASE = "data/";
   const DAY_KEYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
   const DAY_LABELS = ["So","Mo","Di","Mi","Do","Fr","Sa"];
+  const DAY_LABELS_LONG = ["Sonntag","Montag","Dienstag","Mittwoch","Donnerstag","Freitag","Samstag"];
+
+  const HOLIDAYS = {
+    "2026-01-01":"Neujahr", "2026-01-02":"Berchtoldstag",
+    "2026-04-03":"Karfreitag", "2026-04-06":"Ostermontag",
+    "2026-05-01":"Tag der Arbeit", "2026-05-14":"Auffahrt",
+    "2026-05-25":"Pfingstmontag", "2026-08-01":"Bundesfeier",
+    "2026-12-25":"Weihnachten", "2026-12-26":"Stephanstag",
+    "2027-01-01":"Neujahr", "2027-01-02":"Berchtoldstag",
+    "2027-03-26":"Karfreitag", "2027-03-29":"Ostermontag",
+    "2027-05-01":"Tag der Arbeit", "2027-05-06":"Auffahrt",
+    "2027-05-17":"Pfingstmontag", "2027-08-01":"Bundesfeier",
+    "2027-12-25":"Weihnachten", "2027-12-26":"Stephanstag"
+  };
+  const SCHOOL_HOLIDAYS = [
+    ["2026-04-25","2026-05-10"], ["2026-07-11","2026-08-16"],
+    ["2026-10-03","2026-10-18"], ["2026-12-19","2027-01-03"],
+    ["2027-02-06","2027-02-21"], ["2027-04-17","2027-05-02"]
+  ];
+  const SCHOOL_CODE = 2;
+
+  function isoDate(d) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,"0");
+    const day = String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${day}`;
+  }
+  function getHolidayName(d) { return HOLIDAYS[isoDate(d)] || null; }
+  function isSchoolHoliday(d) {
+    const t = isoDate(d);
+    return SCHOOL_HOLIDAYS.some(([s,e]) => t >= s && t <= e);
+  }
 
   const state = {
-    live: {},
-    history: [],
-    bahnen: null,
+    live: {}, history: [], bahnen: null, temperatures: null,
     selectedBad: localStorage.getItem("badi:bad") || "city",
-    selectedView: localStorage.getItem("badi:view") || "heatmap",
+    selectedView: localStorage.getItem("badi:view") || "heatmap"
   };
-
   const $ = id => document.getElementById(id);
 
   function findEntry(arr, target) {
@@ -233,40 +310,85 @@
     };
   }
 
+  function adjustedLaneEntry(rawEntry, dayDate) {
+    if (!rawEntry) return null;
+    const isHoliday = !!getHolidayName(dayDate);
+    const isFerien = isSchoolHoliday(dayDate);
+    if (!isHoliday && !isFerien) return rawEntry;
+    const codes = rawEntry.raw_codes.slice();
+    let removed = 0;
+    for (let i = 0; i < codes.length; i++) {
+      if (codes[i] === SCHOOL_CODE) { codes[i] = 1; removed++; }
+    }
+    if (removed === 0) return rawEntry;
+    const occupants = { ...(rawEntry.occupants || {}) };
+    delete occupants["Schulen"];
+    return { ...rawEntry, raw_codes: codes,
+      public_lanes: rawEntry.public_lanes + removed, occupants };
+  }
+
   function renderCards() {
     $("cards").innerHTML = TARGETS.map(t => {
       const e = state.live[t.key];
-      if (!e) return `<div class="card"><div class="card-label">${t.label}</div><div class="card-num"><span class="small">—</span></div></div>`;
+      if (!e) return `<div class="card">
+        <div class="card-label">${t.label}</div>
+        <div class="card-num"><span class="small">—</span></div>
+        <div class="card-temp">${t.tempInfo}</div>
+      </div>`;
       const fill = parseInt(e.currentfill) || 0;
       const max = parseInt(e.maxspace) || 1;
       const ratio = fill / max;
       const c = classify(ratio);
       const pct = Math.round(ratio * 100);
+      // Live-Temperatur aus temperatures.json, fallback auf statischen Wert
+      let tempStr = t.tempInfo;
+      if (state.temperatures && state.temperatures[t.key]) {
+        const td = state.temperatures[t.key];
+        if (td.temp !== null && td.temp !== undefined) {
+          tempStr = `🌡 ${td.temp}°C`;
+          if (td.note && t.key === 'city') tempStr += ' (Schwimmerbecken)';
+          if (td.note && t.key === 'utoquai') tempStr += ' (Zürichsee)';
+        }
+      }
       return `<div class="card ${c.cls}">
         <div class="card-label">${t.label}</div>
         <div class="card-num"><span class="big">${fill}</span><span class="small">/ ${max}</span></div>
         <div class="card-bar"><span style="width: ${Math.min(pct,100)}%"></span></div>
         <div class="card-meta">${pct}% · ${c.label}</div>
+        <div class="card-temp">${tempStr}</div>
       </div>`;
     }).join("");
+  }
+
+  function renderDayBanner() {
+    const d = new Date();
+    const dateStr = d.toLocaleDateString("de-CH", {day:"2-digit", month:"long", year:"numeric"});
+    const holiday = getHolidayName(d);
+    const ferien = isSchoolHoliday(d);
+    let badges = "";
+    if (holiday) badges += `<span class="holiday">🎉 ${holiday}</span>`;
+    if (ferien) badges += `<span class="holiday">🏖 Schulferien ZH</span>`;
+    $("day-banner").innerHTML = `Heute · ${DAY_LABELS_LONG[d.getDay()]}, ${dateStr}${badges}`;
   }
 
   function renderLanesNow() {
     if (!state.bahnen) return;
     const { dayKey, slot } = currentSlot();
-    const entry = state.bahnen.schedule?.[dayKey]?.[slot];
+    const raw = state.bahnen.schedule?.[dayKey]?.[slot];
+    const entry = adjustedLaneEntry(raw, new Date());
     const el = $("lanes-now");
     if (!entry) { el.classList.add("hidden"); return; }
     el.classList.remove("hidden");
     const occ = Object.entries(entry.occupants || {});
     const occText = occ.length === 0 ? "alle 6 Bahnen öffentlich" : occ.map(([n,c]) => `${c}× ${n}`).join(" · ");
-    el.innerHTML = `<span class="muted">Bahnen jetzt im City (${slot}):</span> <strong>${entry.public_lanes}/${entry.total_lanes} öffentlich</strong> <span class="muted">— ${occText}</span>`;
+    const today = new Date();
+    const adjustNote = (getHolidayName(today) || isSchoolHoliday(today)) ? ' <span class="muted">(Schulen ausgeblendet)</span>' : '';
+    el.innerHTML = `<span class="muted">Bahnen jetzt im City (${slot}):</span> <strong>${entry.public_lanes}/${entry.total_lanes} öffentlich</strong> <span class="muted">— ${occText}</span>${adjustNote}`;
   }
 
   function setStatus(text, cls) {
     $("status-text").textContent = text;
-    const dot = $("status-dot");
-    dot.className = "dot" + (cls ? " " + cls : "");
+    $("status-dot").className = "dot" + (cls ? " " + cls : "");
   }
 
   function connectLive() {
@@ -284,8 +406,7 @@
         });
         const now = new Date();
         setStatus("Live · " + now.toLocaleTimeString("de-CH", {hour:"2-digit", minute:"2-digit"}), "live");
-        renderCards();
-        renderLanesNow();
+        renderCards(); renderLanesNow();
       } catch (e) {}
     };
     ws.onerror = () => setStatus("Verbindungsfehler", "err");
@@ -303,7 +424,6 @@
       return row;
     });
   }
-
   async function loadData() {
     try {
       const r = await fetch(DATA_BASE + "auslastung.csv", { cache: "no-store" });
@@ -318,8 +438,14 @@
       const r = await fetch(DATA_BASE + "bahnen_city.json", { cache: "no-store" });
       if (r.ok) {
         state.bahnen = await r.json();
-        renderLanesNow();
-        renderLaneGrid();
+        renderLanesNow(); renderLaneGrid();
+      }
+    } catch (e) {}
+    try {
+      const r = await fetch(DATA_BASE + "temperatures.json", { cache: "no-store" });
+      if (r.ok) {
+        state.temperatures = await r.json();
+        renderCards();
       }
     } catch (e) {}
     populateBadSelector();
@@ -351,12 +477,10 @@
   }
 
   let chart = null;
-
   function filterHistory() {
     const t = TARGETS.find(t => t.key === state.selectedBad);
     return state.history.filter(r => t.match.some(m => (r.name || "").toLowerCase().includes(m)));
   }
-
   function renderChart() {
     if (chart) { chart.destroy(); chart = null; }
     if (state.history.length === 0) return;
@@ -369,7 +493,6 @@
     else if (state.selectedView === "weekday") renderWeekday(data);
     else renderLine(data);
   }
-
   function renderHeatmap(data) {
     const dayMap = {Sunday:0,Monday:1,Tuesday:2,Wednesday:3,Thursday:4,Friday:5,Saturday:6};
     const buckets = {};
@@ -390,8 +513,7 @@
     const maxV = Math.max(...matrixData.map(d => d.v ?? 0), 0.1);
     chart = new Chart($("histChart").getContext("2d"), {
       type: "matrix",
-      data: { datasets: [{
-        label: "Auslastung", data: matrixData,
+      data: { datasets: [{ label: "Auslastung", data: matrixData,
         backgroundColor: c => {
           const v = c.raw.v;
           if (v === null) return "rgba(150,150,150,0.06)";
@@ -418,28 +540,22 @@
       }
     });
   }
-
   function renderLine(data) {
     const sorted = data.slice().sort((a,b) => a.timestamp_utc.localeCompare(b.timestamp_utc));
     const points = sorted.map(r => ({ x: new Date(r.timestamp_utc), y: parseFloat(r.fill_ratio) * 100 }));
     chart = new Chart($("histChart").getContext("2d"), {
       type: "line",
-      data: { datasets: [{
-        label: "%", data: points,
+      data: { datasets: [{ label: "%", data: points,
         borderColor: "#4a9eff", backgroundColor: "rgba(74,158,255,0.12)",
         pointRadius: 1.2, pointHoverRadius: 4, borderWidth: 1.5, tension: 0.2, fill: true
       }]},
-      options: {
-        responsive: true, maintainAspectRatio: false,
+      options: { responsive: true, maintainAspectRatio: false,
         plugins: { legend: { display: false } },
-        scales: {
-          x: { type: "time", time: { unit: "day" } },
-          y: { min: 0, max: 100, ticks: { callback: v => v + "%" } }
-        }
+        scales: { x: { type: "time", time: { unit: "day" } },
+                  y: { min: 0, max: 100, ticks: { callback: v => v + "%" } } }
       }
     });
   }
-
   function renderWeekday(data) {
     const dayMap = {Monday:1,Tuesday:2,Wednesday:3,Thursday:4,Friday:5,Saturday:6,Sunday:0};
     const buckets = {};
@@ -450,51 +566,88 @@
       if (!buckets[d]) buckets[d] = { sum: 0, count: 0 };
       buckets[d].sum += ratio; buckets[d].count++;
     });
-    const labels = ["Mo","Di","Mi","Do","Fr","Sa","So"];
     const order = [1,2,3,4,5,6,0];
+    const labels = ["Mo","Di","Mi","Do","Fr","Sa","So"];
     const values = order.map(d => buckets[d] ? Math.round((buckets[d].sum / buckets[d].count) * 100) : 0);
     chart = new Chart($("histChart").getContext("2d"), {
       type: "bar",
-      data: { labels, datasets: [{
-        label: "Mittel %", data: values,
-        backgroundColor: "#4a9eff"
-      }]},
-      options: {
-        responsive: true, maintainAspectRatio: false,
+      data: { labels, datasets: [{ label: "Mittel %", data: values, backgroundColor: "#4a9eff" }]},
+      options: { responsive: true, maintainAspectRatio: false,
         plugins: { legend: { display: false } },
         scales: { y: { min: 0, max: 100, ticks: { callback: v => v + "%" } } }
       }
     });
   }
 
+  function dayLabelByIdx(idx) { return DAY_LABELS[idx]; }
+  function dayKeyByIdx(idx) { return DAY_KEYS[idx]; }
+
   function renderLaneGrid() {
     if (!state.bahnen) return;
     const sched = state.bahnen.schedule;
-    const days = ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
-    const dl = ["Mo","Di","Mi","Do","Fr","Sa","So"];
+    const today = new Date();
+    const ordered = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(today);
+      d.setDate(today.getDate() + i);
+      ordered.push({
+        date: d, idx: d.getDay(),
+        key: dayKeyByIdx(d.getDay()),
+        label: dayLabelByIdx(d.getDay()),
+        isToday: i === 0
+      });
+    }
     const slots = Object.keys(sched.Monday).sort();
-    let html = `<table class="lanes"><thead><tr><th class="time-col">Zeit</th>${dl.map(d=>`<th>${d}</th>`).join("")}</tr></thead><tbody>`;
+    const { slot: nowSlot } = currentSlot();
+
+    let html = `<table class="lanes"><thead><tr><th class="time-col">Zeit</th>`;
+    ordered.forEach(d => {
+      const dateStr = d.date.toLocaleDateString("de-CH", {day:"2-digit", month:"2-digit"});
+      const todayClass = d.isToday ? " today" : "";
+      const holiday = getHolidayName(d.date);
+      const fer = isSchoolHoliday(d.date);
+      const tag = holiday ? "🎉" : (fer ? "🏖" : "");
+      const ttl = holiday || (fer ? "Schulferien" : "");
+      html += `<th class="${todayClass}" title="${ttl}">${d.label} ${tag}<br><span style="font-weight:400;font-size:10px;opacity:0.7">${dateStr}</span></th>`;
+    });
+    html += `</tr></thead><tbody>`;
+
     slots.forEach(slot => {
+      const isNowSlot = slot === nowSlot;
       html += `<tr><td class="time-col">${slot}</td>`;
-      days.forEach(day => {
-        const s = sched[day][slot];
-        const occ = Object.entries(s.occupants || {}).map(([n,c]) => `${c}× ${n}`).join(", ");
-        const title = `${dl[days.indexOf(day)]} ${slot}: ${s.public_lanes}/6 öffentlich${occ ? " · " + occ : ""}`;
-        html += `<td class="l-${s.public_lanes}" title="${title}">${s.public_lanes}</td>`;
+      ordered.forEach(d => {
+        const raw = sched[d.key][slot];
+        const adj = adjustedLaneEntry(raw, d.date);
+        const occ = Object.entries(adj.occupants || {}).map(([n,c]) => `${c}× ${n}`).join(", ");
+        const title = `${d.label} ${slot}: ${adj.public_lanes}/6 öffentlich${occ ? " · " + occ : ""}`;
+        const todayClass = d.isToday ? " today" : "";
+        const nowClass = (d.isToday && isNowSlot) ? " now-row" : "";
+        html += `<td class="l-${adj.public_lanes}${todayClass}${nowClass}" title="${title}">${adj.public_lanes}</td>`;
       });
       html += `</tr>`;
     });
     html += `</tbody></table>`;
     $("lane-grid").innerHTML = html;
+
     const allOcc = new Set();
-    days.forEach(d => slots.forEach(s => Object.keys(sched[d][s].occupants || {}).forEach(o => allOcc.add(o))));
+    Object.keys(sched).forEach(d =>
+      slots.forEach(s => Object.keys(sched[d][s].occupants || {}).forEach(o => allOcc.add(o)))
+    );
     $("lane-legend").innerHTML = [...allOcc].sort().map(o => `<span class="pill">${o}</span>`).join("");
   }
 
   // Init
+  renderDayBanner();
   renderCards();
   connectLive();
   loadData();
+
+  // Re-render minutely so "jetzt"-Indikator und Tagesreihenfolge aktuell bleiben
+  setInterval(() => {
+    renderDayBanner();
+    renderLaneGrid();
+    renderLanesNow();
+  }, 60_000);
 })();
 </script>
 </body>
