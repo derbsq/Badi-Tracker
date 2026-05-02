@@ -1,11 +1,12 @@
 """
 Badi-Tracker: Erfasst alle 10 Min die Auslastung der Schweizer Baeder
-via Crowdmonitor-WebSocket und reichert mit Wetter & Ferien/Feiertagen an.
+via Crowdmonitor-WebSocket und reichert mit Wetter, Ferien/Feiertagen
+und Wassertemperaturen an.
 """
 import asyncio
 import csv
 import json
-import os
+import re
 from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
@@ -16,25 +17,24 @@ import httpx
 # --- Konfiguration ---
 WS_URL = "wss://badi-public.crowdmonitor.ch:9591/api"
 SUBSCRIBE_CMD = "1 all"
-TIMEOUT_SECONDS = 15  # Wie lange auf erste Message warten
+TIMEOUT_SECONDS = 15
 TZ = ZoneInfo("Europe/Zurich")
 
-# Datenpfade (relativ zum Repo-Root)
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 RAW_FILE = DATA_DIR / "auslastung.csv"
 WEATHER_FILE = DATA_DIR / "weather.csv"
+TEMP_FILE = DATA_DIR / "temperatures.json"
 
-# Zuerich-Koordinaten fuers Wetter (Hallenbad City)
 ZURICH_LAT = 47.3739
 ZURICH_LON = 8.5364
 
 
+# ---- WebSocket ----
+
 async def fetch_snapshot() -> list[dict]:
-    """Verbindet sich, schickt Subscribe, sammelt eine Message, schliesst Verbindung."""
     async with websockets.connect(WS_URL, open_timeout=10, close_timeout=5) as ws:
         await ws.send(SUBSCRIBE_CMD)
-        # Erste eingehende Nachricht enthaelt das vollstaendige Array aller Baeder
         raw = await asyncio.wait_for(ws.recv(), timeout=TIMEOUT_SECONDS)
         data = json.loads(raw)
         if not isinstance(data, list):
@@ -42,8 +42,9 @@ async def fetch_snapshot() -> list[dict]:
         return data
 
 
+# ---- Wetter ----
+
 def fetch_weather() -> dict:
-    """Holt aktuelles Wetter fuer Zuerich von Open-Meteo (gratis, kein Key)."""
     url = (
         "https://api.open-meteo.com/v1/forecast"
         f"?latitude={ZURICH_LAT}&longitude={ZURICH_LON}"
@@ -56,9 +57,82 @@ def fetch_weather() -> dict:
     return r.json().get("current", {})
 
 
+# ---- Wassertemperaturen ----
+
+def fetch_temperatures() -> dict:
+    """
+    City:       konstant 28C (Schwimmerbecken), kein Feed noetig
+    Letzigraben: badi-info.ch/_temp/zh/letzigraben.htm  (HTML-Scraping)
+    Utoquai:    Tecdottir-API der Wasserschutzpolizei Zuerich
+                (Messstation Tiefenbrunnen, OGD Stadt Zuerich)
+    """
+    temps = {
+        "city": {
+            "temp": 28.0,
+            "unit": "C",
+            "source": "static",
+            "note": "Schwimmerbecken 28°C / Nichtschwimmer 32°C",
+            "updated_at": None,
+        },
+        "letzigraben": {
+            "temp": None,
+            "unit": "C",
+            "source": "badi-info.ch",
+            "note": None,
+            "updated_at": None,
+        },
+        "utoquai": {
+            "temp": None,
+            "unit": "C",
+            "source": "tecdottir/tiefenbrunnen",
+            "note": "Zürichsee-Temperatur Messstation Tiefenbrunnen",
+            "updated_at": None,
+        },
+    }
+
+    headers = {"User-Agent": "badi-tracker/1.0 (github.com/derbsq/Badi-Tracker)"}
+
+    # Letzigraben
+    try:
+        r = httpx.get(
+            "https://www.badi-info.ch/_temp/zh/letzigraben.htm",
+            timeout=10, follow_redirects=True, headers=headers
+        )
+        r.raise_for_status()
+        m = re.search(r"<strong>([\d.]+)</strong>", r.text)
+        if m:
+            temps["letzigraben"]["temp"] = float(m.group(1))
+            # Zeitstempel aus Text holen, z.B. "Sa, 02.05. um 06:48"
+            ts = re.search(r"(Mo|Di|Mi|Do|Fr|Sa|So),\s*([\d.]+)\s*um\s*([\d:]+)", r.text)
+            temps["letzigraben"]["updated_at"] = ts.group(0) if ts else None
+    except Exception as e:
+        print(f"WARN Letzigraben-Temp: {e}")
+
+    # Utoquai via Tecdottir
+    try:
+        today = datetime.now(TZ).strftime("%Y-%m-%d")
+        r = httpx.get(
+            f"https://tecdottir.herokuapp.com/measurements/tiefenbrunnen"
+            f"?startDate={today}&endDate={today}",
+            timeout=15, follow_redirects=True, headers=headers
+        )
+        r.raise_for_status()
+        results = r.json().get("result", [])
+        for entry in reversed(results):
+            wt = (entry.get("values") or {}).get("water_temperature", {}).get("value")
+            if wt is not None:
+                temps["utoquai"]["temp"] = round(float(wt), 1)
+                temps["utoquai"]["updated_at"] = entry.get("timestamp_utc")
+                break
+    except Exception as e:
+        print(f"WARN Utoquai-Temp (Tecdottir): {e}")
+
+    return temps
+
+
+# ---- Feiertage / Schulferien ----
+
 def is_swiss_holiday(d: datetime) -> bool:
-    """Pruefe Schweizer Feiertage (Bund + ZH) fuers gegebene Datum."""
-    # Minimaler Set fester ZH-Feiertage; Ostern etc. werden via 'holidays' lib gemacht
     try:
         import holidays
         ch_zh = holidays.country_holidays("CH", subdiv="ZH")
@@ -68,32 +142,21 @@ def is_swiss_holiday(d: datetime) -> bool:
 
 
 def is_zh_school_holiday(d: datetime) -> bool:
-    """
-    Zuercher Schulferien (vereinfacht, manuell gepflegt).
-    Quelle: stadt-zuerich.ch/schulferien - update jaehrlich.
-    Format: Liste von (start, end) Tupeln im Format YYYY-MM-DD inklusiv.
-    """
-    ferien_2026 = [
-        ("2026-04-25", "2026-05-10"),  # Fruehlingsferien 2026
-        ("2026-07-11", "2026-08-16"),  # Sommerferien 2026
-        ("2026-10-03", "2026-10-18"),  # Herbstferien 2026
-        ("2026-12-19", "2027-01-03"),  # Weihnachtsferien 2026/27
+    ferien = [
+        ("2026-04-25", "2026-05-10"),
+        ("2026-07-11", "2026-08-16"),
+        ("2026-10-03", "2026-10-18"),
+        ("2026-12-19", "2027-01-03"),
+        ("2027-02-06", "2027-02-21"),
+        ("2027-04-17", "2027-05-02"),
     ]
-    ferien_2027 = [
-        ("2027-02-06", "2027-02-21"),  # Sportferien 2027
-        ("2027-04-17", "2027-05-02"),  # Fruehlingsferien 2027
-    ]
-    today = d.date()
-    for start, end in ferien_2026 + ferien_2027:
-        s = datetime.fromisoformat(start).date()
-        e = datetime.fromisoformat(end).date()
-        if s <= today <= e:
-            return True
-    return False
+    today = d.date().isoformat()
+    return any(s <= today <= e for s, e in ferien)
 
+
+# ---- CSV Helper ----
 
 def append_csv(path: Path, fieldnames: list[str], rows: list[dict]) -> None:
-    """Haengt Zeilen an CSV an, erzeugt Header beim ersten Mal."""
     path.parent.mkdir(parents=True, exist_ok=True)
     new_file = not path.exists()
     with path.open("a", newline="", encoding="utf-8") as f:
@@ -103,19 +166,20 @@ def append_csv(path: Path, fieldnames: list[str], rows: list[dict]) -> None:
         writer.writerows(rows)
 
 
+# ---- Main ----
+
 def main() -> None:
     now_utc = datetime.now(timezone.utc)
     now_local = now_utc.astimezone(TZ)
     timestamp_iso = now_utc.isoformat(timespec="seconds")
 
-    # 1. Auslastungsdaten holen
+    # 1. Auslastung
     try:
         snapshot = asyncio.run(fetch_snapshot())
     except Exception as e:
         print(f"FEHLER beim WebSocket-Fetch: {e}")
         raise
 
-    # 2. Kontext berechnen (gilt fuer alle Zeilen)
     context = {
         "timestamp_utc": timestamp_iso,
         "timestamp_local": now_local.isoformat(timespec="seconds"),
@@ -126,7 +190,6 @@ def main() -> None:
         "is_school_holiday": is_zh_school_holiday(now_local),
     }
 
-    # 3. Auslastungs-Zeilen bauen (eine pro Bad)
     rows = []
     for entry in snapshot:
         try:
@@ -135,7 +198,6 @@ def main() -> None:
             freespace = int(entry.get("freespace", 0) or 0)
         except (ValueError, TypeError):
             currentfill = maxspace = freespace = 0
-
         ratio = (currentfill / maxspace) if maxspace > 0 else 0.0
         rows.append({
             **context,
@@ -155,7 +217,7 @@ def main() -> None:
     append_csv(RAW_FILE, auslastung_fields, rows)
     print(f"OK Auslastung: {len(rows)} Eintraege geschrieben")
 
-    # 4. Wetter (separater File - eine Zeile pro Snapshot)
+    # 2. Wetter
     try:
         weather = fetch_weather()
         weather_row = {
@@ -168,13 +230,26 @@ def main() -> None:
             "cloud_cover_pct": weather.get("cloud_cover"),
             "wind_speed_kmh": weather.get("wind_speed_10m"),
         }
-        weather_fields = list(weather_row.keys())
-        append_csv(WEATHER_FILE, weather_fields, [weather_row])
+        append_csv(WEATHER_FILE, list(weather_row.keys()), [weather_row])
         print(f"OK Wetter: {weather.get('temperature_2m')}C, "
               f"Niederschlag {weather.get('precipitation')}mm")
     except Exception as e:
-        # Wetter-Fehler soll nicht den ganzen Run kippen
-        print(f"WARN Wetter konnte nicht geladen werden: {e}")
+        print(f"WARN Wetter: {e}")
+
+    # 3. Wassertemperaturen
+    try:
+        temps = fetch_temperatures()
+        temps["updated_at"] = timestamp_iso
+        DATA_DIR.mkdir(parents=True, exist_ok=True)
+        TEMP_FILE.write_text(json.dumps(temps, indent=2, ensure_ascii=False))
+        print(
+            f"OK Temperaturen: "
+            f"City {temps['city']['temp']}C, "
+            f"Letzi {temps['letzigraben']['temp']}C, "
+            f"Uto {temps['utoquai']['temp']}C"
+        )
+    except Exception as e:
+        print(f"WARN Temperaturen: {e}")
 
 
 if __name__ == "__main__":
