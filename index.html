@@ -345,7 +345,7 @@
       if (state.temperatures && state.temperatures[t.key]) {
         const td = state.temperatures[t.key];
         if (td.temp !== null && td.temp !== undefined) {
-          tempStr = `🌡 ${td.temp}°C`;
+          tempStr = `🌡 ${Number(td.temp).toFixed(1)}°C`;
           if (t.key === 'city') tempStr += ' (Schwimmerbecken)';
           if (t.key === 'utoquai') tempStr += ' (Zürichsee)';
           if (td.measured_at) {
@@ -424,13 +424,14 @@
   }
 
   function parseCSV(text) {
-    const lines = text.trim().split("\n");
+    const lines = text.replace(/\r/g, "").trim().split("\n").filter(l => l.trim());
     if (lines.length < 2) return [];
-    const headers = lines[0].split(",");
+    const sep = lines[0].includes("\t") ? "\t" : ",";
+    const headers = lines[0].split(sep).map(h => h.trim());
     return lines.slice(1).map(line => {
-      const vals = line.split(",");
+      const vals = line.split(sep);
       const row = {};
-      headers.forEach((h, i) => row[h] = vals[i]);
+      headers.forEach((h, i) => row[h] = (vals[i] || "").trim());
       return row;
     });
   }
