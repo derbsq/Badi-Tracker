@@ -517,7 +517,7 @@
       buckets[k].sum += ratio; buckets[k].count++;
     });
     const matrixData = [];
-    for (let d = 0; d < 7; d++) for (let h = 5; h <= 23; h++) {
+    for (let d = 0; d < 7; d++) for (let h = 6; h <= 21; h++) {
       const b = buckets[d + "_" + h];
       matrixData.push({ x: h, y: d, v: b ? b.sum / b.count : null });
     }
@@ -545,7 +545,7 @@
           label: c => `${DAY_LABELS[c.raw.y]} ${c.raw.x}:00 · ${c.raw.v === null ? "—" : Math.round(c.raw.v * 100) + "%"}`
         }}},
         scales: {
-          x: { type: "linear", min: 5, max: 23, ticks: { stepSize: 1, callback: v => v + ":00" }, grid: { display: false } },
+          x: { type: "linear", min: 6, max: 21, ticks: { stepSize: 1, callback: v => v + ":00" }, grid: { display: false } },
           y: { type: "linear", min: -0.5, max: 6.5, reverse: true, ticks: { stepSize: 1, callback: v => DAY_LABELS[v] }, grid: { display: false } }
         }
       }
