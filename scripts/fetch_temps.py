@@ -1,7 +1,12 @@
 """
-Holt Wassertemperaturen fuer Letzigraben und Utoquai.
-Bei Fehler wird der alte Wert behalten (temperatures.json bleibt unveraendert).
+Holt Wassertemperaturen fuer Letzigraben und Utoquai (Zürichsee).
+
+Quellen:
+- Letzigraben: badi-info.ch scraping
+- Utoquai: OGD Stadt Zürich CSV (Messstation Tiefenbrunnen, Wasserschutzpolizei)
 """
+import csv
+import io
 import json
 import re
 from datetime import datetime, timezone
@@ -14,82 +19,101 @@ TZ = ZoneInfo("Europe/Zurich")
 ROOT = Path(__file__).resolve().parent.parent
 TEMP_FILE = ROOT / "data" / "temperatures.json"
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (compatible; badi-tracker/1.0; +https://github.com/derbsq/Badi-Tracker)",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Language": "de-CH,de;q=0.9",
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+    "Accept": "text/html,application/xhtml+xml,*/*;q=0.8",
 }
 
 
 def fetch_letzigraben() -> dict:
-    """Scrapet badi-info.ch fuer Letzigraben-Wassertemperatur."""
+    print("  Fetching Letzigraben (badi-info.ch)...", flush=True)
     r = httpx.get(
         "https://www.badi-info.ch/_temp/zh/letzigraben.htm",
         timeout=15, follow_redirects=True, headers=HEADERS
     )
     r.raise_for_status()
-    # Debug: ersten 500 Zeichen ausgeben
-    print(f"  Letzigraben HTML preview: {r.text[:300]!r}")
-    # Robuster Regex: Zahl mit optionalem Dezimalpunkt zwischen Tags oder als Text
-    m = re.search(r"(\d+[.,]\d+|\d+)\s*°?\s*C", r.text)
-    if not m:
-        # Fallback: suche nach bold-Zahl
-        m = re.search(r"<b[^>]*>([\d.,]+)</b>|<strong[^>]*>([\d.,]+)</strong>", r.text, re.IGNORECASE)
-        val = m.group(1) or m.group(2) if m else None
-    else:
-        val = m.group(1).replace(",", ".")
-    ts = re.search(r"(Mo|Di|Mi|Do|Fr|Sa|So)[.,\s]*([\d.]+)\s*um\s*([\d:]+)", r.text)
-    return {
-        "temp": float(val) if val else None,
-        "unit": "C",
-        "source": "badi-info.ch",
-        "measured_at": ts.group(0) if ts else None,
-    }
+    print(f"  Status: {r.status_code}, Encoding: {r.encoding}", flush=True)
+
+    # Mehrere Patterns versuchen
+    for pattern in [
+        r"<strong[^>]*>\s*([\d.,]+)\s*</strong>",
+        r"<b[^>]*>\s*([\d.,]+)\s*</b>",
+        r"Becken[^<]*<[^>]+>\s*([\d.,]+)",
+        r"(1[0-9]|2[0-9])\.([\d])\s*°",
+    ]:
+        m = re.search(pattern, r.text, re.IGNORECASE)
+        if m:
+            raw = m.group(1).replace(",", ".")
+            print(f"  Match: '{raw}' via pattern: {pattern}", flush=True)
+            # Messzeit extrahieren
+            ts = re.search(r"(Mo|Di|Mi|Do|Fr|Sa|So)[^<]{0,5}[\d]{2}\.[\d]{2}[^<]{0,10}um\s*([\d:]+)", r.text)
+            measured_at = ts.group(0).strip() if ts else None
+            return {
+                "temp": float(raw),
+                "unit": "C",
+                "source": "badi-info.ch",
+                "measured_at": measured_at,
+            }
+
+    # Letzter Versuch: alle Zahlen im Text
+    numbers = re.findall(r"\b(\d{1,2}[.,]\d)\b", r.text)
+    print(f"  All numbers found in text: {numbers}", flush=True)
+    print(f"  Full HTML (first 800 chars): {r.text[:800]!r}", flush=True)
+    return {"temp": None, "unit": "C", "source": "badi-info.ch"}
 
 
-def fetch_utoquai_ogd() -> dict:
+def fetch_utoquai() -> dict:
     """
-    Holt Zuerichsee-Wassertemperatur via OGD Stadt Zuerich CKAN-API.
-    Datensatz: sid_wapo_wetterstationen, Ressource tiefenbrunnen.
+    Holt letzten Messwert von Tiefenbrunnen via OGD CSV der Stadt Zürich.
+    Die CSV ist gross (seit 2007), daher lesen wir nur die letzten Bytes.
     """
-    # Resource-ID fuer Tiefenbrunnen im OGD-Katalog
-    url = (
-        "https://data.stadt-zuerich.ch/api/3/action/datastore_search_sql"
-        "?sql=SELECT%20timestamp_utc,water_temperature%20FROM%20"
-        "%22sid_wapo_wetterstationen_tiefenbrunnen%22%20"
-        "WHERE%20water_temperature%20IS%20NOT%20NULL%20"
-        "ORDER%20BY%20timestamp_utc%20DESC%20LIMIT%201"
-    )
-    r = httpx.get(url, timeout=15, follow_redirects=True, headers=HEADERS)
-    r.raise_for_status()
-    data = r.json()
-    print(f"  OGD response: {json.dumps(data)[:300]}")
-    records = data.get("result", {}).get("records", [])
-    if records:
-        return {
-            "temp": round(float(records[0]["water_temperature"]), 1),
-            "unit": "C",
-            "source": "OGD Stadt Zürich / Wasserschutzpolizei Tiefenbrunnen",
-            "measured_at": records[0].get("timestamp_utc"),
-        }
-    return {"temp": None, "unit": "C", "source": "OGD Stadt Zürich", "measured_at": None}
+    print("  Fetching Utoquai (OGD Tiefenbrunnen CSV)...", flush=True)
+    url = "https://data.stadt-zuerich.ch/dataset/sid_wapo_wetterstationen/download/messwerte_tiefenbrunnen_seit2007-heute.csv"
 
-
-def fetch_utoquai_badoinfo() -> dict:
-    """Fallback: badi-info.ch fuer Zuerichsee Tiefenbrunnen."""
+    # Hole nur letzten Teil der Datei (letzte ~5KB reichen fuer mehrere Zeilen)
     r = httpx.get(
-        "https://www.badi-info.ch/_temp/zuerichsee-tiefenbrunnen.htm",
-        timeout=15, follow_redirects=True, headers=HEADERS
+        url, timeout=30, follow_redirects=True,
+        headers={**HEADERS, "Range": "bytes=-5000"}
     )
-    r.raise_for_status()
-    print(f"  Utoquai badi-info HTML preview: {r.text[:300]!r}")
-    m = re.search(r"<strong>([\d.]+)</strong>", r.text)
-    ts = re.search(r"(Mo|Di|Mi|Do|Fr|Sa|So)[.,\s]*([\d.]+)\s*um\s*([\d:]+)", r.text)
-    return {
-        "temp": float(m.group(1)) if m else None,
-        "unit": "C",
-        "source": "badi-info.ch / Zürichsee Tiefenbrunnen",
-        "measured_at": ts.group(0) if ts else None,
-    }
+    print(f"  Status: {r.status_code}, Content-Length: {len(r.content)}", flush=True)
+
+    if r.status_code not in (200, 206):
+        r.raise_for_status()
+
+    # CSV parsen - letzte vollstaendige Zeile mit water_temperature finden
+    text = r.text
+    # Falls kein Header (206 Partial Content), Header separat holen
+    if r.status_code == 206:
+        header_r = httpx.get(url, timeout=15, follow_redirects=True,
+                             headers={**HEADERS, "Range": "bytes=0-500"})
+        header_line = header_r.text.split("\n")[0]
+        text = header_line + "\n" + text.lstrip()
+        # Erste Zeile koennte unvollstaendig sein, entfernen
+        lines = text.split("\n")
+        if len(lines) > 2:
+            text = lines[0] + "\n" + "\n".join(lines[2:])
+
+    print(f"  Last 500 chars: {text[-500:]!r}", flush=True)
+
+    reader = csv.DictReader(io.StringIO(text))
+    last_row = None
+    for row in reader:
+        wt = row.get("water_temperature") or row.get("Wassertemperatur") or row.get("watertemperature")
+        if wt and wt.strip() not in ("", "NA", "NaN", "null"):
+            last_row = row
+            last_wt = wt
+
+    if last_row:
+        print(f"  Headers: {list(last_row.keys())}", flush=True)
+        ts = last_row.get("timestamp_utc") or last_row.get("Datum") or last_row.get("timestamp")
+        return {
+            "temp": round(float(last_wt.replace(",", ".")), 1),
+            "unit": "C",
+            "source": "OGD Stadt Zürich / Tiefenbrunnen",
+            "measured_at": ts,
+        }
+
+    print("  WARNING: No water_temperature found in CSV", flush=True)
+    return {"temp": None, "unit": "C", "source": "OGD Stadt Zürich"}
 
 
 def main():
@@ -104,37 +128,31 @@ def main():
             "unit": "C",
             "source": "static",
             "note": "Schwimmerbecken 28°C / Nichtschwimmer 32°C",
+            "measured_at": None,
         },
         "letzigraben": {"temp": None},
         "utoquai": {"temp": None},
     }
 
-    # Letzigraben
     try:
         result["letzigraben"] = fetch_letzigraben()
-        print(f"OK Letzigraben: {result['letzigraben']['temp']}°C")
+        print(f"OK Letzigraben: {result['letzigraben']['temp']}°C "
+              f"(gemessen: {result['letzigraben'].get('measured_at')})", flush=True)
     except Exception as e:
-        print(f"WARN Letzigraben: {type(e).__name__}: {e}")
+        print(f"ERROR Letzigraben: {type(e).__name__}: {e}", flush=True)
         result["letzigraben"] = {"temp": None, "error": str(e)}
 
-    # Utoquai: OGD zuerst, dann badi-info als Fallback
     try:
-        result["utoquai"] = fetch_utoquai_ogd()
-        if result["utoquai"]["temp"] is None:
-            raise ValueError("OGD lieferte None, versuche Fallback")
-        print(f"OK Utoquai (OGD): {result['utoquai']['temp']}°C")
+        result["utoquai"] = fetch_utoquai()
+        print(f"OK Utoquai: {result['utoquai']['temp']}°C "
+              f"(gemessen: {result['utoquai'].get('measured_at')})", flush=True)
     except Exception as e:
-        print(f"WARN Utoquai OGD: {e}, versuche badi-info Fallback")
-        try:
-            result["utoquai"] = fetch_utoquai_badoinfo()
-            print(f"OK Utoquai (badi-info): {result['utoquai']['temp']}°C")
-        except Exception as e2:
-            print(f"WARN Utoquai badi-info: {e2}")
-            result["utoquai"] = {"temp": None, "error": str(e2)}
+        print(f"ERROR Utoquai: {type(e).__name__}: {e}", flush=True)
+        result["utoquai"] = {"temp": None, "error": str(e)}
 
     TEMP_FILE.parent.mkdir(parents=True, exist_ok=True)
     TEMP_FILE.write_text(json.dumps(result, indent=2, ensure_ascii=False))
-    print(f"OK temperatures.json geschrieben ({now_local} CH-Zeit)")
+    print(f"OK temperatures.json geschrieben ({now_local} CH-Zeit)", flush=True)
 
 
 if __name__ == "__main__":
