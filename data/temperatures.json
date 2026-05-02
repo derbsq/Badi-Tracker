@@ -1,0 +1,22 @@
+{
+  "updated_at": "2026-05-02T09:30:43+00:00",
+  "updated_at_local": "11:30",
+  "city": {
+    "temp": 28.0,
+    "unit": "C",
+    "source": "static",
+    "note": "Schwimmerbecken 28°C / Nichtschwimmer 32°C"
+  },
+  "letzigraben": {
+    "temp": null,
+    "unit": "C",
+    "source": "badi-info.ch",
+    "measured_at": "Sa, 02.05. um 06:48"
+  },
+  "utoquai": {
+    "temp": null,
+    "unit": "C",
+    "source": "tecdottir/tiefenbrunnen",
+    "measured_at": null
+  }
+}
