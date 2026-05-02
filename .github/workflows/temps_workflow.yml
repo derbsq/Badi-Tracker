@@ -2,10 +2,9 @@ name: Update Wassertemperaturen
 
 on:
   schedule:
-    # 08:00, 12:00, 18:00 Schweizer Zeit = 06:00, 10:00, 16:00 UTC (Sommerzeit)
-    - cron: "0 6 * * *"
-    - cron: "0 10 * * *"
-    - cron: "0 16 * * *"
+    - cron: "0 6 * * *"   # 08:00 CH-Zeit (Sommerzeit = UTC+2)
+    - cron: "0 10 * * *"  # 12:00 CH-Zeit
+    - cron: "0 16 * * *"  # 18:00 CH-Zeit
   workflow_dispatch:
 
 concurrency:
@@ -43,5 +42,11 @@ jobs:
             echo "Keine Aenderungen"
           else
             git commit -m "temps: update $(date -u +'%Y-%m-%dT%H:%MZ')"
-            git pull --rebase origin main && git push
+            # Retry mit force-push auf temperatures.json bei Konflikt
+            for i in 1 2 3; do
+              git fetch origin main
+              git rebase origin/main && git push && break || git rebase --abort
+              echo "Retry $i..."
+              sleep 3
+            done
           fi
