@@ -346,8 +346,18 @@
         const td = state.temperatures[t.key];
         if (td.temp !== null && td.temp !== undefined) {
           tempStr = `🌡 ${td.temp}°C`;
-          if (td.note && t.key === 'city') tempStr += ' (Schwimmerbecken)';
-          if (td.note && t.key === 'utoquai') tempStr += ' (Zürichsee)';
+          if (t.key === 'city') tempStr += ' (Schwimmerbecken)';
+          if (t.key === 'utoquai') tempStr += ' (Zürichsee)';
+          if (td.measured_at) {
+            // Datum kürzen: nur Zeit oder "Sa 06:48" Format
+            let ts = td.measured_at;
+            if (ts && ts.includes('T')) {
+              // ISO UTC Timestamp → lokale Zeit
+              const d = new Date(ts);
+              ts = d.toLocaleString('de-CH', {weekday:'short', hour:'2-digit', minute:'2-digit'});
+            }
+            tempStr += ` · ${ts}`;
+          }
         }
       }
       return `<div class="card ${c.cls}">
