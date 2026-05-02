@@ -20,6 +20,18 @@ SUBSCRIBE_CMD = "1 all"
 TIMEOUT_SECONDS = 15
 TZ = ZoneInfo("Europe/Zurich")
 
+# Nur diese Bäder in der CSV speichern (UIDs aus dem WebSocket-Feed)
+TRACKED_UIDS = {
+    "flb6939",   # Flussbad Oberer Letten
+    "flb6940",   # Flussbad Unterer Letten
+    "fb012",     # Freibad Heuried
+    "LETZI-1",   # Freibad Letzigraben
+    "SSD-11",    # Freibad Seebach
+    "SSD-4",     # Hallenbad City
+    "SSD-7",     # Hallenbad Oerlikon
+    "SSD-10",    # Seebad Utoquai
+}
+
 ROOT = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT / "data"
 RAW_FILE = DATA_DIR / "auslastung.csv"
@@ -192,6 +204,8 @@ def main() -> None:
 
     rows = []
     for entry in snapshot:
+        if entry.get("uid") not in TRACKED_UIDS:
+            continue
         try:
             currentfill = int(entry.get("currentfill", 0) or 0)
             maxspace = int(entry.get("maxspace", 0) or 0)
