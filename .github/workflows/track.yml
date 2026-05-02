@@ -2,11 +2,15 @@ name: Track Badi Auslastung
 
 on:
   schedule:
-    # Alle 10 Minuten (UTC). Cron versteht keine Zeitzonen.
-    - cron: "*/10 * * * *"
-  workflow_dispatch:  # Erlaubt manuelles Ausloesen via UI
+    # Alle 10 Minuten, 24/7 - Öffnungszeiten-Check im Script
+    - cron: "0 * * * *"
+    - cron: "10 * * * *"
+    - cron: "20 * * * *"
+    - cron: "30 * * * *"
+    - cron: "40 * * * *"
+    - cron: "50 * * * *"
+  workflow_dispatch:
 
-# Verhindert, dass parallele Runs die CSV gleichzeitig committen
 concurrency:
   group: tracker
   cancel-in-progress: false
@@ -15,25 +19,46 @@ jobs:
   track:
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # Damit der Job zurueck ins Repo committen darf
+      contents: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Check Öffnungszeiten
+        id: check_hours
+        run: |
+          # Prüfe ob aktuell innerhalb der Öffnungszeiten (06:00-22:00 CH-Zeit)
+          python3 - << 'PYEOF'
+          from datetime import datetime
+          from zoneinfo import ZoneInfo
+          now = datetime.now(ZoneInfo("Europe/Zurich"))
+          hour = now.hour
+          in_hours = 6 <= hour < 22
+          print(f"CH-Zeit: {now.strftime('%H:%M')} - {'IN' if in_hours else 'AUSSERHALB'} Öffnungszeiten")
+          # GitHub Actions output setzen
+          with open("/tmp/in_hours.txt", "w") as f:
+              f.write("true" if in_hours else "false")
+          PYEOF
+          echo "in_hours=$(cat /tmp/in_hours.txt)" >> $GITHUB_OUTPUT
+
       - name: Setup Python
+        if: steps.check_hours.outputs.in_hours == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: "pip"
 
       - name: Install dependencies
+        if: steps.check_hours.outputs.in_hours == 'true'
         run: pip install -r requirements.txt
 
       - name: Run tracker
+        if: steps.check_hours.outputs.in_hours == 'true'
         run: python scripts/track.py
 
       - name: Commit data
+        if: steps.check_hours.outputs.in_hours == 'true'
         run: |
           git config user.name "badi-tracker-bot"
           git config user.email "actions@github.com"
@@ -42,7 +67,6 @@ jobs:
             echo "Keine Aenderungen"
           else
             git commit -m "data: snapshot $(date -u +'%Y-%m-%dT%H:%MZ')"
-            # Retry bei Push-Konflikt (parallele Runs)
             for i in 1 2 3; do
               git pull --rebase origin main && git push && break
               echo "Push-Versuch $i fehlgeschlagen, retry..."
