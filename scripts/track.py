@@ -198,6 +198,50 @@ def fetch_temp_utoquai() -> dict:
     return {"temp": None, "measured_at": None, "source": "OGD Stadt Zürich"}
 
 
+
+
+def fetch_limmat_letten() -> dict:
+    """
+    Holt Limmat-Wassertemperatur und Abfluss von hydroproweb.zh.ch.
+    Messstation: Limmat-Zch. KW Letten (direkt beim Flussbad Oberer Letten).
+    """
+    result = {"water_temp": None, "abfluss_m3s": None, "measured_at": None}
+    try:
+        r = httpx.get(
+            "https://hydroproweb.zh.ch/Listen/AktuelleWerte/AktWassertemp.html",
+            timeout=15, follow_redirects=True, headers=HEADERS_WEB
+        )
+        r.raise_for_status()
+        # Suche nach "Limmat-Zch. KW Letten" Zeile
+        m = re.search(
+            r"Limmat-Zch\. KW Letten.*?(\d+[.,]\d+)",
+            r.text, re.DOTALL | re.IGNORECASE
+        )
+        if m:
+            result["water_temp"] = float(m.group(1).replace(",", "."))
+            # Zeitstempel
+            result["measured_at"] = None  # Zeitstempel aus Tabelle
+    except Exception as e:
+        print(f"  WARN Limmat-Temp: {e}")
+
+    # Abfluss von Abfluss-Seite
+    try:
+        r = httpx.get(
+            "https://hydroproweb.zh.ch/Listen/AktuelleWerte/AktAbfluss.html",
+            timeout=15, follow_redirects=True, headers=HEADERS_WEB
+        )
+        r.raise_for_status()
+        m = re.search(
+            r"Limmat-Zch\. KW Letten.*?(\d+[.,]\d*)",
+            r.text, re.DOTALL | re.IGNORECASE
+        )
+        if m:
+            result["abfluss_m3s"] = float(m.group(1).replace(",", "."))
+    except Exception as e:
+        print(f"  WARN Limmat-Abfluss: {e}")
+
+    return result
+
 # ---- Feiertage / Schulferien ----
 
 def is_swiss_holiday(d: datetime) -> bool:
@@ -296,6 +340,8 @@ def main() -> None:
             print(f"WARN Uto-Temp: {e}")
             uto = {"temp": None, "measured_at": None, "source": "error"}
 
+        letten = fetch_limmat_letten()
+        print(f"OK Letten: {letten['water_temp']}°C, {letten['abfluss_m3s']} m³/s")
         temps = {
             "updated_at": timestamp_iso,
             "updated_at_local": now_local.strftime("%H:%M"),
@@ -303,6 +349,7 @@ def main() -> None:
                      "note": "Schwimmerbecken 28°C / Nichtschwimmer 32°C"},
             "letzigraben": {**letzi, "unit": "C"},
             "utoquai": {**uto, "unit": "C"},
+            "letten": {**letten, "source": "hydroproweb.zh.ch / Limmat KW Letten"},
         }
         existing, sha = gh_get_file("data/temperatures.json")
         gh_put_file(
