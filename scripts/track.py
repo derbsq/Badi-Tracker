@@ -202,41 +202,57 @@ def fetch_temp_utoquai() -> dict:
 
 def fetch_limmat_letten() -> dict:
     """
-    Holt Limmat-Wassertemperatur und Abfluss von hydroproweb.zh.ch.
-    Messstation: Limmat-Zch. KW Letten (direkt beim Flussbad Oberer Letten).
+    Temperatur: hydroproweb.zh.ch, Station 'Limmat-Zch. KW Letten'
+                (vor der Sihl-Mündung, direkt beim Flussbad Oberer Letten)
+    Abfluss:    api.existenz.ch, BAFU Station 2099 Limmat-Zürich Unterhard
+                (nach der Sihl-Mündung – beste verfügbare Quelle, BAFU)
     """
-    result = {"water_temp": None, "abfluss_m3s": None, "measured_at": None}
+    result = {"water_temp": None, "abfluss_m3s": None,
+              "temp_measured_at": None, "flow_measured_at": None}
+
+    # Temperatur von hydroproweb.zh.ch
     try:
         r = httpx.get(
             "https://hydroproweb.zh.ch/Listen/AktuelleWerte/AktWassertemp.html",
             timeout=15, follow_redirects=True, headers=HEADERS_WEB
         )
         r.raise_for_status()
-        # Suche nach "Limmat-Zch. KW Letten" Zeile
+        # Tabelle parsen: Zeile mit "Limmat-Zch. KW Letten"
+        # Format: | Limmat-Zch. KW Letten | °C | 10:40 13.04.2026 | 6.4 | ...
         m = re.search(
-            r"Limmat-Zch\. KW Letten.*?(\d+[.,]\d+)",
+            r"Limmat-Zch\.\s*KW\s*Letten\s*\|[^|]*\|\s*\*\*(\d{1,2}:\d{2})\*\*\s*(\d{2}\.\d{2}\.\d{4})\s*\|\s*\*\*(\d+[.,]\d+)\*\*",
             r.text, re.DOTALL | re.IGNORECASE
         )
         if m:
-            result["water_temp"] = float(m.group(1).replace(",", "."))
-            # Zeitstempel
-            result["measured_at"] = None  # Zeitstempel aus Tabelle
+            result["water_temp"] = float(m.group(3).replace(",", "."))
+            result["temp_measured_at"] = f"{m.group(2)} {m.group(1)}"
+            print(f"  Limmat Temp (KW Letten): {result['water_temp']}°C um {result['temp_measured_at']}")
+        else:
+            # Fallback: einfacherer Regex
+            idx = r.text.find("KW Letten")
+            if idx > 0:
+                snippet = r.text[idx:idx+300]
+                nums = re.findall(r"\b(\d{1,2}[.,]\d)\b", snippet)
+                if nums:
+                    result["water_temp"] = float(nums[0].replace(",", "."))
+                    print(f"  Limmat Temp (KW Letten, fallback): {result['water_temp']}°C")
     except Exception as e:
         print(f"  WARN Limmat-Temp: {e}")
 
-    # Abfluss von Abfluss-Seite
+    # Abfluss von existenz.ch (BAFU Station 2099, nach Sihl-Mündung)
     try:
         r = httpx.get(
-            "https://hydroproweb.zh.ch/Listen/AktuelleWerte/AktAbfluss.html",
+            "https://api.existenz.ch/apiv1/hydro/latest"
+            "?locations=2099&parameters=flow&app=badi-tracker",
             timeout=15, follow_redirects=True, headers=HEADERS_WEB
         )
         r.raise_for_status()
-        m = re.search(
-            r"Limmat-Zch\. KW Letten.*?(\d+[.,]\d*)",
-            r.text, re.DOTALL | re.IGNORECASE
-        )
-        if m:
-            result["abfluss_m3s"] = float(m.group(1).replace(",", "."))
+        for entry in r.json().get("payload", []):
+            if entry.get("par") == "flow" and entry.get("val") is not None:
+                result["abfluss_m3s"] = round(float(entry["val"]), 1)
+                result["flow_measured_at"] = entry.get("dt")
+                print(f"  Limmat Abfluss (Unterhard): {result['abfluss_m3s']} m³/s")
+                break
     except Exception as e:
         print(f"  WARN Limmat-Abfluss: {e}")
 
