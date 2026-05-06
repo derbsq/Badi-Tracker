@@ -217,27 +217,51 @@ def fetch_limmat_letten() -> dict:
             timeout=15, follow_redirects=True, headers=HEADERS_WEB
         )
         r.raise_for_status()
-        # Tabelle parsen: Zeile mit "Limmat-Zch. KW Letten"
-        # Format: | Limmat-Zch. KW Letten | °C | 10:40 13.04.2026 | 6.4 | ...
-        m = re.search(
-            r"Limmat-Zch\.\s*KW\s*Letten\s*\|[^|]*\|\s*\*\*(\d{1,2}:\d{2})\*\*\s*(\d{2}\.\d{2}\.\d{4})\s*\|\s*\*\*(\d+[.,]\d+)\*\*",
-            r.text, re.DOTALL | re.IGNORECASE
-        )
-        if m:
-            result["water_temp"] = float(m.group(3).replace(",", "."))
-            result["temp_measured_at"] = f"{m.group(2)} {m.group(1)}"
-            print(f"  Limmat Temp (KW Letten): {result['water_temp']}°C um {result['temp_measured_at']}")
+        # Prüfe ob Daten aktuell sind (Datum im letzten Update)
+        update_m = re.search(r"Letztes Update:\s*(\d{2}\.\d{2}\.\d{4})", r.text)
+        if update_m:
+            from datetime import date
+            update_date = update_m.group(1)
+            today_str = date.today().strftime("%d.%m.%Y")
+            if update_date != today_str:
+                print(f"  WARN hydroproweb veraltet: {update_date}, heute: {today_str}")
+                raise ValueError(f"Daten veraltet: {update_date}")
+        # Zeile mit KW Letten parsen
+        idx = r.text.find("KW Letten")
+        if idx < 0:
+            raise ValueError("KW Letten nicht in Seite gefunden")
+        snippet = r.text[idx:idx+400]
+        # Aktueller Wert steht nach Uhrzeit und Datum in **fett**
+        nums = re.findall(r"\*\*(\d{1,2}[.,]\d)\*\*", snippet)
+        if nums:
+            result["water_temp"] = float(nums[0].replace(",", "."))
+            # Uhrzeit
+            time_m = re.search(r"\*\*(\d{2}:\d{2})\*\*", snippet)
+            result["temp_measured_at"] = time_m.group(1) if time_m else None
+            print(f"  Limmat Temp (KW Letten): {result['water_temp']}°C")
         else:
-            # Fallback: einfacherer Regex
-            idx = r.text.find("KW Letten")
-            if idx > 0:
-                snippet = r.text[idx:idx+300]
-                nums = re.findall(r"\b(\d{1,2}[.,]\d)\b", snippet)
-                if nums:
-                    result["water_temp"] = float(nums[0].replace(",", "."))
-                    print(f"  Limmat Temp (KW Letten, fallback): {result['water_temp']}°C")
+            raise ValueError("Kein Temperaturwert gefunden")
     except Exception as e:
-        print(f"  WARN Limmat-Temp: {e}")
+        print(f"  WARN hydroproweb: {e} – versuche existenz.ch Stationen")
+        # Fallback: existenz.ch mit mehreren möglichen Stationsnummern testen
+        for station in ["2135", "2030", "2011"]:
+            try:
+                r2 = httpx.get(
+                    f"https://api.existenz.ch/apiv1/hydro/latest"
+                    f"?locations={station}&parameters=temperature&app=badi-tracker",
+                    timeout=10, follow_redirects=True, headers=HEADERS_WEB
+                )
+                r2.raise_for_status()
+                for entry in r2.json().get("payload", []):
+                    if entry.get("par") == "temperature" and entry.get("val") is not None:
+                        result["water_temp"] = round(float(entry["val"]), 1)
+                        result["temp_measured_at"] = entry.get("dt")
+                        print(f"  Limmat Temp (existenz.ch Station {station}): {result['water_temp']}°C")
+                        break
+                if result["water_temp"] is not None:
+                    break
+            except Exception as e2:
+                print(f"  WARN existenz.ch {station}: {e2}")
 
     # Abfluss von existenz.ch (BAFU Station 2099, nach Sihl-Mündung)
     try:
