@@ -201,6 +201,11 @@
   <div id="cards" class="cards"></div>
 
   <div id="lanes-now" class="lanes-now hidden"></div>
+  <div id="letten-card" class="lanes-now hidden" style="margin-bottom:1rem;">
+    <span class="muted">🏊 Flussbad Oberer Letten · Limmat:</span>
+    <span id="letten-temp">—</span> ·
+    <span id="letten-flow">—</span>
+  </div>
 
   <div class="panel">
     <h2 style="margin-top: 0;">Verlauf</h2>
@@ -208,10 +213,11 @@
       <select id="bad-select"></select>
       <select id="view-select">
         <option value="heatmap">Heatmap (Wochentag × Stunde)</option>
-        <option value="today">Heute (Tagesverlauf)</option>
+        <option value="today">Tagesverlauf</option>
         <option value="line">Verlauf (chronologisch)</option>
         <option value="weekday">Mittel pro Wochentag</option>
       </select>
+      <input type="date" id="date-picker" style="font-size:13px; padding:6px 10px; border-radius:8px; border:1px solid var(--border-strong); background:var(--bg-card); color:var(--text); font-family:inherit;" />
     </div>
     <div id="hist-status" style="font-size: 12px; color: var(--text-muted); margin-bottom: 0.5rem;">Lade…</div>
     <div class="chart-wrap"><canvas id="histChart"></canvas></div>
@@ -288,7 +294,7 @@
   }
 
   const state = {
-    live: {}, history: [], bahnen: null, vario: null, temperatures: null,
+    live: {}, history: [], bahnen: null, vario: null, temperatures: null, latestWeather: null,
     selectedBad: localStorage.getItem("badi:bad") || "city",
     selectedView: localStorage.getItem("badi:view") || "heatmap"
   };
@@ -381,6 +387,21 @@
     }).join("");
   }
 
+
+  function weatherIcon(code) {
+    // WMO Weather Codes -> Emoji
+    if (code === 0) return "☀️";
+    if (code <= 2) return "⛅";
+    if (code === 3) return "☁️";
+    if (code <= 49) return "🌫️"; // Nebel
+    if (code <= 59) return "🌦️"; // Nieselregen
+    if (code <= 69) return "🌧️"; // Regen
+    if (code <= 79) return "❄️"; // Schnee
+    if (code <= 84) return "🌧️"; // Schauer
+    if (code <= 99) return "⛈️"; // Gewitter
+    return "🌡️";
+  }
+
   function renderDayBanner() {
     const d = new Date();
     const dateStr = d.toLocaleDateString("de-CH", {day:"2-digit", month:"long", year:"numeric"});
@@ -389,7 +410,17 @@
     let badges = "";
     if (holiday) badges += `<span class="holiday">🎉 ${holiday}</span>`;
     if (ferien) badges += `<span class="holiday">🏖 Schulferien ZH</span>`;
-    $("day-banner").innerHTML = `Heute · ${DAY_LABELS_LONG[d.getDay()]}, ${dateStr}${badges}`;
+    // Wetter aus letztem weather.csv Eintrag
+    let wetterStr = "";
+    if (state.latestWeather) {
+      const w = state.latestWeather;
+      const icon = weatherIcon(parseInt(w.weather_code) || 0);
+      const temp = parseFloat(w.temperature_c);
+      if (!isNaN(temp)) wetterStr = ` · ${icon} ${temp.toFixed(1)}°C`;
+      const rain = parseFloat(w.precipitation_mm);
+      if (!isNaN(rain) && rain > 0) wetterStr += ` · 🌧 ${rain.toFixed(1)}mm`;
+    }
+    $("day-banner").innerHTML = `Heute · ${DAY_LABELS_LONG[d.getDay()]}, ${dateStr}${wetterStr}${badges}`;
   }
 
   function renderLanesNow() {
@@ -477,6 +508,30 @@
       if (r.ok) {
         state.temperatures = await r.json();
         renderCards();
+        // Letten-Daten anzeigen
+        const t = state.temperatures;
+        if (t?.letten) {
+          const el = $("letten-card");
+          el.classList.remove("hidden");
+          const temp = t.letten.water_temp != null ? `🌡 ${Number(t.letten.water_temp).toFixed(1)}°C` : "—";
+          const flow = t.letten.abfluss_m3s != null ? `💧 ${Number(t.letten.abfluss_m3s).toFixed(1)} m³/s` : "—";
+          $("letten-temp").textContent = temp;
+          $("letten-flow").textContent = flow;
+        }
+      }
+    } catch (e) {}
+    try {
+      const r = await fetch(DATA_BASE + "weather.csv", { cache: "no-store" });
+      if (r.ok) {
+        const lines = (await r.text()).replace(/\r/g,"").trim().split("\n").filter(l=>l.trim());
+        if (lines.length >= 2) {
+          const headers = lines[0].split(",");
+          const last = lines[lines.length-1].split(",");
+          const row = {};
+          headers.forEach((h,i) => row[h] = last[i]);
+          state.latestWeather = row;
+          renderDayBanner();
+        }
       }
     } catch (e) {}
     populateBadSelector();
@@ -497,8 +552,21 @@
     vs.onchange = () => {
       state.selectedView = vs.value;
       localStorage.setItem("badi:view", vs.value);
+      const dp = $("date-picker");
+      dp.style.display = (vs.value === "today") ? "inline-block" : "none";
       renderChart();
     };
+    // Datumspicker initialisieren
+    const dp = $("date-picker");
+    // Heute als Default, min/max aus Daten
+    const dates = state.history.map(r => r.timestamp_local?.slice(0,10)).filter(Boolean).sort();
+    if (dates.length > 0) {
+      dp.min = dates[0];
+      dp.max = dates[dates.length-1];
+    }
+    dp.value = new Date().toLocaleDateString("sv"); // YYYY-MM-DD
+    dp.style.display = (state.selectedView === "today") ? "inline-block" : "none";
+    dp.onchange = () => { if (state.selectedView === "today") renderChart(); };
     toggleLaneSection();
   }
 
@@ -590,12 +658,10 @@
   }
 
   function renderToday(data) {
-    // Filtere nur Datenpunkte vom heutigen Tag (CH-Zeit)
-    const today = new Date();
-    const todayStr = today.toISOString().slice(0, 10);
-    const dayOfWeek = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][today.getDay()];
+    // Datum aus Picker oder heute
+    const dp = $("date-picker");
+    const todayStr = dp?.value || new Date().toLocaleDateString("sv");
     const todayData = data.filter(r => {
-      // Vergleiche anhand timestamp_local YYYY-MM-DD
       return r.timestamp_local && r.timestamp_local.slice(0, 10) === todayStr;
     });
 
@@ -635,7 +701,7 @@
             type: "time",
             time: { unit: "hour", displayFormats: { hour: "HH:mm" } },
             min: new Date(todayStr + "T04:00:00Z"),
-            max: new Date(todayStr + "T20:00:00Z"),
+            max: new Date(todayStr + "T20:30:00Z"),
             ticks: { source: "auto" }
           },
           y: { min: 0, suggestedMax: maxSpace, ticks: { callback: v => v + " P" } }
