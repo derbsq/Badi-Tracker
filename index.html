@@ -350,12 +350,22 @@
           if (t.key === 'city') tempStr += ' (Schwimmerbecken)';
           if (t.key === 'utoquai') tempStr += ' (Zürichsee)';
           if (td.measured_at) {
-            // Datum kürzen: nur Zeit oder "Sa 06:48" Format
             let ts = td.measured_at;
             if (ts && ts.includes('T')) {
-              // ISO UTC Timestamp → lokale Zeit
+              // ISO UTC Timestamp → Wochentag + Datum + Uhrzeit
               const d = new Date(ts);
-              ts = d.toLocaleString('de-CH', {weekday:'short', hour:'2-digit', minute:'2-digit'});
+              const wt = d.toLocaleDateString('de-CH', {weekday:'long'});
+              const dat = d.toLocaleDateString('de-CH', {day:'2-digit', month:'2-digit', year:'numeric'});
+              const zeit = d.toLocaleTimeString('de-CH', {hour:'2-digit', minute:'2-digit'});
+              ts = `${wt}, ${dat}, ${zeit} Uhr`;
+            } else if (ts && ts.match(/^(Mo|Di|Mi|Do|Fr|Sa|So)/)) {
+              // badi-info Format: "Sa, 02.05. um 06:48" → Samstag, 02.05.2026, 06:48 Uhr
+              // Belassen aber vereinheitlichen: Wochentag ausschreiben
+              const tage = {Mo:'Montag',Di:'Dienstag',Mi:'Mittwoch',Do:'Donnerstag',Fr:'Freitag',Sa:'Samstag',So:'Sonntag'};
+              ts = ts.replace(/^(Mo|Di|Mi|Do|Fr|Sa|So)/, m => tage[m] || m)
+                     .replace(' um ', ', ')
+                     .replace(/(\d{2}\.\d{2}\.)/, '$12026, ')
+                     + ' Uhr';
             }
             tempStr += ` · ${ts}`;
           }
