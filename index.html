@@ -288,7 +288,7 @@
   }
 
   const state = {
-    live: {}, history: [], bahnen: null, temperatures: null,
+    live: {}, history: [], bahnen: null, vario: null, temperatures: null,
     selectedBad: localStorage.getItem("badi:bad") || "city",
     selectedView: localStorage.getItem("badi:view") || "heatmap"
   };
@@ -404,7 +404,14 @@
     const occText = occ.length === 0 ? "alle 6 Bahnen öffentlich" : occ.map(([n,c]) => `${c}× ${n}`).join(" · ");
     const today = new Date();
     const adjustNote = (getHolidayName(today) || isSchoolHoliday(today)) ? ' <span class="muted">(Schulen ausgeblendet)</span>' : '';
-    el.innerHTML = `<span class="muted">Bahnen jetzt im City (${slot}):</span> <strong>${entry.public_lanes}/${entry.total_lanes} öffentlich</strong> <span class="muted">— ${occText}</span>${adjustNote}`;
+    // Variobecken
+    let varioStr = '';
+    if (state.vario) {
+      const vraw = state.vario.schedule?.[dayKey]?.[slot];
+      const vadj = adjustedLaneEntry(vraw, today);
+      if (vadj) varioStr = ` · Vario: <strong>${vadj.public_lanes}/${vadj.total_lanes}</strong>`;
+    }
+    el.innerHTML = `<span class="muted">Bahnen jetzt im City (${slot}):</span> Schwimmer: <strong>${entry.public_lanes}/${entry.total_lanes} öffentlich</strong>${varioStr} <span class="muted">— ${occText}</span>${adjustNote}`;
   }
 
   function setStatus(text, cls) {
@@ -458,11 +465,13 @@
     }
     try {
       const r = await fetch(DATA_BASE + "bahnen_city.json", { cache: "no-store" });
-      if (r.ok) {
-        state.bahnen = await r.json();
-        renderLanesNow(); renderLaneGrid();
-      }
+      if (r.ok) state.bahnen = await r.json();
     } catch (e) {}
+    try {
+      const r = await fetch(DATA_BASE + "vario_city.json", { cache: "no-store" });
+      if (r.ok) state.vario = await r.json();
+    } catch (e) {}
+    if (state.bahnen || state.vario) { renderLanesNow(); renderLaneGrid(); }
     try {
       const r = await fetch(DATA_BASE + "temperatures.json", { cache: "no-store" });
       if (r.ok) {
@@ -598,15 +607,16 @@
     const sorted = todayData.slice().sort((a,b) => a.timestamp_utc.localeCompare(b.timestamp_utc));
     const points = sorted.map(r => ({
       x: new Date(r.timestamp_utc),
-      y: parseFloat(r.fill_ratio) * 100
+      y: parseInt(r.currentfill) || 0
     }));
+    const maxSpace = parseInt(sorted[0]?.maxspace) || 220;
 
     $("hist-status").textContent = `${todayData.length} Messpunkte heute`;
 
     chart = new Chart($("histChart").getContext("2d"), {
       type: "line",
       data: { datasets: [{
-        label: "%", data: points,
+        label: "Personen", data: points,
         borderColor: "#4a9eff", backgroundColor: "rgba(74,158,255,0.15)",
         pointRadius: 3, pointHoverRadius: 5,
         borderWidth: 2, tension: 0.3, fill: true
@@ -616,7 +626,7 @@
         plugins: {
           legend: { display: false },
           tooltip: { callbacks: {
-            label: c => `${Math.round(c.raw.y)}% Auslastung`,
+            label: c => `${c.raw.y} Personen (${Math.round(c.raw.y/maxSpace*100)}%)`,
             title: c => new Date(c[0].raw.x).toLocaleTimeString("de-CH", {hour:"2-digit", minute:"2-digit"})
           }}
         },
@@ -628,7 +638,7 @@
             max: new Date(todayStr + "T20:00:00Z"),
             ticks: { source: "auto" }
           },
-          y: { min: 0, max: 100, ticks: { callback: v => v + "%" } }
+          y: { min: 0, suggestedMax: maxSpace, ticks: { callback: v => v + " P" } }
         }
       }
     });
