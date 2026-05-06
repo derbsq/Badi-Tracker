@@ -447,7 +447,7 @@
       // Klickbarer Link zu MeteoSwiss Regenradar
       wetterStr = ` · <a href="https://www.meteoswiss.admin.ch/services-and-publications/applications/precipitation.html#param=rainfall-rate&lang=de&zoom=8&centerX=2683000&centerY=1247000" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;" title="MeteoSwiss Regenradar Zürich">${wetterStr.trim()} 🔗</a>`;
     }
-    $("day-banner").innerHTML = `Heute · ${DAY_LABELS_LONG[d.getDay()]}, ${dateStr}${wetterStr}${badges}`;
+    $("day-banner").innerHTML = `${DAY_LABELS_LONG[d.getDay()]}, ${dateStr}${wetterStr}${badges}`;
   }
 
   function renderLanesNow() {
