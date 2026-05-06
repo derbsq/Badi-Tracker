@@ -388,6 +388,9 @@
       const wt = l?.water_temp;
       const q = l?.abfluss_m3s;
       let tempStr = wt != null ? `${Number(wt).toFixed(1)}°C` : "—";
+      // Temperatur-Messzeit
+      let tempSubStr = "🌡 Limmat KW Letten";
+      if (l?.temp_measured_at) tempSubStr += ` · ${l.temp_measured_at} Uhr`;
       let flowStr = "Abfluss wird geladen…";
       let ampelStr = "";
       if (q != null) {
@@ -395,7 +398,13 @@
         const sec100 = 100 / v;
         const mm = Math.floor(sec100 / 60).toString().padStart(2, "0");
         const ss = Math.round(sec100 % 60).toString().padStart(2, "0");
-        flowStr = `💧 ${q} m³/s · ~${v.toFixed(2)} m/s · ≙ ${mm}:${ss}/100m`;
+        // Abfluss-Messzeit
+        let flowMeta = "";
+        if (l?.flow_measured_at) {
+          const fd = new Date(l.flow_measured_at);
+          flowMeta = ` · ${fd.toLocaleTimeString("de-CH", {hour:"2-digit", minute:"2-digit"})} Uhr`;
+        }
+        flowStr = `💧 ${q} m³/s · ~${v.toFixed(2)} m/s · ≙ ${mm}:${ss}/100m${flowMeta}`;
         let ampel, farbe;
         if      (q < 60)  { ampel = "🟢 sehr ruhig";    farbe = "#4caf50"; }
         else if (q < 100) { ampel = "🟢 ruhig";          farbe = "#8bc34a"; }
@@ -408,6 +417,7 @@
       return `<div class="card ${cls}" style="border-color:var(--border-strong)" id="letten-card">
         <div class="card-label" style="color:var(--text-muted)">Flussbad Oberer Letten</div>
         <div class="card-num"><span class="big">${tempStr}</span></div>
+        <div class="card-temp">${tempSubStr}</div>
         <div class="card-meta" style="font-size:0.8rem;color:var(--text-muted)">${flowStr}</div>
         ${ampelStr}
       </div>`;
