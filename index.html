@@ -208,6 +208,7 @@
       <select id="bad-select"></select>
       <select id="view-select">
         <option value="heatmap">Heatmap (Wochentag × Stunde)</option>
+        <option value="today">Heute (Tagesverlauf)</option>
         <option value="line">Verlauf (chronologisch)</option>
         <option value="weekday">Mittel pro Wochentag</option>
       </select>
@@ -268,7 +269,7 @@
     "2027-12-25":"Weihnachten", "2027-12-26":"Stephanstag"
   };
   const SCHOOL_HOLIDAYS = [
-    ["2026-04-25","2026-05-10"], ["2026-07-11","2026-08-16"],
+    ["2026-04-20","2026-05-02"], ["2026-07-13","2026-08-15"],
     ["2026-10-03","2026-10-18"], ["2026-12-19","2027-01-03"],
     ["2027-02-06","2027-02-21"], ["2027-04-17","2027-05-02"]
   ];
@@ -501,11 +502,12 @@
       return;
     }
     if (state.selectedView === "heatmap") renderHeatmap(data);
+    else if (state.selectedView === "today") renderToday(data);
     else if (state.selectedView === "weekday") renderWeekday(data);
     else renderLine(data);
   }
   function renderHeatmap(data) {
-    const dayMap = {Sunday:0,Monday:1,Tuesday:2,Wednesday:3,Thursday:4,Friday:5,Saturday:6};
+    const dayMap = {Monday:0,Tuesday:1,Wednesday:2,Thursday:3,Friday:4,Saturday:5,Sunday:6};
     const buckets = {};
     data.forEach(r => {
       const d = dayMap[r.weekday];
@@ -542,11 +544,11 @@
         responsive: true, maintainAspectRatio: false,
         plugins: { legend: { display: false }, tooltip: { callbacks: {
           title: () => "",
-          label: c => `${DAY_LABELS[c.raw.y]} ${c.raw.x}:00 · ${c.raw.v === null ? "—" : Math.round(c.raw.v * 100) + "%"}`
+          label: c => `${["Mo","Di","Mi","Do","Fr","Sa","So"][c.raw.y]} ${c.raw.x}:00 · ${c.raw.v === null ? "—" : Math.round(c.raw.v * 100) + "%"}`
         }}},
         scales: {
           x: { type: "linear", min: 6, max: 21, ticks: { stepSize: 1, callback: v => v + ":00" }, grid: { display: false } },
-          y: { type: "linear", min: -0.5, max: 6.5, reverse: true, ticks: { stepSize: 1, callback: v => DAY_LABELS[v] }, grid: { display: false } }
+          y: { type: "linear", min: -0.5, max: 6.5, reverse: true, ticks: { stepSize: 1, callback: v => ["Mo","Di","Mi","Do","Fr","Sa","So"][v] }, grid: { display: false } }
         }
       }
     });
@@ -567,6 +569,61 @@
       }
     });
   }
+
+  function renderToday(data) {
+    // Filtere nur Datenpunkte vom heutigen Tag (CH-Zeit)
+    const today = new Date();
+    const todayStr = today.toISOString().slice(0, 10);
+    const dayOfWeek = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][today.getDay()];
+    const todayData = data.filter(r => {
+      // Vergleiche anhand timestamp_local YYYY-MM-DD
+      return r.timestamp_local && r.timestamp_local.slice(0, 10) === todayStr;
+    });
+
+    if (todayData.length === 0) {
+      $("hist-status").textContent = "Noch keine Daten für heute";
+      return;
+    }
+
+    const sorted = todayData.slice().sort((a,b) => a.timestamp_utc.localeCompare(b.timestamp_utc));
+    const points = sorted.map(r => ({
+      x: new Date(r.timestamp_utc),
+      y: parseFloat(r.fill_ratio) * 100
+    }));
+
+    $("hist-status").textContent = `${todayData.length} Messpunkte heute`;
+
+    chart = new Chart($("histChart").getContext("2d"), {
+      type: "line",
+      data: { datasets: [{
+        label: "%", data: points,
+        borderColor: "#4a9eff", backgroundColor: "rgba(74,158,255,0.15)",
+        pointRadius: 3, pointHoverRadius: 5,
+        borderWidth: 2, tension: 0.3, fill: true
+      }]},
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: {
+            label: c => `${Math.round(c.raw.y)}% Auslastung`,
+            title: c => new Date(c[0].raw.x).toLocaleTimeString("de-CH", {hour:"2-digit", minute:"2-digit"})
+          }}
+        },
+        scales: {
+          x: {
+            type: "time",
+            time: { unit: "hour", displayFormats: { hour: "HH:mm" } },
+            min: new Date(todayStr + "T04:00:00Z"),
+            max: new Date(todayStr + "T20:00:00Z"),
+            ticks: { source: "auto" }
+          },
+          y: { min: 0, max: 100, ticks: { callback: v => v + "%" } }
+        }
+      }
+    });
+  }
+
   function renderWeekday(data) {
     const dayMap = {Monday:1,Tuesday:2,Wednesday:3,Thursday:4,Friday:5,Saturday:6,Sunday:0};
     const buckets = {};
