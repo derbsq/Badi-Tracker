@@ -74,7 +74,8 @@
     }
 
     .cards {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
       gap: 10px; margin-bottom: 1.25rem;
     }
     .card { padding: 14px 16px; border-radius: 12px; background: var(--bg-soft); }
@@ -115,7 +116,7 @@
     }
 
     .chart-wrap { position: relative; width: 100%; height: 320px; }
-    @media (max-width: 600px) { .chart-wrap { height: 280px; } }
+    @media (max-width: 600px) { .chart-wrap { height: 280px; } .cards { grid-template-columns: repeat(2, 1fr); } }
 
     details summary {
       cursor: pointer; list-style: none;
@@ -193,7 +194,7 @@
 <div class="wrap">
 
   <header>
-    <h1>Bésko's Kleiner Baditracker 🏊</h1>
+    <h1>Bésko's Kleiner Baditracker 🤓</h1>
     <span class="status"><span class="dot" id="status-dot"></span><span id="status-text">Verbinde…</span></span>
   </header>
   <div id="day-banner" class="day-banner"></div>
