@@ -390,7 +390,15 @@
       let tempStr = wt != null ? `${Number(wt).toFixed(1)}°C` : "—";
       // Temperatur-Messzeit
       let tempSubStr = "🌡 Limmat KW Letten";
-      if (l?.temp_measured_at) tempSubStr += ` · ${l.temp_measured_at} Uhr`;
+      if (l?.temp_measured_at) {
+        let ts = l.temp_measured_at;
+        if (ts.includes("T") || ts.includes("+")) {
+          // ISO Timestamp → Uhrzeit
+          const d = new Date(ts);
+          ts = d.toLocaleTimeString("de-CH", {hour:"2-digit", minute:"2-digit"});
+        }
+        tempSubStr += ` · ${ts} Uhr`;
+      }
       let flowStr = "Abfluss wird geladen…";
       let ampelStr = "";
       if (q != null) {
