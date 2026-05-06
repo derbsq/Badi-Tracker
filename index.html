@@ -366,12 +366,12 @@
               ts = `${wt}, ${dat}, ${zeit} Uhr`;
             } else if (ts && ts.match(/^(Mo|Di|Mi|Do|Fr|Sa|So)/)) {
               // badi-info Format: "Sa, 02.05. um 06:48" → Samstag, 02.05.2026, 06:48 Uhr
-              // Belassen aber vereinheitlichen: Wochentag ausschreiben
               const tage = {Mo:'Montag',Di:'Dienstag',Mi:'Mittwoch',Do:'Donnerstag',Fr:'Freitag',Sa:'Samstag',So:'Sonntag'};
-              ts = ts.replace(/^(Mo|Di|Mi|Do|Fr|Sa|So)/, m => tage[m] || m)
-                     .replace(' um ', ', ')
-                     .replace(/(\d{2}\.\d{2}\.)/, '$12026, ')
-                     + ' Uhr';
+              // "Sa, 02.05. um 06:48" → "Samstag, 02.05.2026, 06:48 Uhr"
+              ts = ts
+                .replace(/^(Mo|Di|Mi|Do|Fr|Sa|So),?\s*/, m => tage[m.trim().replace(',','')] + ', ')
+                .replace(/(\d{2}\.\d{2}\.)\s*um\s*/, '$12026, ')
+                + ' Uhr';
             }
             tempStr += ` · ${ts}`;
           }
