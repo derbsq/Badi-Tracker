@@ -1,11 +1,15 @@
 """
-Badi-Tracker: Erfasst alle 10 Min die Auslastung der Schweizer Baeder
-via Crowdmonitor-WebSocket und reichert mit Wetter, Ferien/Feiertagen
-und Wassertemperaturen an.
+Badi-Tracker: Laeuft auf Railway als Cron-Job alle 10 Min.
+Holt Auslastung via WebSocket, Wetter via Open-Meteo,
+Temperaturen via badi-info.ch / tecson-data.ch,
+und committet alles via GitHub API ins Repo.
 """
 import asyncio
+import base64
 import csv
+import io
 import json
+import os
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -20,26 +24,92 @@ SUBSCRIBE_CMD = "1 all"
 TIMEOUT_SECONDS = 15
 TZ = ZoneInfo("Europe/Zurich")
 
-# Nur diese Bäder in der CSV speichern (UIDs aus dem WebSocket-Feed)
 TRACKED_UIDS = {
-    "flb6939",   # Flussbad Oberer Letten
-    "flb6940",   # Flussbad Unterer Letten
-    "fb012",     # Freibad Heuried
-    "LETZI-1",   # Freibad Letzigraben
-    "SSD-11",    # Freibad Seebach
-    "SSD-4",     # Hallenbad City
-    "SSD-7",     # Hallenbad Oerlikon
-    "SSD-10",    # Seebad Utoquai
+    "flb6939",  # Flussbad Oberer Letten
+    "flb6940",  # Flussbad Unterer Letten
+    "fb012",    # Freibad Heuried
+    "LETZI-1",  # Freibad Letzigraben
+    "SSD-11",   # Freibad Seebach
+    "SSD-4",    # Hallenbad City
+    "SSD-7",    # Hallenbad Oerlikon
+    "SSD-10",   # Seebad Utoquai
 }
-
-ROOT = Path(__file__).resolve().parent.parent
-DATA_DIR = ROOT / "data"
-RAW_FILE = DATA_DIR / "auslastung.csv"
-WEATHER_FILE = DATA_DIR / "weather.csv"
-TEMP_FILE = DATA_DIR / "temperatures.json"
 
 ZURICH_LAT = 47.3739
 ZURICH_LON = 8.5364
+
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", "")
+GITHUB_REPO = "derbsq/Badi-Tracker"
+GITHUB_BRANCH = "main"
+GITHUB_API = "https://api.github.com"
+
+HEADERS_GH = {
+    "Authorization": f"Bearer {GITHUB_TOKEN}",
+    "Accept": "application/vnd.github+json",
+    "X-GitHub-Api-Version": "2022-11-28",
+}
+HEADERS_WEB = {
+    "User-Agent": "Mozilla/5.0 (compatible; badi-tracker/1.0; +https://github.com/derbsq/Badi-Tracker)",
+    "Accept": "text/html,*/*;q=0.8",
+}
+
+
+# ---- GitHub API Helpers ----
+
+def gh_get_file(path: str) -> tuple[str, str]:
+    """Gibt (content_decoded, sha) zurueck. content_decoded ist leerer String wenn Datei neu."""
+    r = httpx.get(
+        f"{GITHUB_API}/repos/{GITHUB_REPO}/contents/{path}",
+        headers=HEADERS_GH, params={"ref": GITHUB_BRANCH}, timeout=15
+    )
+    if r.status_code == 404:
+        return "", ""
+    r.raise_for_status()
+    data = r.json()
+    content = base64.b64decode(data["content"]).decode("utf-8")
+    return content, data["sha"]
+
+
+def gh_put_file(path: str, content: str, sha: str, message: str) -> None:
+    """Erstellt oder updated eine Datei im Repo."""
+    payload = {
+        "message": message,
+        "content": base64.b64encode(content.encode("utf-8")).decode("ascii"),
+        "branch": GITHUB_BRANCH,
+    }
+    if sha:
+        payload["sha"] = sha
+    r = httpx.put(
+        f"{GITHUB_API}/repos/{GITHUB_REPO}/contents/{path}",
+        headers=HEADERS_GH, json=payload, timeout=30
+    )
+    r.raise_for_status()
+
+
+def append_to_csv_in_repo(repo_path: str, fieldnames: list[str], new_rows: list[dict]) -> None:
+    """Laedt bestehende CSV aus Repo, haengt Zeilen an, schreibt zurueck."""
+    existing, sha = gh_get_file(repo_path)
+
+    # CSV parsen
+    if existing.strip():
+        reader = csv.DictReader(io.StringIO(existing))
+        rows = list(reader)
+    else:
+        rows = []
+
+    # Neue Zeilen anhaengen
+    rows.extend(new_rows)
+
+    # CSV neu schreiben
+    buf = io.StringIO()
+    writer = csv.DictWriter(buf, fieldnames=fieldnames, lineterminator="\n")
+    writer.writeheader()
+    writer.writerows(rows)
+    new_content = buf.getvalue()
+
+    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%MZ")
+    gh_put_file(repo_path, new_content, sha, f"data: snapshot {now_str}")
+    print(f"OK GitHub commit: {repo_path} ({len(new_rows)} neue Zeilen, {len(rows)} total)")
 
 
 # ---- WebSocket ----
@@ -50,7 +120,7 @@ async def fetch_snapshot() -> list[dict]:
         raw = await asyncio.wait_for(ws.recv(), timeout=TIMEOUT_SECONDS)
         data = json.loads(raw)
         if not isinstance(data, list):
-            raise ValueError(f"Unerwartetes Datenformat: {type(data)}")
+            raise ValueError(f"Unerwartetes Format: {type(data)}")
         return data
 
 
@@ -71,75 +141,61 @@ def fetch_weather() -> dict:
 
 # ---- Wassertemperaturen ----
 
-def fetch_temperatures() -> dict:
-    """
-    City:       konstant 28C (Schwimmerbecken), kein Feed noetig
-    Letzigraben: badi-info.ch/_temp/zh/letzigraben.htm  (HTML-Scraping)
-    Utoquai:    Tecdottir-API der Wasserschutzpolizei Zuerich
-                (Messstation Tiefenbrunnen, OGD Stadt Zuerich)
-    """
-    temps = {
-        "city": {
-            "temp": 28.0,
-            "unit": "C",
-            "source": "static",
-            "note": "Schwimmerbecken 28°C / Nichtschwimmer 32°C",
-            "updated_at": None,
-        },
-        "letzigraben": {
-            "temp": None,
-            "unit": "C",
-            "source": "badi-info.ch",
-            "note": None,
-            "updated_at": None,
-        },
-        "utoquai": {
-            "temp": None,
-            "unit": "C",
-            "source": "tecdottir/tiefenbrunnen",
-            "note": "Zürichsee-Temperatur Messstation Tiefenbrunnen",
-            "updated_at": None,
-        },
-    }
-
-    headers = {"User-Agent": "badi-tracker/1.0 (github.com/derbsq/Badi-Tracker)"}
-
-    # Letzigraben
-    try:
-        r = httpx.get(
-            "https://www.badi-info.ch/_temp/zh/letzigraben.htm",
-            timeout=10, follow_redirects=True, headers=headers
-        )
-        r.raise_for_status()
-        m = re.search(r"<strong>([\d.]+)</strong>", r.text)
+def fetch_temp_letzigraben() -> dict:
+    r = httpx.get(
+        "https://www.badi-info.ch/_temp/zh/letzigraben.htm",
+        timeout=15, follow_redirects=True, headers=HEADERS_WEB
+    )
+    r.raise_for_status()
+    for pattern in [
+        r"<strong[^>]*>\s*([\d.,]+)\s*</strong>",
+        r"<b[^>]*>\s*([\d.,]+)\s*</b>",
+    ]:
+        m = re.search(pattern, r.text, re.IGNORECASE)
         if m:
-            temps["letzigraben"]["temp"] = float(m.group(1))
-            # Zeitstempel aus Text holen, z.B. "Sa, 02.05. um 06:48"
-            ts = re.search(r"(Mo|Di|Mi|Do|Fr|Sa|So),\s*([\d.]+)\s*um\s*([\d:]+)", r.text)
-            temps["letzigraben"]["updated_at"] = ts.group(0) if ts else None
-    except Exception as e:
-        print(f"WARN Letzigraben-Temp: {e}")
+            val = float(m.group(1).replace(",", "."))
+            ts = re.search(r"(Mo|Di|Mi|Do|Fr|Sa|So)[^<]{0,5}[\d]{2}\.[\d]{2}[^<]{0,10}um\s*([\d:]+)", r.text)
+            return {"temp": val, "measured_at": ts.group(0).strip() if ts else None, "source": "badi-info.ch"}
+    return {"temp": None, "measured_at": None, "source": "badi-info.ch"}
 
-    # Utoquai via Tecdottir
+
+def fetch_temp_utoquai() -> dict:
+    """Versucht tecson-data.ch direkt, dann OGD CSV als Fallback."""
+    # Versuch 1: tecson-data.ch direkt
     try:
-        today = datetime.now(TZ).strftime("%Y-%m-%d")
         r = httpx.get(
-            f"https://tecdottir.herokuapp.com/measurements/tiefenbrunnen"
-            f"?startDate={today}&endDate={today}",
-            timeout=15, follow_redirects=True, headers=headers
+            "https://www.tecson-data.ch/zurich/tiefenbrunnen/index.php",
+            timeout=15, follow_redirects=True, headers=HEADERS_WEB
         )
-        r.raise_for_status()
-        results = r.json().get("result", [])
-        for entry in reversed(results):
-            wt = (entry.get("values") or {}).get("water_temperature", {}).get("value")
-            if wt is not None:
-                temps["utoquai"]["temp"] = round(float(wt), 1)
-                temps["utoquai"]["updated_at"] = entry.get("timestamp_utc")
-                break
+        if r.status_code == 200:
+            m = re.search(r"(\d{1,2}[.,]\d)\s*°?\s*C", r.text)
+            if m:
+                val = float(m.group(1).replace(",", "."))
+                print(f"  Utoquai via tecson-data.ch: {val}°C")
+                return {"temp": val, "measured_at": "aktuell", "source": "tecson-data.ch"}
     except Exception as e:
-        print(f"WARN Utoquai-Temp (Tecdottir): {e}")
+        print(f"  tecson-data.ch nicht erreichbar: {e}")
 
-    return temps
+    # Versuch 2: OGD CSV (letzte 5KB)
+    url = "https://data.stadt-zuerich.ch/dataset/sid_wapo_wetterstationen/download/messwerte_tiefenbrunnen_seit2007-heute.csv"
+    r = httpx.get(url, timeout=30, follow_redirects=True,
+                  headers={**HEADERS_WEB, "Range": "bytes=-5000"})
+    text = r.text
+    if r.status_code == 206:
+        header_r = httpx.get(url, timeout=15, follow_redirects=True,
+                             headers={**HEADERS_WEB, "Range": "bytes=0-300"})
+        header_line = header_r.text.split("\n")[0]
+        lines = text.split("\n")
+        text = header_line + "\n" + "\n".join(lines[2:]) if len(lines) > 2 else text
+
+    reader = csv.DictReader(io.StringIO(text))
+    for row in reversed(list(reader)):
+        wt = row.get("water_temperature", "").strip()
+        if wt and wt not in ("", "NA", "NaN"):
+            ts = row.get("timestamp_utc") or row.get("timestamp_cet")
+            return {"temp": round(float(wt.replace(",", ".")), 1),
+                    "measured_at": ts, "source": "OGD Stadt Zürich / Tiefenbrunnen"}
+    return {"temp": None, "measured_at": None, "source": "OGD Stadt Zürich"}
 
 
 # ---- Feiertage / Schulferien ----
@@ -147,8 +203,7 @@ def fetch_temperatures() -> dict:
 def is_swiss_holiday(d: datetime) -> bool:
     try:
         import holidays
-        ch_zh = holidays.country_holidays("CH", subdiv="ZH")
-        return d.date() in ch_zh
+        return d.date() in holidays.country_holidays("CH", subdiv="ZH")
     except Exception:
         return False
 
@@ -156,42 +211,30 @@ def is_swiss_holiday(d: datetime) -> bool:
 def is_zh_school_holiday(d: datetime) -> bool:
     ferien = [
         ("2026-04-20", "2026-05-02"),
-        ("2026-07-11", "2026-08-16"),
-        ("2026-10-03", "2026-10-18"),
-        ("2026-12-19", "2027-01-03"),
-        ("2027-02-06", "2027-02-21"),
-        ("2027-04-17", "2027-05-02"),
+        ("2026-07-13", "2026-08-15"),
+        ("2026-10-05", "2026-10-17"),
+        ("2026-12-21", "2027-01-02"),
+        ("2027-02-08", "2027-02-20"),
+        ("2027-04-26", "2027-05-08"),
     ]
     today = d.date().isoformat()
     return any(s <= today <= e for s, e in ferien)
 
 
-# ---- CSV Helper ----
-
-def append_csv(path: Path, fieldnames: list[str], rows: list[dict]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    new_file = not path.exists()
-    with path.open("a", newline="", encoding="utf-8") as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        if new_file:
-            writer.writeheader()
-        writer.writerows(rows)
-
-
 # ---- Main ----
 
 def main() -> None:
+    if not GITHUB_TOKEN:
+        raise RuntimeError("GITHUB_TOKEN nicht gesetzt!")
+
     now_utc = datetime.now(timezone.utc)
     now_local = now_utc.astimezone(TZ)
     timestamp_iso = now_utc.isoformat(timespec="seconds")
 
-    # 1. Auslastung
-    try:
-        snapshot = asyncio.run(fetch_snapshot())
-    except Exception as e:
-        print(f"FEHLER beim WebSocket-Fetch: {e}")
-        raise
+    print(f"=== Badi-Tracker {timestamp_iso} ===")
 
+    # 1. Auslastung via WebSocket
+    snapshot = asyncio.run(fetch_snapshot())
     context = {
         "timestamp_utc": timestamp_iso,
         "timestamp_local": now_local.isoformat(timespec="seconds"),
@@ -201,35 +244,25 @@ def main() -> None:
         "is_holiday": is_swiss_holiday(now_local),
         "is_school_holiday": is_zh_school_holiday(now_local),
     }
-
     rows = []
     for entry in snapshot:
         if entry.get("uid") not in TRACKED_UIDS:
             continue
         try:
-            currentfill = int(entry.get("currentfill", 0) or 0)
-            maxspace = int(entry.get("maxspace", 0) or 0)
-            freespace = int(entry.get("freespace", 0) or 0)
+            cf = int(entry.get("currentfill", 0) or 0)
+            ms = int(entry.get("maxspace", 0) or 0)
+            fs = int(entry.get("freespace", 0) or 0)
         except (ValueError, TypeError):
-            currentfill = maxspace = freespace = 0
-        ratio = (currentfill / maxspace) if maxspace > 0 else 0.0
-        rows.append({
-            **context,
-            "uid": entry.get("uid", ""),
-            "name": entry.get("name", ""),
-            "currentfill": currentfill,
-            "freespace": freespace,
-            "maxspace": maxspace,
-            "fill_ratio": round(ratio, 4),
-        })
+            cf = ms = fs = 0
+        ratio = (cf / ms) if ms > 0 else 0.0
+        rows.append({**context, "uid": entry.get("uid", ""), "name": entry.get("name", ""),
+                     "currentfill": cf, "freespace": fs, "maxspace": ms,
+                     "fill_ratio": round(ratio, 4)})
 
-    auslastung_fields = [
-        "timestamp_utc", "timestamp_local", "weekday", "hour", "minute",
-        "is_holiday", "is_school_holiday",
-        "uid", "name", "currentfill", "freespace", "maxspace", "fill_ratio",
-    ]
-    append_csv(RAW_FILE, auslastung_fields, rows)
-    print(f"OK Auslastung: {len(rows)} Eintraege geschrieben")
+    fields = ["timestamp_utc", "timestamp_local", "weekday", "hour", "minute",
+              "is_holiday", "is_school_holiday",
+              "uid", "name", "currentfill", "freespace", "maxspace", "fill_ratio"]
+    append_to_csv_in_repo("data/auslastung.csv", fields, rows)
 
     # 2. Wetter
     try:
@@ -244,26 +277,41 @@ def main() -> None:
             "cloud_cover_pct": weather.get("cloud_cover"),
             "wind_speed_kmh": weather.get("wind_speed_10m"),
         }
-        append_csv(WEATHER_FILE, list(weather_row.keys()), [weather_row])
-        print(f"OK Wetter: {weather.get('temperature_2m')}C, "
-              f"Niederschlag {weather.get('precipitation')}mm")
+        append_to_csv_in_repo("data/weather.csv", list(weather_row.keys()), [weather_row])
     except Exception as e:
         print(f"WARN Wetter: {e}")
 
-    # 3. Wassertemperaturen
-    try:
-        temps = fetch_temperatures()
-        temps["updated_at"] = timestamp_iso
-        DATA_DIR.mkdir(parents=True, exist_ok=True)
-        TEMP_FILE.write_text(json.dumps(temps, indent=2, ensure_ascii=False))
-        print(
-            f"OK Temperaturen: "
-            f"City {temps['city']['temp']}C, "
-            f"Letzi {temps['letzigraben']['temp']}C, "
-            f"Uto {temps['utoquai']['temp']}C"
+    # 3. Temperaturen (nur alle 30 Min aktualisieren um API-Rate zu schonen)
+    if now_local.minute in (0, 30):
+        try:
+            letzi = fetch_temp_letzigraben()
+            print(f"OK Letzigraben: {letzi['temp']}°C ({letzi['measured_at']})")
+        except Exception as e:
+            print(f"WARN Letzi-Temp: {e}")
+            letzi = {"temp": None, "measured_at": None, "source": "error"}
+        try:
+            uto = fetch_temp_utoquai()
+            print(f"OK Utoquai: {uto['temp']}°C ({uto['measured_at']})")
+        except Exception as e:
+            print(f"WARN Uto-Temp: {e}")
+            uto = {"temp": None, "measured_at": None, "source": "error"}
+
+        temps = {
+            "updated_at": timestamp_iso,
+            "updated_at_local": now_local.strftime("%H:%M"),
+            "city": {"temp": 28.0, "unit": "C", "source": "static",
+                     "note": "Schwimmerbecken 28°C / Nichtschwimmer 32°C"},
+            "letzigraben": {**letzi, "unit": "C"},
+            "utoquai": {**uto, "unit": "C"},
+        }
+        existing, sha = gh_get_file("data/temperatures.json")
+        gh_put_file(
+            "data/temperatures.json",
+            json.dumps(temps, indent=2, ensure_ascii=False),
+            sha,
+            f"temps: update {now_local.strftime('%H:%M')} CH-Zeit"
         )
-    except Exception as e:
-        print(f"WARN Temperaturen: {e}")
+        print("OK temperatures.json committed")
 
 
 if __name__ == "__main__":
