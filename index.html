@@ -391,8 +391,11 @@
       let flowStr = "Abfluss wird geladen…";
       let ampelStr = "";
       if (q != null) {
-        const v = (q / 80).toFixed(2);
-        flowStr = `💧 ${q} m³/s · ~${v} m/s`;
+        const v = q / 80;
+        const sec100 = 100 / v;
+        const mm = Math.floor(sec100 / 60).toString().padStart(2, "0");
+        const ss = Math.round(sec100 % 60).toString().padStart(2, "0");
+        flowStr = `💧 ${q} m³/s · ~${v.toFixed(2)} m/s · ≙ ${mm}:${ss}/100m`;
         let ampel, farbe;
         if      (q < 60)  { ampel = "🟢 sehr ruhig";    farbe = "#4caf50"; }
         else if (q < 100) { ampel = "🟢 ruhig";          farbe = "#8bc34a"; }
