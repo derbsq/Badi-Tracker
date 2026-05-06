@@ -1,23 +1,22 @@
 {
-  "updated_at": "2026-05-06T11:23:54+00:00",
-  "updated_at_local": "13:23",
+  "updated_at": "2026-05-06T12:00:47+00:00",
+  "updated_at_local": "14:00",
   "city": {
     "temp": 28.0,
     "unit": "C",
     "source": "static",
-    "note": "Schwimmerbecken 28°C / Nichtschwimmer 32°C",
-    "measured_at": null
+    "note": "Schwimmerbecken 28°C / Nichtschwimmer 32°C"
   },
   "letzigraben": {
     "temp": 19.0,
-    "unit": "C",
+    "measured_at": "Mi, 06.05. um 07:06",
     "source": "badi-info.ch",
-    "measured_at": "Mi, 06.05. um 07:06"
+    "unit": "C"
   },
   "utoquai": {
     "temp": 16.1,
-    "unit": "C",
+    "measured_at": "2026-05-06T09:40:00+00:00",
     "source": "OGD Stadt Zürich / Tiefenbrunnen",
-    "measured_at": "2026-05-06T09:40:00+00:00"
+    "unit": "C"
   }
 }
