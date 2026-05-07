@@ -430,7 +430,13 @@
         ${ampelStr}
       </div>`;
     })();
-    $("cards").innerHTML += lettenHtml;
+    // Letten-Karte nur einmal einfügen oder updaten
+    const existing = $("letten-card");
+    if (existing) {
+      existing.outerHTML = lettenHtml;
+    } else {
+      $("cards").innerHTML += lettenHtml;
+    }
   }
 
 
