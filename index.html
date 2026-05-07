@@ -468,11 +468,11 @@
       const w = state.latestWeather;
       const icon = weatherIcon(parseInt(w.weather_code) || 0);
       const temp = parseFloat(w.temperature_c);
-      if (!isNaN(temp)) wetterStr = ` · ${icon} ${temp.toFixed(1)}°C`;
+      const parts = [];
+      if (!isNaN(temp)) parts.push(`${icon} ${temp.toFixed(1)}°C`);
       const rain = parseFloat(w.precipitation_mm);
-      if (!isNaN(rain) && rain > 0) wetterStr += ` · 🌧 ${rain.toFixed(1)}mm`;
-      // Klickbarer Link zu MeteoSwiss Regenradar
-      wetterStr = `<a href="https://www.meteoswiss.admin.ch/services-and-publications/applications/precipitation.html#param=rainfall-rate&lang=de&zoom=8&centerX=2683000&centerY=1247000" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;" title="MeteoSwiss Regenradar Zürich">${wetterStr.trim()} 🔗</a>`;
+      if (!isNaN(rain) && rain > 0) parts.push(`🌧 ${rain.toFixed(1)}mm`);
+      wetterStr = `<a href="https://www.meteoswiss.admin.ch/services-and-publications/applications/precipitation.html#param=rainfall-rate&lang=de&zoom=8&centerX=2683000&centerY=1247000" target="_blank" rel="noopener" style="color:inherit;text-decoration:none;" title="MeteoSwiss Regenradar Zürich">${parts.join(" · ")} 🔗</a>`;
     }
     $("day-banner").innerHTML = `${DAY_LABELS_LONG[d.getDay()]}, ${dateStr}${wetterStr ? " · " + wetterStr : ""}${badges}`;
   }
