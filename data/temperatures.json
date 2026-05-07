@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-05-07T06:00:19+00:00",
-  "updated_at_local": "08:00",
+  "updated_at": "2026-05-07T06:30:08+00:00",
+  "updated_at_local": "08:30",
   "city": {
     "temp": 28.0,
     "unit": "C",
@@ -9,7 +9,7 @@
   },
   "letzigraben": {
     "temp": 19.0,
-    "measured_at": "Mi, 06.05. um 19:07",
+    "measured_at": "Do, 07.05. um 07:53",
     "source": "badi-info.ch",
     "unit": "C"
   },
