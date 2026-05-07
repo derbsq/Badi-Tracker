@@ -384,7 +384,7 @@ table.lanes td.now-row {
         }
       }
       const col = occupancyColor(ratio);
-      return `<div class="card" style="background:${col}22;border-color:${col}66">
+      return `<div class="card" style="background:${col}44;border-color:${col}cc">
         <div class="card-label">${t.label}</div>
         <div class="card-num"><span class="big">${fill}</span><span class="small">/ ${max}</span></div>
         <div class="card-bar"><span style="width:${Math.min(pct,100)}%;background:${col}"></span></div>
@@ -433,7 +433,7 @@ table.lanes td.now-row {
         ampelStr = `<div class="card-temp" style="color:${farbe}">${ampel} <span style="color:var(--text-muted);font-size:0.75em">(Schätzung)</span></div>`;
       }
       const cls = l ? "" : "hidden";
-      return `<div class="card ${cls}" style="border-color:var(--border-strong)" id="letten-card">
+      return `<div class="card ${cls}" style="background:#1a7fa844;border-color:#1a7fa8cc" id="letten-card">
         <div class="card-label" style="color:var(--text-muted)">Flussbad Oberer Letten</div>
         <div class="card-num"><span class="big">${tempStr}</span></div>
         <div class="card-temp">${tempSubStr}</div>
