@@ -300,10 +300,13 @@
     return arr.find(e => target.match.some(m => (e.name || "").toLowerCase().includes(m)));
   }
   function classify(r) {
-    if (r < 0.3) return { cls: "green", label: "leer" };
-    if (r < 0.6) return { cls: "amber", label: "mässig" };
-    if (r < 0.85) return { cls: "coral", label: "voll" };
-    return { cls: "red", label: "überfüllt" };
+    if (r < 0.10) return { label: "sehr leer" };
+    if (r < 0.25) return { label: "leer" };
+    if (r < 0.45) return { label: "ruhig" };
+    if (r < 0.60) return { label: "mässig" };
+    if (r < 0.75) return { label: "voll" };
+    if (r < 0.90) return { label: "sehr voll" };
+    return { label: "überfüllt" };
   }
   function currentSlot() {
     const d = new Date();
@@ -373,10 +376,11 @@
           }
         }
       }
-      return `<div class="card ${c.cls}">
-        <div class="card-label">${t.label}</div>
-        <div class="card-num"><span class="big">${fill}</span><span class="small">/ ${max}</span></div>
-        <div class="card-bar"><span style="width: ${Math.min(pct,100)}%"></span></div>
+      const col = occupancyColor(ratio);
+      return `<div class="card" style="border-color:${col}40">
+        <div class="card-label" style="color:${col}">${t.label}</div>
+        <div class="card-num"><span class="big" style="color:${col}">${fill}</span><span class="small">/ ${max}</span></div>
+        <div class="card-bar"><span style="width:${Math.min(pct,100)}%;background:${col}"></span></div>
         <div class="card-meta">${pct}% · ${c.label}</div>
         <div class="card-temp">${tempStr}</div>
       </div>`;
@@ -452,6 +456,19 @@
     if (code <= 84) return "🌧️"; // Schauer
     if (code <= 99) return "⛈️"; // Gewitter
     return "🌡️";
+  }
+
+
+  function occupancyColor(ratio) {
+    // 0-10%: Mitternachtsblau, 10-25%: Ozean, 25-45%: Smaragd,
+    // 45-60%: Bernstein, 60-75%: Terrakotta, 75-90%: Karmesin, 90-100%: Tiefrot
+    if (ratio < 0.10) return "#1e3a5f";
+    if (ratio < 0.25) return "#1a7fa8";
+    if (ratio < 0.45) return "#1a9e6e";
+    if (ratio < 0.60) return "#d4a017";
+    if (ratio < 0.75) return "#c45c2a";
+    if (ratio < 0.90) return "#a02020";
+    return "#6b0f0f";
   }
 
   function renderDayBanner() {
@@ -661,11 +678,7 @@
         backgroundColor: c => {
           const v = c.raw.v;
           if (v === null) return "rgba(150,150,150,0.06)";
-          const r = v / maxV;
-          if (r < 0.25) return "#5dcaa5";
-          if (r < 0.5) return "#ef9f27";
-          if (r < 0.75) return "#f0997b";
-          return "#f09595";
+          return occupancyColor(v) + "cc";
         },
         borderColor: "rgba(0,0,0,0.05)", borderWidth: 1,
         width: c => (c.chart.chartArea || {}).width / 19 - 2,
