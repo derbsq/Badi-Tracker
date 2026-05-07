@@ -255,9 +255,13 @@ def fetch_limmat_letten() -> dict:
                 for entry in r2.json().get("payload", []):
                     if entry.get("par") == "temperature" and entry.get("val") is not None:
                         result["water_temp"] = round(float(entry["val"]), 1)
-                        ts = entry.get("dt") or entry.get("timestamp") or entry.get("date")
-                        result["temp_measured_at"] = ts
-                        print(f"  Limmat Temp Station {station}: {result['water_temp']}°C ts={ts} keys={list(entry.keys())}")
+                        raw_ts = entry.get("timestamp") or entry.get("dt")
+                        if isinstance(raw_ts, (int, float)):
+                            from datetime import timezone
+                            result["temp_measured_at"] = datetime.fromtimestamp(raw_ts, tz=timezone.utc).isoformat()
+                        else:
+                            result["temp_measured_at"] = raw_ts
+                        print(f"  Limmat Temp Station {station}: {result['water_temp']}°C ts={result['temp_measured_at']}")
                         break
                 if result["water_temp"] is not None:
                     break
@@ -275,9 +279,13 @@ def fetch_limmat_letten() -> dict:
         for entry in r.json().get("payload", []):
             if entry.get("par") == "flow" and entry.get("val") is not None:
                 result["abfluss_m3s"] = round(float(entry["val"]), 1)
-                ts = entry.get("dt") or entry.get("timestamp") or entry.get("date")
-                result["flow_measured_at"] = ts
-                print(f"  Limmat Abfluss: {result['abfluss_m3s']} m³/s ts={ts} keys={list(entry.keys())}")
+                raw_ts = entry.get("timestamp") or entry.get("dt")
+                if isinstance(raw_ts, (int, float)):
+                    from datetime import timezone
+                    result["flow_measured_at"] = datetime.fromtimestamp(raw_ts, tz=timezone.utc).isoformat()
+                else:
+                    result["flow_measured_at"] = raw_ts
+                print(f"  Limmat Abfluss: {result['abfluss_m3s']} m³/s ts={result['flow_measured_at']}")
                 break
     except Exception as e:
         print(f"  WARN Limmat-Abfluss: {e}")
