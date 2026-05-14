@@ -118,6 +118,115 @@
     .chart-wrap { position: relative; width: 100%; height: 320px; }
     @media (max-width: 600px) { .chart-wrap { height: 280px; } .cards { grid-template-columns: repeat(2, 1fr); } }
 
+    /* Bésmeralda */
+    .oracle-section {
+      background: linear-gradient(135deg, #0d0d1a 0%, #1a0a2e 50%, #0d1a1a 100%);
+      border: 1px solid #3a1f6e;
+      border-radius: 16px;
+      padding: 2rem 1.5rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .oracle-section::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(120,60,220,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .oracle-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #c9a0ff;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+    .oracle-subtitle {
+      font-size: 0.75rem;
+      color: #6a4a9a;
+      margin-bottom: 1.5rem;
+      font-style: italic;
+    }
+    .oracle-ball-wrap {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      margin: 0 auto 1.5rem;
+    }
+    .oracle-ball {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%,
+        rgba(255,255,255,0.9) 0%,
+        rgba(180,140,255,0.6) 20%,
+        rgba(80,40,160,0.8) 50%,
+        rgba(20,10,60,0.95) 80%,
+        rgba(10,5,30,1) 100%);
+      box-shadow:
+        0 0 40px rgba(140,80,255,0.5),
+        0 0 80px rgba(100,50,200,0.3),
+        inset 0 0 30px rgba(0,0,0,0.5);
+      animation: pulse-ball 3s ease-in-out infinite;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .oracle-ball:hover { transform: scale(1.05); }
+    .oracle-ball:active { transform: scale(0.97); }
+    @keyframes pulse-ball {
+      0%, 100% { box-shadow: 0 0 40px rgba(140,80,255,0.5), 0 0 80px rgba(100,50,200,0.3), inset 0 0 30px rgba(0,0,0,0.5); }
+      50% { box-shadow: 0 0 60px rgba(160,100,255,0.7), 0 0 120px rgba(120,60,220,0.5), inset 0 0 30px rgba(0,0,0,0.5); }
+    }
+    .oracle-stars {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .oracle-star {
+      position: absolute;
+      width: 3px; height: 3px;
+      border-radius: 50%;
+      background: white;
+      animation: twinkle 2s ease-in-out infinite;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 1; }
+    }
+    .oracle-message {
+      font-size: 1rem;
+      color: #e0c8ff;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      min-height: 3rem;
+      font-style: italic;
+    }
+    .oracle-forecast {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+      gap: 6px;
+      margin-top: 1rem;
+    }
+    .oracle-slot {
+      border-radius: 8px;
+      padding: 6px 4px;
+      font-size: 0.72rem;
+      text-align: center;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: transform 0.15s;
+    }
+    .oracle-slot:hover { transform: translateY(-2px); }
+    .oracle-slot .slot-time { color: #8870aa; font-size: 0.65rem; margin-bottom: 2px; }
+    .oracle-slot .slot-val { font-weight: 600; }
+    .oracle-slot .slot-icon { font-size: 0.85rem; }
+    .oracle-accuracy {
+      margin-top: 1rem;
+      font-size: 0.75rem;
+      color: #6a4a9a;
+    }
+
     details summary {
       cursor: pointer; list-style: none;
       display: flex; align-items: center; justify-content: space-between;
@@ -203,6 +312,18 @@
 
   <div id="lanes-now" class="lanes-now hidden"></div>
 
+  <div class="oracle-section" id="oracle-section">
+    <div class="oracle-title">🔮 Bésmeralda's Kleine Kristallkugel</div>
+    <div class="oracle-subtitle">Sie sieht alles. Meistens. Ungefähr.</div>
+    <div class="oracle-ball-wrap">
+      <div class="oracle-stars" id="oracle-stars"></div>
+      <div class="oracle-ball" id="oracle-ball" title="Klick mich"></div>
+    </div>
+    <div class="oracle-message" id="oracle-message">Die Kugel erwacht…</div>
+    <div class="oracle-forecast" id="oracle-forecast"></div>
+    <div class="oracle-accuracy" id="oracle-accuracy"></div>
+  </div>
+
   <div class="panel">
     <h2 style="margin-top: 0;">Verlauf</h2>
     <div class="controls">
@@ -211,7 +332,6 @@
         <option value="heatmap">Heatmap (Wochentag × Stunde)</option>
         <option value="today">Tagesverlauf</option>
         <option value="weekday">Mittel pro Wochentag</option>
-        <option value="oracle">🔮 Kristallkugel</option>
       </select>
       <select id="month-select" style="font-size:13px; padding:6px 10px; border-radius:8px; border:1px solid var(--border-strong); background:var(--bg-card); color:var(--text); font-family:inherit;">
         <option value="all">Alle Daten</option>
@@ -600,6 +720,8 @@
     } catch (e) {}
     populateBadSelector();
     renderChart();
+    initBesmeralda();
+    renderBesmeralda(state.history);
   }
 
   function populateBadSelector() {
@@ -793,6 +915,152 @@
     });
   }
 
+
+
+  function initBesmeralda() {
+    // Sterne erzeugen
+    const starsEl = $("oracle-stars");
+    for (let i = 0; i < 12; i++) {
+      const s = document.createElement("div");
+      s.className = "oracle-star";
+      s.style.left = Math.random() * 100 + "%";
+      s.style.top = Math.random() * 100 + "%";
+      s.style.animationDelay = (Math.random() * 2) + "s";
+      s.style.animationDuration = (1.5 + Math.random() * 2) + "s";
+      starsEl.appendChild(s);
+    }
+    // Klick auf Kugel = neue Botschaft
+    $("oracle-ball").onclick = () => renderBesmeralda(state.history);
+  }
+
+  function renderBesmeralda(data) {
+    if (!data || data.length === 0) return;
+
+    const now = new Date();
+    const todayKey = DAY_KEYS[now.getDay()];
+    const isHoliday = !!getHolidayName(now);
+    const isSchool = isSchoolHoliday(now);
+    const weather = state.latestWeather;
+    const tempC = weather ? parseFloat(weather.temperature_c) : null;
+    const rainMm = weather ? parseFloat(weather.precipitation_mm || 0) : 0;
+
+    // Für Hallenbad City
+    const uid = "SSD-4";
+
+    // Historische Mittelwerte pro Stunde für diesen Wochentag
+    const similar = data.filter(r =>
+      r.uid === uid &&
+      r.weekday === todayKey &&
+      r.is_holiday === String(isHoliday) &&
+      r.is_school_holiday === String(isSchool)
+    );
+
+    const buckets = {};
+    similar.forEach(r => {
+      const h = parseInt(r.hour);
+      const ratio = parseFloat(r.fill_ratio);
+      if (isNaN(h) || isNaN(ratio)) return;
+      if (!buckets[h]) buckets[h] = [];
+      buckets[h].push(ratio);
+    });
+
+    // Prognose-Slots 06-21
+    const hours = Array.from({length: 16}, (_, i) => i + 6);
+    const predictions = hours.map(h => {
+      const vals = buckets[h];
+      if (!vals || vals.length === 0) return { h, pct: null };
+      const mean = vals.reduce((s,v) => s+v, 0) / vals.length;
+      return { h, pct: Math.round(mean * 100), n: vals.length };
+    });
+
+    // Tatsächliche Werte heute
+    const todayStr = now.toLocaleDateString("sv");
+    const actualByHour = {};
+    data.filter(r => r.uid === uid && r.timestamp_local?.slice(0,10) === todayStr)
+        .forEach(r => {
+          const h = parseInt(r.hour);
+          if (!actualByHour[h]) actualByHour[h] = [];
+          actualByHour[h].push(parseFloat(r.fill_ratio));
+        });
+
+    // Oracle-Sprüche
+    const currentHour = now.getHours();
+    const curPred = predictions.find(p => p.h === currentHour);
+    const pct = curPred?.pct;
+
+    const sprueche = pct === null ? [
+      "Die Nebel lichten sich noch nicht… komm später wieder.",
+      "Bésmeralda braucht mehr Daten. Und einen Kaffee.",
+    ] : pct < 15 ? [
+      "Die Kugel flüstert: Leer wie eine Badehose im Winter. Geniess es.",
+      "Stille Wasser. Du hast die Bahn für dich.",
+      "Bésmeralda sieht: niemand ausser dir und deinen Gedanken.",
+    ] : pct < 35 ? [
+      "Angenehm. Du wirst vielleicht jemandem zunicken müssen.",
+      "Die Kugel zeigt ruhige Wasser. Perfekt für lange Bahnen.",
+      "Bésmeralda sieht: Genug Platz für dein Ego und dich.",
+    ] : pct < 55 ? [
+      "Mittelfeld. Die Kugel rät: Anpassungsfähigkeit.",
+      "Es wird Menschen geben. Wie im echten Leben.",
+      "Bésmeralda sieht Bahnteilung. Lächle freundlich.",
+    ] : pct < 75 ? [
+      "Voll genug um genervt zu sein. Die Kugel empfiehlt: Geduld.",
+      "Bésmeralda sieht Gedränge. Und jemanden der zu langsam überholt.",
+      "Die Nebel zeigen: Heute brauchst du Zen.",
+    ] : pct < 90 ? [
+      "Die Kugel leuchtet rot. Warte eine Stunde – oder geh Kaffee trinken.",
+      "Bésmeralda warnt: Viele Körper, wenig Bahnen.",
+      "Die Kugel zittert. Das Hallenbad auch.",
+    ] : [
+      "CHAOS. Selbst Bésmeralda schaut weg.",
+      "Die Kugel zeigt nur noch Schulterblätter und Wassertretenden.",
+      "Nicht heute. Bésmeralda hat gesprochen.",
+    ];
+
+    const spruch = sprueche[Math.floor(Math.random() * sprueche.length)];
+    $("oracle-message").textContent = `"${spruch}"`;
+
+    // Forecast-Slots rendern
+    const fc = $("oracle-forecast");
+    fc.innerHTML = predictions.map(p => {
+      const isPast = p.h < currentHour;
+      const isCurrent = p.h === currentHour;
+      const actual = actualByHour[p.h] ? Math.round(actualByHour[p.h].reduce((s,v)=>s+v,0)/actualByHour[p.h].length*100) : null;
+      const displayPct = isPast && actual !== null ? actual : p.pct;
+      const col = displayPct !== null ? occupancyColor(displayPct/100) : "#333";
+      const icon = displayPct === null ? "—" : displayPct < 15 ? "🔵" : displayPct < 45 ? "🟢" : displayPct < 60 ? "🟡" : displayPct < 75 ? "🟠" : "🔴";
+      const border = isCurrent ? "border:1px solid #c9a0ff;box-shadow:0 0 8px rgba(200,160,255,0.4);" : `border:1px solid ${col}44;`;
+      return `<div class="oracle-slot" style="background:${col}22;${border}">
+        <div class="slot-time">${String(p.h).padStart(2,"0")}:00</div>
+        <div class="slot-icon">${icon}</div>
+        <div class="slot-val" style="color:${col}">${displayPct !== null ? displayPct+"%" : "·"}</div>
+        ${isPast && actual !== null && p.pct !== null ? `<div style="font-size:0.6rem;color:#6a4a9a">war ${actual}%</div>` : ""}
+      </div>`;
+    }).join("");
+
+    // Genauigkeit berechnen
+    let maeSum = 0, maeCount = 0;
+    predictions.forEach(p => {
+      if (p.pct === null) return;
+      const h = p.h;
+      if (!actualByHour[h]) return;
+      const actual = Math.round(actualByHour[h].reduce((s,v)=>s+v,0)/actualByHour[h].length*100);
+      maeSum += Math.abs(p.pct - actual);
+      maeCount++;
+    });
+    const acc = $("oracle-accuracy");
+    if (maeCount > 0) {
+      const mae = (maeSum/maeCount).toFixed(1);
+      acc.textContent = `✦ Heutige Trefferquote (bisher): ±${mae}% Abweichung · ${similar.length} ähnliche Referenztage`;
+    } else {
+      acc.textContent = `✦ Basiert auf ${similar.length} ähnlichen ${todayKey}en`;
+    }
+
+    // Kugel-Animation beim Klick
+    const ball = $("oracle-ball");
+    ball.style.animation = "none";
+    setTimeout(() => ball.style.animation = "", 50);
+  }
 
   function renderOracle(data) {
     if (chart) { chart.destroy(); chart = null; }
