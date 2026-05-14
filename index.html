@@ -211,6 +211,7 @@
         <option value="heatmap">Heatmap (Wochentag × Stunde)</option>
         <option value="today">Tagesverlauf</option>
         <option value="weekday">Mittel pro Wochentag</option>
+        <option value="oracle">🔮 Kristallkugel</option>
       </select>
       <select id="month-select" style="font-size:13px; padding:6px 10px; border-radius:8px; border:1px solid var(--border-strong); background:var(--bg-card); color:var(--text); font-family:inherit;">
         <option value="all">Alle Daten</option>
@@ -618,7 +619,7 @@
       const dp = $("date-picker");
       const ms = $("month-select");
       dp.style.display = (vs.value === "today") ? "inline-block" : "none";
-      ms.style.display = (vs.value === "today") ? "none" : "inline-block";
+      ms.style.display = (vs.value === "today" || vs.value === "oracle") ? "none" : "inline-block";
       renderChart();
     };
     // Monats-Dropdown befüllen
@@ -631,7 +632,7 @@
         return `<option value="${m}">${label}</option>`;
       }).join("");
     ms.value = state.selectedMonth;
-    ms.style.display = (state.selectedView === "today") ? "none" : "inline-block";
+    ms.style.display = (state.selectedView === "today" || state.selectedView === "oracle") ? "none" : "inline-block";
     ms.onchange = () => {
       state.selectedMonth = ms.value;
       renderChart();
@@ -670,6 +671,7 @@
     }
     if (state.selectedView === "heatmap") renderHeatmap(data);
     else if (state.selectedView === "today") renderToday(data);
+    else if (state.selectedView === "oracle") renderOracle(data);
     else renderWeekday(data);
   }
 
@@ -789,6 +791,188 @@
         }
       }
     });
+  }
+
+
+  function renderOracle(data) {
+    if (chart) { chart.destroy(); chart = null; }
+
+    const now = new Date();
+    const todayKey = DAY_KEYS[now.getDay()];
+    const isHoliday = !!getHolidayName(now);
+    const isSchool = isSchoolHoliday(now);
+    const weather = state.latestWeather;
+    const tempC = weather ? parseFloat(weather.temperature_c) : null;
+    const rainMm = weather ? parseFloat(weather.precipitation_mm) : 0;
+
+    const t = TARGETS.find(t => t.key === state.selectedBad);
+    const uid = t?.uid || state.selectedBad;
+
+    // Historische Mittelwerte pro Stunde für diesen Wochentag
+    const similar = data.filter(r => {
+      if (r.uid !== uid) return false;
+      if (r.weekday !== todayKey) return false;
+      // Feiertage/Schulferien matchen
+      const rHoliday = r.is_holiday === "True";
+      const rSchool = r.is_school_holiday === "True";
+      if (isHoliday !== rHoliday) return false;
+      return true;
+    });
+
+    // Stunden-Buckets
+    const buckets = {};
+    similar.forEach(r => {
+      const h = parseInt(r.hour);
+      const ratio = parseFloat(r.fill_ratio);
+      if (isNaN(h) || isNaN(ratio)) return;
+      if (!buckets[h]) buckets[h] = { sum: 0, count: 0, vals: [] };
+      buckets[h].sum += ratio;
+      buckets[h].count++;
+      buckets[h].vals.push(ratio);
+    });
+
+    // Wetter-Korrekturfaktor (nur für Freibäder)
+    let weatherFactor = 1.0;
+    const isOutdoor = uid !== "SSD-4";
+    if (isOutdoor && tempC !== null) {
+      if (tempC < 15) weatherFactor = 0.3;
+      else if (tempC < 20) weatherFactor = 0.6;
+      else if (tempC < 25) weatherFactor = 0.85;
+      else weatherFactor = 1.1;
+      if (rainMm > 2) weatherFactor *= 0.4;
+      else if (rainMm > 0.5) weatherFactor *= 0.7;
+    }
+
+    const hours = Array.from({length: 16}, (_, i) => i + 6); // 6-21
+    const predictions = hours.map(h => {
+      const b = buckets[h];
+      if (!b || b.count === 0) return null;
+      const mean = b.sum / b.count;
+      // Standardabweichung für Konfidenz
+      const variance = b.vals.reduce((s, v) => s + (v - mean)**2, 0) / b.vals.length;
+      const std = Math.sqrt(variance);
+      const adjusted = Math.min(1, Math.max(0, mean * weatherFactor));
+      return { h, mean: adjusted, std, count: b.count };
+    });
+
+    // Tatsächliche Werte heute (für Backtesting)
+    const todayStr = now.toLocaleDateString("sv");
+    const actualToday = data.filter(r =>
+      r.uid === uid && r.timestamp_local?.slice(0,10) === todayStr
+    );
+    const actualByHour = {};
+    actualToday.forEach(r => {
+      const h = parseInt(r.hour);
+      if (!actualByHour[h]) actualByHour[h] = [];
+      actualByHour[h].push(parseFloat(r.fill_ratio));
+    });
+
+    const predVals = predictions.map(p => p ? Math.round(p.mean * 100) : null);
+    const actualVals = hours.map(h => {
+      const vals = actualByHour[h];
+      if (!vals || vals.length === 0) return null;
+      return Math.round(vals.reduce((s,v) => s+v, 0) / vals.length * 100);
+    });
+
+    // Oracle-Spruch
+    const currentHour = now.getHours();
+    const currentPred = predictions.find(p => p && p.h === currentHour);
+    const oracleMsg = (() => {
+      if (!currentPred) return "Die Kugel schweigt zu dieser Stunde…";
+      const pct = Math.round(currentPred.mean * 100);
+      const conf = currentPred.count >= 5 ? "Die Kugel ist sich sicher" : "Die Kugel ahnt";
+      if (pct < 15) return `${conf}: Jetzt ist es so leer wie dein Kopf nach der langen Bahn. 🧘`;
+      if (pct < 35) return `${conf}: Angenehm ruhig. Du musst niemanden überholen. 🏊`;
+      if (pct < 55) return `${conf}: Mittelfeld. Bahnteilung könnte nötig werden. 🤝`;
+      if (pct < 75) return `${conf}: Voll genug um genervt zu sein. Plane entsprechend. 😤`;
+      if (pct < 90) return `${conf}: Die Kugel rät: Warte eine Stunde. Oder nicht. Du weisst es selbst. 🔮`;
+      return `${conf}: Absolutes Chaos. Nicht mal die Kristallkugel will da rein. 🚫`;
+    })();
+
+    // Backtesting: MAE berechnen
+    let maeSum = 0, maeCount = 0;
+    hours.forEach((h, i) => {
+      if (predVals[i] !== null && actualVals[i] !== null) {
+        maeSum += Math.abs(predVals[i] - actualVals[i]);
+        maeCount++;
+      }
+    });
+    const mae = maeCount > 0 ? (maeSum / maeCount).toFixed(1) : null;
+
+    const sampleCount = similar.length;
+    $("hist-status").textContent = `🔮 Basiert auf ${sampleCount} ähnlichen ${todayKey}-Messungen${isHoliday ? " (Feiertag)" : ""}${isSchool ? " (Schulferien)" : ""}${isOutdoor && weatherFactor !== 1 ? " · Wetter-korrigiert" : ""}${mae ? ` · Tagesgenauigkeit bisher: ±${mae}%` : ""}`;
+
+    chart = new Chart($("histChart").getContext("2d"), {
+      type: "bar",
+      data: {
+        labels: hours.map(h => h + ":00"),
+        datasets: [
+          {
+            label: "🔮 Prognose",
+            data: predVals,
+            backgroundColor: hours.map((h,i) => {
+              const v = predVals[i];
+              if (v === null) return "transparent";
+              return occupancyColor(v/100) + "99";
+            }),
+            borderColor: hours.map((h,i) => {
+              const v = predVals[i];
+              if (v === null) return "transparent";
+              return occupancyColor(v/100);
+            }),
+            borderWidth: 1,
+            borderRadius: 4,
+          },
+          {
+            label: "✓ Tatsächlich",
+            data: actualVals,
+            type: "line",
+            borderColor: "#4a9eff",
+            backgroundColor: "rgba(74,158,255,0.15)",
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            borderWidth: 2,
+            tension: 0.3,
+            fill: false,
+          }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true, labels: { color: "var(--text)" } },
+          tooltip: { callbacks: {
+            label: c => `${c.dataset.label}: ${c.raw !== null ? c.raw + "%" : "—"}`
+          }},
+          annotation: {
+            annotations: {
+              now: {
+                type: "line",
+                xMin: currentHour - 6,
+                xMax: currentHour - 6,
+                borderColor: "rgba(255,255,255,0.3)",
+                borderWidth: 1,
+                borderDash: [4,4],
+              }
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: "var(--text-muted)" }, grid: { display: false } },
+          y: { min: 0, max: 100, ticks: { callback: v => v + "%", color: "var(--text-muted)" } }
+        }
+      }
+    });
+
+    // Oracle-Box über dem Chart
+    const oracleBox = document.createElement("div");
+    oracleBox.style.cssText = "text-align:center;padding:0.75rem;margin-bottom:0.75rem;background:rgba(255,255,255,0.04);border-radius:10px;font-size:0.9rem;line-height:1.5;";
+    oracleBox.textContent = oracleMsg;
+    const chartWrap = $("histChart").parentElement;
+    const existing = chartWrap.previousElementSibling;
+    if (existing && existing.dataset.oracle) existing.remove();
+    oracleBox.dataset.oracle = "1";
+    chartWrap.before(oracleBox);
   }
 
   function renderWeekday(data) {
