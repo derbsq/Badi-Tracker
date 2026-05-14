@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
@@ -50,148 +49,145 @@
     }
     .wrap { max-width: 900px; margin: 0 auto; padding: 1.25rem 1rem 4rem; }
 
-```
-header {
-  display: flex; align-items: baseline; justify-content: space-between;
-  margin-bottom: 0.5rem; flex-wrap: wrap; gap: 8px;
-}
-h1 { margin: 0; font-size: 22px; font-weight: 500; }
-h2 { margin: 1.5rem 0 0.75rem; font-size: 16px; font-weight: 500; }
-.status {
-  font-size: 12px; color: var(--text-muted);
-  display: inline-flex; align-items: center; gap: 6px;
-}
-.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); }
-.dot.live { background: #5dcaa5; box-shadow: 0 0 6px rgba(93,202,165,0.5); }
-.dot.err { background: #f09595; }
+    header {
+      display: flex; align-items: baseline; justify-content: space-between;
+      margin-bottom: 0.5rem; flex-wrap: wrap; gap: 8px;
+    }
+    h1 { margin: 0; font-size: 22px; font-weight: 500; }
+    h2 { margin: 1.5rem 0 0.75rem; font-size: 16px; font-weight: 500; }
+    .status {
+      font-size: 12px; color: var(--text-muted);
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-dim); }
+    .dot.live { background: #5dcaa5; box-shadow: 0 0 6px rgba(93,202,165,0.5); }
+    .dot.err { background: #f09595; }
 
-.day-banner {
-  font-size: 13px; color: var(--text-muted); margin-bottom: 1.25rem;
-}
-.day-banner .holiday {
-  display: inline-block; margin-left: 6px;
-  padding: 2px 8px; border-radius: 999px;
-  background: var(--amber-bg); color: var(--amber-fg);
-  font-size: 11px; font-weight: 500;
-}
+    .day-banner {
+      font-size: 13px; color: var(--text-muted); margin-bottom: 1.25rem;
+    }
+    .day-banner .holiday {
+      display: inline-block; margin-left: 6px;
+      padding: 2px 8px; border-radius: 999px;
+      background: var(--amber-bg); color: var(--amber-fg);
+      font-size: 11px; font-weight: 500;
+    }
 
-.cards {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
-  gap: 10px; margin-bottom: 1.25rem;
-}
-.card { padding: 14px 16px; border-radius: 12px; background: var(--bg-soft); }
-.card.green { background: var(--green-bg); color: var(--green-fg); }
-.card.amber { background: var(--amber-bg); color: var(--amber-fg); }
-.card.coral { background: var(--coral-bg); color: var(--coral-fg); }
-.card.red   { background: var(--red-bg);   color: var(--red-fg); }
-.card-label { font-size: 13px; font-weight: 500; margin-bottom: 6px; opacity: 0.9; }
-.card-num { display: flex; align-items: baseline; gap: 6px; }
-.card-num .big { font-size: 26px; font-weight: 500; }
-.card-num .small { font-size: 13px; opacity: 0.7; }
-.card-bar { margin-top: 8px; height: 4px; background: rgba(0,0,0,0.18); border-radius: 2px; overflow: hidden; }
-.card-bar > span { display: block; height: 100%; background: currentColor; opacity: 0.85; }
-.card-meta { margin-top: 6px; font-size: 11px; opacity: 0.85; }
-.card-temp { font-size: 11px; opacity: 0.8; margin-top: 3px; }
+    .cards {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      gap: 10px; margin-bottom: 1.25rem;
+    }
+    .card { padding: 14px 16px; border-radius: 12px; background: var(--bg-soft); }
+    .card.green { background: var(--green-bg); color: var(--green-fg); }
+    .card.amber { background: var(--amber-bg); color: var(--amber-fg); }
+    .card.coral { background: var(--coral-bg); color: var(--coral-fg); }
+    .card.red   { background: var(--red-bg);   color: var(--red-fg); }
+    .card-label { font-size: 13px; font-weight: 500; margin-bottom: 6px; opacity: 0.9; }
+    .card-num { display: flex; align-items: baseline; gap: 6px; }
+    .card-num .big { font-size: 26px; font-weight: 500; }
+    .card-num .small { font-size: 13px; opacity: 0.7; }
+    .card-bar { margin-top: 8px; height: 4px; background: rgba(0,0,0,0.18); border-radius: 2px; overflow: hidden; }
+    .card-bar > span { display: block; height: 100%; background: currentColor; opacity: 0.85; }
+    .card-meta { margin-top: 6px; font-size: 11px; opacity: 0.85; }
+    .card-temp { font-size: 11px; opacity: 0.8; margin-top: 3px; }
 
-.panel {
-  background: var(--bg-card); border-radius: 12px;
-  border: 1px solid var(--border); padding: 14px 16px;
-}
-.panel + .panel, .panel + details { margin-top: 1rem; }
+    .panel {
+      background: var(--bg-card); border-radius: 12px;
+      border: 1px solid var(--border); padding: 14px 16px;
+    }
+    .panel + .panel, .panel + details { margin-top: 1rem; }
 
-.lanes-now {
-  padding: 12px 14px; background: var(--bg-soft); border-radius: 10px;
-  font-size: 13px; margin-bottom: 1rem;
-}
-.lanes-now strong { font-weight: 500; }
-.lanes-now .muted { color: var(--text-muted); }
+    .lanes-now {
+      padding: 12px 14px; background: var(--bg-soft); border-radius: 10px;
+      font-size: 13px; margin-bottom: 1rem;
+    }
+    .lanes-now strong { font-weight: 500; }
+    .lanes-now .muted { color: var(--text-muted); }
 
-.controls {
-  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 0.75rem;
-}
-select {
-  background: var(--bg-card); color: var(--text);
-  border: 1px solid var(--border-strong);
-  padding: 6px 10px; border-radius: 8px; font-size: 13px;
-  font-family: inherit;
-}
+    .controls {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 0.75rem;
+    }
+    select {
+      background: var(--bg-card); color: var(--text);
+      border: 1px solid var(--border-strong);
+      padding: 6px 10px; border-radius: 8px; font-size: 13px;
+      font-family: inherit;
+    }
 
-.chart-wrap { position: relative; width: 100%; height: 320px; }
-@media (max-width: 600px) { .chart-wrap { height: 280px; } .cards { grid-template-columns: repeat(2, 1fr); } }
+    .chart-wrap { position: relative; width: 100%; height: 320px; }
+    @media (max-width: 600px) { .chart-wrap { height: 280px; } .cards { grid-template-columns: repeat(2, 1fr); } }
 
-details summary {
-  cursor: pointer; list-style: none;
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 16px; background: var(--bg-card);
-  border-radius: 12px; border: 1px solid var(--border);
-  font-size: 16px; font-weight: 500;
-  user-select: none;
-}
-details[open] summary { border-radius: 12px 12px 0 0; border-bottom: none; }
-details summary::-webkit-details-marker { display: none; }
-details summary::after {
-  content: "▸"; color: var(--text-muted);
-  transition: transform 0.2s ease;
-}
-details[open] summary::after { transform: rotate(90deg); }
-details .panel-body {
-  background: var(--bg-card); border: 1px solid var(--border);
-  border-top: none; border-radius: 0 0 12px 12px;
-  padding: 14px 16px;
-}
+    details summary {
+      cursor: pointer; list-style: none;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; background: var(--bg-card);
+      border-radius: 12px; border: 1px solid var(--border);
+      font-size: 16px; font-weight: 500;
+      user-select: none;
+    }
+    details[open] summary { border-radius: 12px 12px 0 0; border-bottom: none; }
+    details summary::-webkit-details-marker { display: none; }
+    details summary::after {
+      content: "▸"; color: var(--text-muted);
+      transition: transform 0.2s ease;
+    }
+    details[open] summary::after { transform: rotate(90deg); }
+    details .panel-body {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-top: none; border-radius: 0 0 12px 12px;
+      padding: 14px 16px;
+    }
 
-table.lanes {
-  border-collapse: collapse; font-size: 11px; width: 100%;
-  font-variant-numeric: tabular-nums;
-}
-table.lanes th {
-  padding: 4px 6px; text-align: center;
-  color: var(--text-muted); font-weight: 500;
-  position: sticky; top: 0; background: var(--bg-card);
-}
-table.lanes th.today, table.lanes td.today {
-  background: var(--bg-soft);
-}
-table.lanes th.today { color: var(--accent); }
-table.lanes th.time-col, table.lanes td.time-col {
-  text-align: left; color: var(--text-dim);
-  font-family: ui-monospace, "SF Mono", Menlo, monospace;
-  padding: 3px 6px;
-}
-table.lanes td {
-  padding: 3px 6px; text-align: center; font-weight: 500;
-  border-radius: 3px;
-}
-table.lanes td.l-6 { background: var(--green-bg); color: var(--green-fg); }
-table.lanes td.l-5 { background: var(--green-bg); color: var(--green-fg); opacity: 0.85; }
-table.lanes td.l-4 { background: var(--amber-bg); color: var(--amber-fg); }
-table.lanes td.l-3 { background: var(--coral-bg); color: var(--coral-fg); }
-table.lanes td.l-2 { background: var(--red-bg); color: var(--red-fg); }
-table.lanes td.l-1 { background: var(--red-bg); color: var(--red-fg); opacity: 0.85; }
-table.lanes td.now-row {
-  box-shadow: inset 0 0 0 2px var(--accent);
-}
-.lane-table-wrap { overflow-x: auto; }
+    table.lanes {
+      border-collapse: collapse; font-size: 11px; width: 100%;
+      font-variant-numeric: tabular-nums;
+    }
+    table.lanes th {
+      padding: 4px 6px; text-align: center;
+      color: var(--text-muted); font-weight: 500;
+      position: sticky; top: 0; background: var(--bg-card);
+    }
+    table.lanes th.today, table.lanes td.today {
+      background: var(--bg-soft);
+    }
+    table.lanes th.today { color: var(--accent); }
+    table.lanes th.time-col, table.lanes td.time-col {
+      text-align: left; color: var(--text-dim);
+      font-family: ui-monospace, "SF Mono", Menlo, monospace;
+      padding: 3px 6px;
+    }
+    table.lanes td {
+      padding: 3px 6px; text-align: center; font-weight: 500;
+      border-radius: 3px;
+    }
+    table.lanes td.l-6 { background: var(--green-bg); color: var(--green-fg); }
+    table.lanes td.l-5 { background: var(--green-bg); color: var(--green-fg); opacity: 0.85; }
+    table.lanes td.l-4 { background: var(--amber-bg); color: var(--amber-fg); }
+    table.lanes td.l-3 { background: var(--coral-bg); color: var(--coral-fg); }
+    table.lanes td.l-2 { background: var(--red-bg); color: var(--red-fg); }
+    table.lanes td.l-1 { background: var(--red-bg); color: var(--red-fg); opacity: 0.85; }
+    table.lanes td.now-row {
+      box-shadow: inset 0 0 0 2px var(--accent);
+    }
+    .lane-table-wrap { overflow-x: auto; }
 
-.note {
-  margin-top: 1.5rem; padding: 12px 14px;
-  background: var(--bg-soft); border-radius: 10px;
-  font-size: 12px; color: var(--text-muted);
-}
-.note strong { color: var(--text); font-weight: 500; }
+    .note {
+      margin-top: 1.5rem; padding: 12px 14px;
+      background: var(--bg-soft); border-radius: 10px;
+      font-size: 12px; color: var(--text-muted);
+    }
+    .note strong { color: var(--text); font-weight: 500; }
 
-.legend-pills {
-  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
-  font-size: 11px;
-}
-.pill {
-  padding: 2px 8px; border-radius: 999px;
-  background: var(--bg-soft); color: var(--text-muted);
-}
-.hidden { display: none !important; }
-```
-
+    .legend-pills {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;
+      font-size: 11px;
+    }
+    .pill {
+      padding: 2px 8px; border-radius: 999px;
+      background: var(--bg-soft); color: var(--text-muted);
+    }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
@@ -214,8 +210,10 @@ table.lanes td.now-row {
       <select id="view-select">
         <option value="heatmap">Heatmap (Wochentag × Stunde)</option>
         <option value="today">Tagesverlauf</option>
-        <option value="line">Verlauf (chronologisch)</option>
         <option value="weekday">Mittel pro Wochentag</option>
+      </select>
+      <select id="month-select" style="font-size:13px; padding:6px 10px; border-radius:8px; border:1px solid var(--border-strong); background:var(--bg-card); color:var(--text); font-family:inherit;">
+        <option value="all">Alle Daten</option>
       </select>
       <input type="date" id="date-picker" style="font-size:13px; padding:6px 10px; border-radius:8px; border:1px solid var(--border-strong); background:var(--bg-card); color:var(--text); font-family:inherit;" />
     </div>
@@ -244,11 +242,8 @@ table.lanes td.now-row {
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-matrix@2.0.1/dist/chartjs-chart-matrix.min.js"></script>
-
 <script>
 (function() {
   const TARGETS = [
@@ -297,7 +292,7 @@ table.lanes td.now-row {
   }
 
   const state = {
-    live: {}, history: [], bahnen: null, vario: null, temperatures: null, latestWeather: null,
+    live: {}, history: [], bahnen: null, vario: null, temperatures: null, latestWeather: null, selectedMonth: 'all',
     selectedBad: localStorage.getItem("badi:bad") || "city",
     selectedView: localStorage.getItem("badi:view") || "heatmap"
   };
@@ -621,7 +616,24 @@ table.lanes td.now-row {
       state.selectedView = vs.value;
       localStorage.setItem("badi:view", vs.value);
       const dp = $("date-picker");
+      const ms = $("month-select");
       dp.style.display = (vs.value === "today") ? "inline-block" : "none";
+      ms.style.display = (vs.value === "today") ? "none" : "inline-block";
+      renderChart();
+    };
+    // Monats-Dropdown befüllen
+    const ms = $("month-select");
+    const months = [...new Set(state.history.map(r => r.timestamp_local?.slice(0,7)).filter(Boolean))].sort().reverse();
+    ms.innerHTML = '<option value="all">Alle Daten</option>' +
+      months.map(m => {
+        const [y, mo] = m.split("-");
+        const label = new Date(y, mo-1, 1).toLocaleDateString("de-CH", {month:"long", year:"numeric"});
+        return `<option value="${m}">${label}</option>`;
+      }).join("");
+    ms.value = state.selectedMonth;
+    ms.style.display = (state.selectedView === "today") ? "none" : "inline-block";
+    ms.onchange = () => {
+      state.selectedMonth = ms.value;
       renderChart();
     };
     // Datumspicker initialisieren
@@ -658,13 +670,20 @@ table.lanes td.now-row {
     }
     if (state.selectedView === "heatmap") renderHeatmap(data);
     else if (state.selectedView === "today") renderToday(data);
-    else if (state.selectedView === "weekday") renderWeekday(data);
-    else renderLine(data);
+    else renderWeekday(data);
   }
+
+  function filteredData(data) {
+    const m = state.selectedMonth;
+    if (m === "all") return data;
+    return data.filter(r => r.timestamp_local?.slice(0,7) === m);
+  }
+
   function renderHeatmap(data) {
+    const fd = filteredData(data).filter(r => r.uid === state.selectedBad);
     const dayMap = {Monday:0,Tuesday:1,Wednesday:2,Thursday:3,Friday:4,Saturday:5,Sunday:6};
     const buckets = {};
-    data.forEach(r => {
+    fd.forEach(r => {
       const d = dayMap[r.weekday];
       const h = parseInt(r.hour);
       const ratio = parseFloat(r.fill_ratio);
@@ -703,22 +722,9 @@ table.lanes td.now-row {
         }
       }
     });
-  }
-  function renderLine(data) {
-    const sorted = data.slice().sort((a,b) => a.timestamp_utc.localeCompare(b.timestamp_utc));
-    const points = sorted.map(r => ({ x: new Date(r.timestamp_utc), y: parseFloat(r.fill_ratio) * 100 }));
-    chart = new Chart($("histChart").getContext("2d"), {
-      type: "line",
-      data: { datasets: [{ label: "%", data: points,
-        borderColor: "#4a9eff", backgroundColor: "rgba(74,158,255,0.12)",
-        pointRadius: 1.2, pointHoverRadius: 4, borderWidth: 1.5, tension: 0.2, fill: true
-      }]},
-      options: { responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: { x: { type: "time", time: { unit: "day" } },
-                  y: { min: 0, max: 100, ticks: { callback: v => v + "%" } } }
-      }
-    });
+    const monthLabel = state.selectedMonth === "all" ? "gesamt" :
+      new Date(state.selectedMonth + "-01").toLocaleDateString("de-CH", {month:"long", year:"numeric"});
+    $("hist-status").textContent = `${fd.length} Datenpunkte · ${monthLabel}`;
   }
 
   function renderToday(data) {
@@ -775,9 +781,10 @@ table.lanes td.now-row {
   }
 
   function renderWeekday(data) {
+    const fd = filteredData(data).filter(r => r.uid === state.selectedBad);
     const dayMap = {Monday:1,Tuesday:2,Wednesday:3,Thursday:4,Friday:5,Saturday:6,Sunday:0};
     const buckets = {};
-    data.forEach(r => {
+    fd.forEach(r => {
       const d = dayMap[r.weekday];
       const ratio = parseFloat(r.fill_ratio);
       if (d === undefined || isNaN(ratio)) return;
@@ -868,6 +875,5 @@ table.lanes td.now-row {
   }, 60_000);
 })();
 </script>
-
 </body>
 </html>
