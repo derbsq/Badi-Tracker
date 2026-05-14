@@ -421,7 +421,7 @@
   }
 
   const state = {
-    live: {}, history: [], bahnen: null, vario: null, temperatures: null, latestWeather: null, selectedMonth: 'all', oracleDayOffset: 0,
+    live: {}, history: [], bahnen: null, vario: null, temperatures: null, latestWeather: null, weatherForecast: null, selectedMonth: 'all', oracleDayOffset: 0,
     selectedBad: localStorage.getItem("badi:bad") || "city",
     selectedView: localStorage.getItem("badi:view") || "heatmap"
   };
@@ -713,6 +713,12 @@
       }
     } catch (e) {}
     try {
+      const r = await fetch(DATA_BASE + "weather_forecast.json", { cache: "no-store" });
+      if (r.ok) {
+        state.weatherForecast = await r.json();
+      }
+    } catch (e) {}
+    try {
       const r = await fetch(DATA_BASE + "weather.csv", { cache: "no-store" });
       if (r.ok) {
         const lines = (await r.text()).replace(/\r/g,"").trim().split("\n").filter(l=>l.trim());
@@ -965,9 +971,25 @@
     const isSchool = isSchoolHoliday(now);
     const isBruecke = isBrueckentag(now);
     const isWeekend = now.getDay() === 0 || now.getDay() === 6;
-    const weather = state.latestWeather;
-    const tempC = weather ? parseFloat(weather.temperature_c) : null;
-    const rainMm = weather ? parseFloat(weather.precipitation_mm || 0) : 0;
+    // Wetterdaten: für Morgen Forecast nutzen, sonst aktuell
+    let tempC = null, rainMm = 0, weatherCode = null;
+    const offset = state.oracleDayOffset || 0;
+    if (offset !== 0 && state.weatherForecast?.days) {
+      const targetDate = now.toLocaleDateString("sv");
+      const fday = state.weatherForecast.days.find(d => d.date === targetDate);
+      if (fday) {
+        tempC = fday.temp_max != null && fday.temp_min != null
+          ? (fday.temp_max + fday.temp_min) / 2
+          : fday.temp_max ?? fday.temp_min;
+        rainMm = fday.precip_sum ?? 0;
+        weatherCode = fday.weather_code;
+      }
+    } else {
+      const weather = state.latestWeather;
+      tempC = weather ? parseFloat(weather.temperature_c) : null;
+      rainMm = weather ? parseFloat(weather.precipitation_mm || 0) : 0;
+      weatherCode = weather ? parseInt(weather.weather_code) : null;
+    }
     const currentHour = state.oracleDayOffset === 0 ? nowReal.getHours() : -1; // -1 = kein "aktuell"
     const todayStr = now.toLocaleDateString("sv");
     const isToday = state.oracleDayOffset === 0;
@@ -1274,11 +1296,12 @@
       maeSum += Math.abs(p.pct - actual);
       maeCount++;
     });
+    const forecastNote = offset !== 0 && state.weatherForecast ? " · Wettervorhersage" : "";
     const ctx = [
       isHoliday ? "Feiertag" : null,
       isBruecke ? "Brückentag" : null,
       isSchool ? "Schulferien" : null,
-      tempC !== null ? `${tempC.toFixed(0)}°C` : null,
+      tempC !== null ? `${tempC.toFixed(0)}°C${forecastNote}` : null,
       rainMm > 0.5 ? `🌧 ${rainMm.toFixed(1)}mm` : null,
     ].filter(Boolean).join(" · ");
     const acc = $("oracle-accuracy");
