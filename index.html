@@ -247,11 +247,11 @@
 <script>
 (function() {
   const TARGETS = [
-    { key: "city", label: "Hallenbad City", match: ["city"], hasLanes: true,
+    { key: "city", uid: "SSD-4", label: "Hallenbad City", match: ["city"], hasLanes: true,
       tempInfo: "🌡 28°C / 32°C / 29°C" },
-    { key: "letzigraben", label: "Freibad Letzigraben", match: ["letzigraben"], hasLanes: false,
+    { key: "letzigraben", uid: "LETZI-1", label: "Freibad Letzigraben", match: ["letzigraben"], hasLanes: false,
       tempInfo: "🌡 saisonal, ~20–25°C" },
-    { key: "utoquai", label: "Seebad Utoquai", match: ["utoquai"], hasLanes: false,
+    { key: "utoquai", uid: "SSD-10", label: "Seebad Utoquai", match: ["utoquai"], hasLanes: false,
       tempInfo: "🌡 Seewasser, saisonal" }
   ];
   const WS_URL = "wss://badi-public.crowdmonitor.ch:9591/api";
@@ -680,7 +680,8 @@
   }
 
   function renderHeatmap(data) {
-    const fd = filteredData(data).filter(r => r.uid === state.selectedBad);
+    const t = TARGETS.find(t => t.key === state.selectedBad);
+    const fd = filteredData(data).filter(r => r.uid === (t?.uid || state.selectedBad));
     const dayMap = {Monday:0,Tuesday:1,Wednesday:2,Thursday:3,Friday:4,Saturday:5,Sunday:6};
     const buckets = {};
     fd.forEach(r => {
@@ -781,7 +782,8 @@
   }
 
   function renderWeekday(data) {
-    const fd = filteredData(data).filter(r => r.uid === state.selectedBad);
+    const t = TARGETS.find(t => t.key === state.selectedBad);
+    const fd = filteredData(data).filter(r => r.uid === (t?.uid || state.selectedBad));
     const dayMap = {Monday:1,Tuesday:2,Wednesday:3,Thursday:4,Friday:5,Saturday:6,Sunday:0};
     const buckets = {};
     fd.forEach(r => {
