@@ -841,7 +841,7 @@
       buckets[k].sum += ratio; buckets[k].count++;
     });
     const matrixData = [];
-    for (let d = 0; d < 7; d++) for (let h = 6; h <= 21; h++) {
+    for (let d = 0; d < 7; d++) for (let h = 6; h <= 22; h++) {
       const b = buckets[d + "_" + h];
       matrixData.push({ x: h, y: d, v: b ? b.sum / b.count : null });
     }
@@ -865,8 +865,22 @@
           label: c => `${["Mo","Di","Mi","Do","Fr","Sa","So"][c.raw.y]} ${c.raw.x}:00 · ${c.raw.v === null ? "—" : Math.round(c.raw.v * 100) + "%"}`
         }}},
         scales: {
-          x: { type: "linear", min: 6, max: 21, ticks: { stepSize: 1, callback: v => v + ":00" }, grid: { display: false } },
-          y: { type: "linear", min: -0.5, max: 6.5, reverse: true, ticks: { stepSize: 1, callback: v => ["Mo","Di","Mi","Do","Fr","Sa","So"][v] }, grid: { display: false } }
+          x: { type: "linear", min: 6, max: 22, ticks: { stepSize: 1, callback: v => v + ":00" }, grid: { display: false } },
+          y: { type: "linear", min: -0.5, max: 6.5, reverse: true, ticks: { stepSize: 1,
+            callback: v => {
+              const days = ["Mo","Di","Mi","Do","Fr","Sa","So"];
+              const todayIdx = (new Date().getDay() + 6) % 7; // Mo=0
+              return v === todayIdx ? "▶ " + days[v] : days[v];
+            },
+            color: ctx => {
+              const todayIdx = (new Date().getDay() + 6) % 7;
+              return ctx.index === todayIdx ? "#4a9eff" : "var(--text-muted)";
+            },
+            font: ctx => {
+              const todayIdx = (new Date().getDay() + 6) % 7;
+              return { weight: ctx.index === todayIdx ? "bold" : "normal", size: 11 };
+            }
+          }, grid: { display: false } }
         }
       }
     });
@@ -1056,7 +1070,7 @@
     const top = scored.slice(0, topN);
 
     // Gewichteten Erwartungswert pro Stunde berechnen
-    const hours = Array.from({length: 16}, (_, i) => i + 6);
+    const hours = Array.from({length: 17}, (_, i) => i + 6);
     const predictions = hours.map(h => {
       let wSum = 0, wValSum = 0, n = 0;
       top.forEach((item, rank) => {
@@ -1359,7 +1373,7 @@
       else if (rainMm > 0.5) weatherFactor *= 0.7;
     }
 
-    const hours = Array.from({length: 16}, (_, i) => i + 6); // 6-21
+    const hours = Array.from({length: 17}, (_, i) => i + 6); // 6-21
     const predictions = hours.map(h => {
       const b = buckets[h];
       if (!b || b.count === 0) return null;
