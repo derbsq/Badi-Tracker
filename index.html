@@ -841,7 +841,7 @@
       buckets[k].sum += ratio; buckets[k].count++;
     });
     const matrixData = [];
-    for (let d = 0; d < 7; d++) for (let h = 6; h <= 22; h++) {
+    for (let d = 0; d < 7; d++) for (let h = 6; h <= 21; h++) {
       const b = buckets[d + "_" + h];
       matrixData.push({ x: h, y: d, v: b ? b.sum / b.count : null });
     }
@@ -865,24 +865,36 @@
           label: c => `${["Mo","Di","Mi","Do","Fr","Sa","So"][c.raw.y]} ${c.raw.x}:00 · ${c.raw.v === null ? "—" : Math.round(c.raw.v * 100) + "%"}`
         }}},
         scales: {
-          x: { type: "linear", min: 6, max: 22, ticks: { stepSize: 1, callback: v => v + ":00" }, grid: { display: false } },
-          y: { type: "linear", min: -0.5, max: 6.5, reverse: true, ticks: { stepSize: 1,
-            callback: v => {
-              const days = ["Mo","Di","Mi","Do","Fr","Sa","So"];
-              const todayIdx = (new Date().getDay() + 6) % 7; // Mo=0
-              return v === todayIdx ? "▶ " + days[v] : days[v];
-            },
-            color: ctx => {
-              const todayIdx = (new Date().getDay() + 6) % 7;
-              return ctx.index === todayIdx ? "#4a9eff" : "var(--text-muted)";
-            },
-            font: ctx => {
-              const todayIdx = (new Date().getDay() + 6) % 7;
-              return { weight: ctx.index === todayIdx ? "bold" : "normal", size: 11 };
-            }
-          }, grid: { display: false } }
+          x: { type: "linear", min: 6, max: 21, ticks: { stepSize: 1, callback: v => v + ":00", color: "rgba(180,180,180,0.7)", font: {size:10} }, grid: { display: false } },
+          y: { type: "linear", min: -0.5, max: 6.5, reverse: true,
+            ticks: { stepSize: 1, callback: v => ["Mo","Di","Mi","Do","Fr","Sa","So"][Math.round(v)] ?? "", color: "rgba(180,180,180,0.7)", font: {size:11} },
+            grid: { display: false }
+          }
         }
-      }
+      },
+      plugins: [{
+        id: "todayHighlight",
+        afterDraw(chart) {
+          const todayIdx = (new Date().getDay() + 6) % 7;
+          const yScale = chart.scales.y;
+          const xScale = chart.scales.x;
+          const ctx2 = chart.ctx;
+          const yPos = yScale.getPixelForValue(todayIdx);
+          const rowH = yScale.getPixelForValue(1) - yScale.getPixelForValue(0);
+          // Highlight-Streifen
+          ctx2.save();
+          ctx2.fillStyle = "rgba(74,158,255,0.07)";
+          ctx2.fillRect(xScale.left, yPos - rowH/2, xScale.width, rowH);
+          // Label blau + fett
+          const days = ["Mo","Di","Mi","Do","Fr","Sa","So"];
+          ctx2.fillStyle = "#4a9eff";
+          ctx2.font = "bold 11px sans-serif";
+          ctx2.textAlign = "right";
+          ctx2.textBaseline = "middle";
+          ctx2.fillText("▶ " + days[todayIdx], xScale.left - 4, yPos);
+          ctx2.restore();
+        }
+      }]
     });
     const monthLabel = state.selectedMonth === "all" ? "gesamt" :
       state.selectedMonth === "thisweek" ? "diese Woche" :
@@ -1070,7 +1082,7 @@
     const top = scored.slice(0, topN);
 
     // Gewichteten Erwartungswert pro Stunde berechnen
-    const hours = Array.from({length: 17}, (_, i) => i + 6);
+    const hours = Array.from({length: 16}, (_, i) => i + 6);
     const predictions = hours.map(h => {
       let wSum = 0, wValSum = 0, n = 0;
       top.forEach((item, rank) => {
@@ -1094,9 +1106,15 @@
         if (rainMm > 2) factor *= 0.3;
         else if (rainMm > 0.5) factor *= 0.65;
       } else if (!isOutdoor && tempC !== null) {
-        // Hallenbad: schönes/heisses Wetter zieht Leute konsequent WEG
-        if (rainMm > 3)        factor = 1.20; // starker Regen → deutlich mehr
-        else if (tempC < 8)    factor = 1.15; // sehr kalt → mehr
+        // Hallenbad: Glocken-Kurve
+        // Leichter Regen = leicht mehr (ungemütlich draussen)
+        // Starkregen = weniger (niemand will raus)
+        // Kalt/trocken = mehr
+        // Warm/schön = weniger
+        if (rainMm > 10)       factor = 0.75; // Starkregen → wenige kommen raus
+        else if (rainMm > 5)   factor = 0.88; // kräftiger Regen → etwas weniger
+        else if (rainMm > 1)   factor = 1.10; // leichter Regen → mehr als normal
+        else if (tempC < 8)    factor = 1.15; // sehr kalt, trocken → mehr
         else if (tempC < 15)   factor = 1.05; // kühl → leicht mehr
         else if (tempC < 20)   factor = 1.00; // mild → normal
         else if (tempC < 25)   factor = 0.90; // angenehm → weniger
@@ -1373,7 +1391,7 @@
       else if (rainMm > 0.5) weatherFactor *= 0.7;
     }
 
-    const hours = Array.from({length: 17}, (_, i) => i + 6); // 6-21
+    const hours = Array.from({length: 16}, (_, i) => i + 6); // 6-21
     const predictions = hours.map(h => {
       const b = buckets[h];
       if (!b || b.count === 0) return null;
