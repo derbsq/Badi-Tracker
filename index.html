@@ -117,10 +117,10 @@
 
     .chart-wrap { position: relative; width: 100%; height: 320px; }
     @media (max-width: 600px) { .chart-wrap { height: 280px; } .cards { grid-template-columns: repeat(2, 1fr); } }
-    #oracle-details[open] .details-arrow { transform: rotate(90deg); }
-    .details-arrow { display:inline-block; transition: transform 0.2s; }
     #oracle-details > summary::-webkit-details-marker { display: none; }
-    .oracle-section { padding: 1.5rem 1rem 1rem; }
+    #oracle-details > summary::after { display: none; }
+    .oracle-section { padding: 1.5rem 1.25rem 1.25rem; background: linear-gradient(135deg,#0d0d1a,#1a0a2e,#0d1a1a); border: 1px solid #3a1f6e; border-top: none; border-radius: 0 0 14px 14px; }
+    #oracle-details[open] > summary { border-radius: 14px 14px 0 0; }
 
     /* Bésmeralda */
     .oracle-section {
@@ -334,7 +334,7 @@
     <div class="chart-wrap"><canvas id="histChart"></canvas></div>
   </div>
 
-  <details id="lane-section" class="hidden">
+  <details id="lane-section" class="hidden" style="margin-bottom:1.5rem;">
     <summary>Bahnen-Belegung Hallenbad City</summary>
     <div class="panel-body">
       <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
@@ -349,7 +349,6 @@
     <summary style="cursor:pointer;padding:1rem 1.25rem;background:linear-gradient(135deg,#0d0d1a,#1a0a2e,#0d1a1a);border:1px solid #3a1f6e;border-radius:14px;list-style:none;display:flex;align-items:center;gap:0.5rem;font-weight:600;color:#c9a0ff;font-size:0.95rem;">
       <span style="font-size:1.2rem;">🔮</span> Bésmeralda's Kleine Kristallkugel
       <span style="margin-left:auto;font-size:0.7rem;color:#6a4a9a;font-style:italic;">Sie sieht alles. Meistens. Ungefähr.</span>
-      <span class="details-arrow" style="color:#6a4a9a;">▶</span>
     </summary>
     <div class="oracle-section" id="oracle-section">
       <div class="oracle-ball-wrap">
@@ -422,7 +421,7 @@
   }
 
   const state = {
-    live: {}, history: [], bahnen: null, vario: null, temperatures: null, latestWeather: null, selectedMonth: 'all',
+    live: {}, history: [], bahnen: null, vario: null, temperatures: null, latestWeather: null, selectedMonth: 'all', oracleDayOffset: 0,
     selectedBad: localStorage.getItem("badi:bad") || "city",
     selectedView: localStorage.getItem("badi:view") || "heatmap"
   };
@@ -958,7 +957,9 @@
   function renderBesmeralda(data) {
     if (!data || data.length === 0) return;
 
-    const now = new Date();
+    const nowReal = new Date();
+    const now = new Date(nowReal);
+    now.setDate(now.getDate() + (state.oracleDayOffset || 0));
     const todayKey = DAY_KEYS[now.getDay()];
     const isHoliday = !!getHolidayName(now);
     const isSchool = isSchoolHoliday(now);
@@ -967,8 +968,10 @@
     const weather = state.latestWeather;
     const tempC = weather ? parseFloat(weather.temperature_c) : null;
     const rainMm = weather ? parseFloat(weather.precipitation_mm || 0) : 0;
-    const currentHour = now.getHours();
+    const currentHour = state.oracleDayOffset === 0 ? nowReal.getHours() : -1; // -1 = kein "aktuell"
     const todayStr = now.toLocaleDateString("sv");
+    const isToday = state.oracleDayOffset === 0;
+    const dayLabel = state.oracleDayOffset === -1 ? "Gestern" : state.oracleDayOffset === 1 ? "Morgen" : "Heute";
 
     // Bad aus state (gleicher Selector wie Verlauf)
     const t = TARGETS.find(t => t.key === state.selectedBad) || TARGETS[0];
@@ -1164,6 +1167,11 @@
         <select id="oracle-bad-select" style="font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid #3a1f6e;background:#0d0d1a;color:#c9a0ff;font-family:inherit;">
           ${TARGETS.map(t2 => `<option value="${t2.key}"${t2.key===state.selectedBad?" selected":""}>${t2.label}</option>`).join("")}
         </select>
+        <select id="oracle-day-select" style="font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid #3a1f6e;background:#0d0d1a;color:#c9a0ff;font-family:inherit;">
+          <option value="-1">Gestern</option>
+          <option value="0" selected>Heute</option>
+          <option value="1">Morgen</option>
+        </select>
         <span style="font-size:0.75rem;color:#6a4a9a;">${topN} Referenztage · kNN-Algorithmus</span>
       </div>
       <div id="oracle-chart-wrap" style="height:220px;position:relative;"></div>`;
@@ -1183,6 +1191,14 @@
         state.selectedBad = e.target.value;
         renderBesmeralda(state.history);
       };
+      const ods = document.getElementById("oracle-day-select");
+      if (ods) {
+        ods.value = String(state.oracleDayOffset);
+        ods.onchange = e => {
+          state.oracleDayOffset = parseInt(e.target.value);
+          renderBesmeralda(state.history);
+        };
+      }
 
       // Chart
       const wrap = document.getElementById("oracle-chart-wrap");
