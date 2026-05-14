@@ -117,6 +117,10 @@
 
     .chart-wrap { position: relative; width: 100%; height: 320px; }
     @media (max-width: 600px) { .chart-wrap { height: 280px; } .cards { grid-template-columns: repeat(2, 1fr); } }
+    #oracle-details[open] .details-arrow { transform: rotate(90deg); }
+    .details-arrow { display:inline-block; transition: transform 0.2s; }
+    #oracle-details > summary::-webkit-details-marker { display: none; }
+    .oracle-section { padding: 1.5rem 1rem 1rem; }
 
     /* Bésmeralda */
     .oracle-section {
@@ -312,18 +316,6 @@
 
   <div id="lanes-now" class="lanes-now hidden"></div>
 
-  <div class="oracle-section" id="oracle-section">
-    <div class="oracle-title">🔮 Bésmeralda's Kleine Kristallkugel</div>
-    <div class="oracle-subtitle">Sie sieht alles. Meistens. Ungefähr.</div>
-    <div class="oracle-ball-wrap">
-      <div class="oracle-stars" id="oracle-stars"></div>
-      <div class="oracle-ball" id="oracle-ball" title="Klick mich"></div>
-    </div>
-    <div class="oracle-message" id="oracle-message">Die Kugel erwacht…</div>
-    <div class="oracle-forecast" id="oracle-forecast"></div>
-    <div class="oracle-accuracy" id="oracle-accuracy"></div>
-  </div>
-
   <div class="panel">
     <h2 style="margin-top: 0;">Verlauf</h2>
     <div class="controls">
@@ -350,6 +342,23 @@
       </div>
       <div class="lane-table-wrap"><div id="lane-grid"></div></div>
       <div id="lane-legend" class="legend-pills"></div>
+    </div>
+  </details>
+
+  <details id="oracle-details" style="margin-bottom:1.5rem;">
+    <summary style="cursor:pointer;padding:1rem 1.25rem;background:linear-gradient(135deg,#0d0d1a,#1a0a2e,#0d1a1a);border:1px solid #3a1f6e;border-radius:14px;list-style:none;display:flex;align-items:center;gap:0.5rem;font-weight:600;color:#c9a0ff;font-size:0.95rem;">
+      <span style="font-size:1.2rem;">🔮</span> Bésmeralda's Kleine Kristallkugel
+      <span style="margin-left:auto;font-size:0.7rem;color:#6a4a9a;font-style:italic;">Sie sieht alles. Meistens. Ungefähr.</span>
+      <span class="details-arrow" style="color:#6a4a9a;">▶</span>
+    </summary>
+    <div class="oracle-section" id="oracle-section">
+      <div class="oracle-ball-wrap">
+        <div class="oracle-stars" id="oracle-stars"></div>
+        <div class="oracle-ball" id="oracle-ball" title="Klick für neuen Spruch"></div>
+      </div>
+      <div class="oracle-message" id="oracle-message">Die Kugel erwacht…</div>
+      <div class="oracle-forecast" id="oracle-forecast"></div>
+      <div class="oracle-accuracy" id="oracle-accuracy"></div>
     </div>
   </details>
 
@@ -933,6 +942,19 @@
     $("oracle-ball").onclick = () => renderBesmeralda(state.history);
   }
 
+  function isBrueckentag(d) {
+    // Brückentag = Mo oder Fr zwischen Wochenende und Feiertag
+    const day = d.getDay(); // 0=So, 1=Mo...5=Fr, 6=Sa
+    if (day !== 1 && day !== 5) return false;
+    const check = new Date(d);
+    if (day === 1) check.setDate(d.getDate() - 1); // Sonntag davor
+    else check.setDate(d.getDate() + 1); // Samstag danach
+    // Prüfe ob benachbarter Tag Feiertag ist (vereinfacht: Feiertag-Liste)
+    const neighbor = new Date(d);
+    neighbor.setDate(d.getDate() + (day === 1 ? -2 : 1));
+    return !!getHolidayName(neighbor);
+  }
+
   function renderBesmeralda(data) {
     if (!data || data.length === 0) return;
 
@@ -940,20 +962,38 @@
     const todayKey = DAY_KEYS[now.getDay()];
     const isHoliday = !!getHolidayName(now);
     const isSchool = isSchoolHoliday(now);
+    const isBruecke = isBrueckentag(now);
+    const isWeekend = now.getDay() === 0 || now.getDay() === 6;
     const weather = state.latestWeather;
     const tempC = weather ? parseFloat(weather.temperature_c) : null;
     const rainMm = weather ? parseFloat(weather.precipitation_mm || 0) : 0;
 
-    // Für Hallenbad City
     const uid = "SSD-4";
 
-    // Historische Mittelwerte pro Stunde für diesen Wochentag
-    const similar = data.filter(r =>
-      r.uid === uid &&
-      r.weekday === todayKey &&
-      r.is_holiday === String(isHoliday) &&
-      r.is_school_holiday === String(isSchool)
-    );
+    // Ähnliche Tage: Wochentag + Feiertag/Schulferien matchen
+    // Bei Brückentag oder Feiertag → vergleiche mit Sonntagen/Feiertagen
+    const similar = data.filter(r => {
+      if (r.uid !== uid) return false;
+      const rHoliday = r.is_holiday === "True";
+      const rSchool = r.is_school_holiday === "True";
+      if (isHoliday || isBruecke) {
+        // Vergleiche mit Feiertagen oder Sonntagen
+        return (rHoliday || r.weekday === "Sunday") && rSchool === isSchool;
+      }
+      if (isWeekend) {
+        return r.weekday === todayKey && rSchool === isSchool;
+      }
+      // Normaler Wochentag
+      return r.weekday === todayKey && !rHoliday && rSchool === isSchool;
+    });
+
+    // Wetter-Faktor (City = Hallenbad, kaum wetterabhängig, aber Extremwetter zieht Leute rein)
+    let weatherFactor = 1.0;
+    if (tempC !== null) {
+      if (tempC < 5) weatherFactor = 0.7; // sehr kalt = weniger Besucher
+      else if (tempC > 28) weatherFactor = 1.2; // Hitze = mehr ins Hallenbad
+      if (rainMm > 5) weatherFactor *= 1.15; // Starkregen treibt Leute ins Hallenbad
+    }
 
     const buckets = {};
     similar.forEach(r => {
@@ -970,7 +1010,8 @@
       const vals = buckets[h];
       if (!vals || vals.length === 0) return { h, pct: null };
       const mean = vals.reduce((s,v) => s+v, 0) / vals.length;
-      return { h, pct: Math.round(mean * 100), n: vals.length };
+      const adjusted = Math.min(1, Math.max(0, mean * weatherFactor));
+      return { h, pct: Math.round(adjusted * 100), raw: Math.round(mean * 100), n: vals.length };
     });
 
     // Tatsächliche Werte heute
@@ -1049,11 +1090,18 @@
       maeCount++;
     });
     const acc = $("oracle-accuracy");
+    const context = [
+      isHoliday ? "Feiertag" : null,
+      isBruecke ? "Brückentag" : null,
+      isSchool ? "Schulferien" : null,
+      weatherFactor !== 1.0 && tempC !== null ? `${tempC.toFixed(0)}°C` : null,
+      rainMm > 0.5 ? `🌧 ${rainMm.toFixed(1)}mm` : null,
+    ].filter(Boolean).join(" · ");
     if (maeCount > 0) {
       const mae = (maeSum/maeCount).toFixed(1);
-      acc.textContent = `✦ Heutige Trefferquote (bisher): ±${mae}% Abweichung · ${similar.length} ähnliche Referenztage`;
+      acc.textContent = `✦ ±${mae}% Abweichung heute · ${similar.length} Referenztage${context ? " · " + context : ""}`;
     } else {
-      acc.textContent = `✦ Basiert auf ${similar.length} ähnlichen ${todayKey}en`;
+      acc.textContent = `✦ ${similar.length} ähnliche Referenztage${context ? " · " + context : ""}`;
     }
 
     // Kugel-Animation beim Klick
