@@ -967,55 +967,113 @@
     const weather = state.latestWeather;
     const tempC = weather ? parseFloat(weather.temperature_c) : null;
     const rainMm = weather ? parseFloat(weather.precipitation_mm || 0) : 0;
+    const currentHour = now.getHours();
+    const todayStr = now.toLocaleDateString("sv");
 
-    const uid = "SSD-4";
+    // Bad aus state (gleicher Selector wie Verlauf)
+    const t = TARGETS.find(t => t.key === state.selectedBad) || TARGETS[0];
+    const uid = t.uid;
+    const isOutdoor = uid !== "SSD-4";
 
-    // Ähnliche Tage: Wochentag + Feiertag/Schulferien matchen
-    // Bei Brückentag oder Feiertag → vergleiche mit Sonntagen/Feiertagen
-    const similar = data.filter(r => {
-      if (r.uid !== uid) return false;
-      const rHoliday = r.is_holiday === "True";
-      const rSchool = r.is_school_holiday === "True";
-      if (isHoliday || isBruecke) {
-        // Vergleiche mit Feiertagen oder Sonntagen
-        return (rHoliday || r.weekday === "Sunday") && rSchool === isSchool;
-      }
-      if (isWeekend) {
-        return r.weekday === todayKey && rSchool === isSchool;
-      }
-      // Normaler Wochentag
-      return r.weekday === todayKey && !rHoliday && rSchool === isSchool;
-    });
+    // kNN Gewichte
+    const W_WEEKDAY   = isOutdoor ? 0.38 : 0.48;
+    const W_HOLIDAY   = 0.22;
+    const W_SCHOOL    = 0.14;
+    const W_TEMP      = isOutdoor ? 0.16 : 0.06;
+    const W_RAIN      = isOutdoor ? 0.10 : 0.04;
 
-    // Wetter-Faktor (City = Hallenbad, kaum wetterabhängig, aber Extremwetter zieht Leute rein)
-    let weatherFactor = 1.0;
-    if (tempC !== null) {
-      if (tempC < 5) weatherFactor = 0.7; // sehr kalt = weniger Besucher
-      else if (tempC > 28) weatherFactor = 1.2; // Hitze = mehr ins Hallenbad
-      if (rainMm > 5) weatherFactor *= 1.15; // Starkregen treibt Leute ins Hallenbad
-    }
-
-    const buckets = {};
-    similar.forEach(r => {
+    // Alle Tage (eindeutige Datumsstrings) aus den Daten für dieses Bad
+    const allDays = {};
+    data.filter(r => r.uid === uid).forEach(r => {
+      const d = r.timestamp_local?.slice(0,10);
+      if (!d) return;
+      if (!allDays[d]) allDays[d] = {
+        weekday: r.weekday,
+        holiday: r.is_holiday === "True",
+        school: r.is_school_holiday === "True",
+        hours: {}
+      };
       const h = parseInt(r.hour);
       const ratio = parseFloat(r.fill_ratio);
-      if (isNaN(h) || isNaN(ratio)) return;
-      if (!buckets[h]) buckets[h] = [];
-      buckets[h].push(ratio);
+      if (!isNaN(h) && !isNaN(ratio)) {
+        if (!allDays[d].hours[h]) allDays[d].hours[h] = [];
+        allDays[d].hours[h].push(ratio);
+      }
     });
 
-    // Prognose-Slots 06-21
+    // Ähnlichkeits-Score pro historischem Tag
+    const scored = Object.entries(allDays).map(([date, day]) => {
+      // Wochentag-Score
+      let s_weekday = 0;
+      if (isHoliday || isBruecke) {
+        s_weekday = (day.holiday || day.weekday === "Sunday") ? 1.0 : 0.2;
+      } else {
+        s_weekday = day.weekday === todayKey ? 1.0 :
+          (["Saturday","Sunday"].includes(day.weekday) === isWeekend) ? 0.4 : 0.1;
+      }
+      // Feiertag-Score
+      const s_holiday = (day.holiday === (isHoliday || isBruecke)) ? 1.0 : 0.2;
+      // Schulferien-Score
+      const s_school = (day.school === isSchool) ? 1.0 : 0.3;
+      // Temp-Score (aus weather.csv wenn vorhanden, sonst neutral)
+      const s_temp = tempC !== null ? Math.max(0, 1 - Math.abs(tempC - 15) / 20) : 0.5;
+      // Regen-Score
+      const s_rain = (rainMm > 1) === (day.holiday) ? 0.5 : 0.8; // Näherung
+
+      const score = W_WEEKDAY * s_weekday + W_HOLIDAY * s_holiday +
+                    W_SCHOOL * s_school + W_TEMP * s_temp + W_RAIN * s_rain;
+      return { date, day, score };
+    }).filter(d => d.date !== todayStr) // Heute ausschliessen
+      .sort((a,b) => b.score - a.score);
+
+    // Top-N ähnlichste Tage (exponentiell gewichtet)
+    const topN = Math.min(scored.length, 20);
+    const top = scored.slice(0, topN);
+
+    // Gewichteten Erwartungswert pro Stunde berechnen
     const hours = Array.from({length: 16}, (_, i) => i + 6);
     const predictions = hours.map(h => {
-      const vals = buckets[h];
-      if (!vals || vals.length === 0) return { h, pct: null };
-      const mean = vals.reduce((s,v) => s+v, 0) / vals.length;
-      const adjusted = Math.min(1, Math.max(0, mean * weatherFactor));
-      return { h, pct: Math.round(adjusted * 100), raw: Math.round(mean * 100), n: vals.length };
+      let wSum = 0, wValSum = 0, n = 0;
+      top.forEach((item, rank) => {
+        const vals = item.day.hours[h];
+        if (!vals || vals.length === 0) return;
+        const mean = vals.reduce((s,v) => s+v, 0) / vals.length;
+        const w = item.score * Math.exp(-rank * 0.15); // höherer Rank = weniger Gewicht
+        wSum += w;
+        wValSum += w * mean;
+        n++;
+      });
+      if (n === 0) return { h, pct: null, n: 0 };
+
+      // Wetter-Korrektur
+      let factor = 1.0;
+      if (isOutdoor && tempC !== null) {
+        if (tempC < 12) factor = 0.2;
+        else if (tempC < 17) factor = 0.5;
+        else if (tempC < 22) factor = 0.8;
+        else if (tempC > 28) factor = 1.1;
+        if (rainMm > 2) factor *= 0.3;
+        else if (rainMm > 0.5) factor *= 0.65;
+      } else if (!isOutdoor && tempC !== null) {
+        // Hallenbad: schönes/heisses Wetter zieht Leute konsequent WEG
+        if (rainMm > 3)        factor = 1.20; // starker Regen → deutlich mehr
+        else if (tempC < 8)    factor = 1.15; // sehr kalt → mehr
+        else if (tempC < 15)   factor = 1.05; // kühl → leicht mehr
+        else if (tempC < 20)   factor = 1.00; // mild → normal
+        else if (tempC < 25)   factor = 0.90; // angenehm → weniger
+        else if (tempC < 30)   factor = 0.80; // warm → deutlich weniger
+        else                   factor = 0.70; // Extremhitze → am wenigsten
+        // Wochenende abends + schön = noch stärker draussen
+        if (isWeekend && currentHour >= 17 && tempC > 18 && rainMm < 1) factor *= 0.85;
+      }
+
+      const mean = wValSum / wSum;
+      const pct = Math.round(Math.min(1, Math.max(0, mean * factor)) * 100);
+      const persons = Math.round(pct / 100 * (parseInt(data.find(r=>r.uid===uid)?.maxspace)||220));
+      return { h, pct, persons, n, confidence: Math.min(1, n / 10) };
     });
 
     // Tatsächliche Werte heute
-    const todayStr = now.toLocaleDateString("sv");
     const actualByHour = {};
     data.filter(r => r.uid === uid && r.timestamp_local?.slice(0,10) === todayStr)
         .forEach(r => {
@@ -1024,90 +1082,193 @@
           actualByHour[h].push(parseFloat(r.fill_ratio));
         });
 
-    // Oracle-Sprüche
-    const currentHour = now.getHours();
+    // Spruch
     const curPred = predictions.find(p => p.h === currentHour);
     const pct = curPred?.pct;
-
-    const sprueche = pct === null ? [
-      "Die Nebel lichten sich noch nicht… komm später wieder.",
-      "Bésmeralda braucht mehr Daten. Und einen Kaffee.",
-    ] : pct < 15 ? [
-      "Die Kugel flüstert: Leer wie eine Badehose im Winter. Geniess es.",
-      "Stille Wasser. Du hast die Bahn für dich.",
-      "Bésmeralda sieht: niemand ausser dir und deinen Gedanken.",
-    ] : pct < 35 ? [
-      "Angenehm. Du wirst vielleicht jemandem zunicken müssen.",
-      "Die Kugel zeigt ruhige Wasser. Perfekt für lange Bahnen.",
-      "Bésmeralda sieht: Genug Platz für dein Ego und dich.",
-    ] : pct < 55 ? [
-      "Mittelfeld. Die Kugel rät: Anpassungsfähigkeit.",
-      "Es wird Menschen geben. Wie im echten Leben.",
-      "Bésmeralda sieht Bahnteilung. Lächle freundlich.",
-    ] : pct < 75 ? [
-      "Voll genug um genervt zu sein. Die Kugel empfiehlt: Geduld.",
-      "Bésmeralda sieht Gedränge. Und jemanden der zu langsam überholt.",
-      "Die Nebel zeigen: Heute brauchst du Zen.",
-    ] : pct < 90 ? [
-      "Die Kugel leuchtet rot. Warte eine Stunde – oder geh Kaffee trinken.",
-      "Bésmeralda warnt: Viele Körper, wenig Bahnen.",
-      "Die Kugel zittert. Das Hallenbad auch.",
-    ] : [
-      "CHAOS. Selbst Bésmeralda schaut weg.",
-      "Die Kugel zeigt nur noch Schulterblätter und Wassertretenden.",
-      "Nicht heute. Bésmeralda hat gesprochen.",
+    // Barnum-Aussagen die immer passen + Badi-Kontext
+    const barnumGesamt = [
+      "Ich spüre, dass Sie in letzter Zeit eine große Veränderung in sich tragen. Das Wasser wird sie klären.",
+      "Die Sterne zeigen: Sie sind jemand, der mehr gibt als er nimmt – auch auf der Bahn.",
+      "Das Pendel schlägt deutlich aus: Heute ist ein Tag der Entscheidungen. Treffen Sie die richtige.",
+      "Ich sehe eine Person in Ihrem Umfeld, die Sie unterschätzt. Das Wasser weiss es längst.",
+      "In letzter Zeit fühlten Sie sich oft missverstanden. Die Bahn ist Ihr Ort der Wahrheit.",
+      "Die Kugel zeigt eine Reise – nicht nur durch das Wasser, sondern auch durch sich selbst.",
+      "Jemand denkt öfter an Sie als Sie ahnen. Vielleicht sogar in der Nachbarbahn.",
+      "Die Handlinien deuten auf Ausdauer und einen starken Willen. Beides brauchen Sie heute.",
+      "Ein unerwartetes Ereignis kündigt sich an. Die Kugel empfiehlt: Seien Sie bereit.",
+      "Sie tragen etwas mit sich, das Sie noch nicht ganz loslassen konnten. Das Wasser hilft.",
     ];
 
-    const spruch = sprueche[Math.floor(Math.random() * sprueche.length)];
-    $("oracle-message").textContent = `"${spruch}"`;
+    const sprueche = pct === null ? [
+      "Die Nebel über dem Becken lichten sich noch nicht. Kommen Sie später wieder, wenn die Sterne günstiger stehen.",
+      "Bésmeralda benötigt mehr Zeichen aus dem Jenseits. Und vielleicht auch mehr Daten.",
+      "Die Kugel schweigt. Manchmal ist das Schweigen selbst die Antwort.",
+    ] : pct < 15 ? [
+      "Die Bahnen liegen frei vor Ihnen wie ein unbeschriebenes Blatt. Schreiben Sie Ihre Geschichte.",
+      "Ich sehe stilles Wasser. Stilles Wasser aber gründet tief – und heute gehört die Tiefe Ihnen.",
+      "Das Pendel schlägt weit in Richtung Einsamkeit – aber heute ist das eine Gabe, keine Last.",
+      "Die Kugel flüstert: Es gibt Momente im Leben, die man allein erleben muss. Dies ist einer.",
+      "Bésmeralda sieht niemanden ausser Ihnen und Ihren Gedanken. Perfekt für die grossen Fragen.",
+    ] : pct < 35 ? [
+      "Die Sterne stehen günstig. Sie werden Menschen begegnen, aber der Raum gehört noch Ihnen.",
+      "Ich sehe ruhige Wasser und ein vertrautes Nicken. Die Kugel sagt: Heute ist ein guter Tag.",
+      "Das Pendel schlägt leicht – aber bestimmt. Eine angenehme Begegnung kündigt sich an.",
+      "Die Kugel zeigt: Genug Platz für Ihr Ego und Ihr Kraulen. Beides darf heute gross sein.",
+      "Jemand aus Ihrer Vergangenheit denkt an Sie. Aber heute – heute schwimmen Sie voraus.",
+    ] : pct < 55 ? [
+      "Die Karten zeigen eine Mischung aus Licht und Schatten. Anpassungsfähigkeit ist Ihre Stärke.",
+      "Ich sehe Bahnteilung in Ihrer Zukunft. Die Kugel rät: Lächeln Sie zuerst.",
+      "Das Pendel schlägt in die Mitte. Weder Stille noch Chaos – sondern das wahre Leben.",
+      "Bésmeralda sieht Menschen. Viele Menschen. Sie alle tragen ihre eigene Last. Und Badekappe.",
+      "Die Sterne zeigen: Heute brauchen Sie Geduld. Jene Tugend, die grösste aller Bahntugenden.",
+    ] : pct < 75 ? [
+      "Ich spüre eine Blockade – nicht in Ihrer Karriere, aber in Ihrer Bahn. Eine Lösung naht.",
+      "Die Kugel leuchtet bernsteinfarben. Voll genug um genervt zu sein. Zen ist Ihre einzige Rettung.",
+      "Das Pendel warnt vor einer Person, die langsamer schwimmt als sie vorgibt. Weichen Sie aus.",
+      "Bésmeralda sieht Gedränge. Und jemanden, der die Wende falsch timed. Geduld, mein Kind.",
+      "Die Handlinien deuten auf Stärke – aber auch auf die Fähigkeit, loszulassen. Heute: die Bahn.",
+    ] : pct < 90 ? [
+      "Die Kugel leuchtet rot. Ein Zeichen. Die Sterne raten: Warten Sie eine Stunde. Oder eine Ewigkeit.",
+      "Ich sehe viele Körper, wenig Bahnen, und eine grosse Prüfung Ihrer inneren Ruhe.",
+      "Das Pendel schlägt weit aus. Bésmeralda warnt: Heute begegnen Sie sich selbst auf engem Raum.",
+      "Ein unerwarteter Geldsegen kündigt sich an – aber erst nachdem Sie dieses Bad überlebt haben.",
+      "Die Karte zeigt den Turm. Manchmal muss etwas zusammenbrechen, damit Neues entsteht. Heute: Ihr Nerv.",
+    ] : [
+      "CHAOS. Die Kugel zeigt nur Schulterblätter, Wassernudeln und Unentschlossenheit.",
+      "Nicht heute. Bésmeralda hat gesprochen. Die Sterne haben gesprochen. Alle haben gesprochen.",
+      "Ich sehe eine grosse Reise in Ihrer Zukunft – weg von diesem Bad, zumindest heute.",
+      "Das Pendel schlägt so weit aus, dass es die Wand trifft. Kehren Sie um.",
+      "Die Karten zeigen: Manchmal ist das mutigste, was man tun kann, nach Hause zu gehen.",
+    ];
 
-    // Forecast-Slots rendern
+    // Barnum-Satz mit 30% Wahrscheinlichkeit anhängen
+    const allSprueche = [...sprueche];
+    const spruch = allSprueche[Math.floor(Math.random() * allSprueche.length)];
+    const barnum = Math.random() < 0.3 ? " " + barnumGesamt[Math.floor(Math.random() * barnumGesamt.length)] : "";
+    $("oracle-message").textContent = `"${spruch}${barnum}"`;
+
+    // Chart (wie Tagesverlauf)
+    const maxSpace = parseInt(data.find(r=>r.uid===uid)?.maxspace) || 220;
+    const predPersons = predictions.map(p => p.pct !== null ? Math.round(p.pct/100*maxSpace) : null);
+    const actualPersons = hours.map(h => {
+      const vals = actualByHour[h];
+      if (!vals) return null;
+      return Math.round(vals.reduce((s,v)=>s+v,0)/vals.length * maxSpace);
+    });
+
+    // Oracle-Box
+    const oracleBox = document.createElement("div");
+    oracleBox.style.cssText = "padding:0 0 1rem;";
+    oracleBox.innerHTML = `
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;">
+        <select id="oracle-bad-select" style="font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid #3a1f6e;background:#0d0d1a;color:#c9a0ff;font-family:inherit;">
+          ${TARGETS.map(t2 => `<option value="${t2.key}"${t2.key===state.selectedBad?" selected":""}>${t2.label}</option>`).join("")}
+        </select>
+        <span style="font-size:0.75rem;color:#6a4a9a;">${topN} Referenztage · kNN-Algorithmus</span>
+      </div>
+      <div id="oracle-chart-wrap" style="height:220px;position:relative;"></div>`;
+
+    const existing = $("oracle-section").querySelector("[data-oracle-content]");
+    if (existing) existing.remove();
+    oracleBox.dataset.oracleContent = "1";
+
     const fc = $("oracle-forecast");
-    fc.innerHTML = predictions.map(p => {
-      const isPast = p.h < currentHour;
-      const isCurrent = p.h === currentHour;
-      const actual = actualByHour[p.h] ? Math.round(actualByHour[p.h].reduce((s,v)=>s+v,0)/actualByHour[p.h].length*100) : null;
-      const displayPct = isPast && actual !== null ? actual : p.pct;
-      const col = displayPct !== null ? occupancyColor(displayPct/100) : "#333";
-      const icon = displayPct === null ? "—" : displayPct < 15 ? "🔵" : displayPct < 45 ? "🟢" : displayPct < 60 ? "🟡" : displayPct < 75 ? "🟠" : "🔴";
-      const border = isCurrent ? "border:1px solid #c9a0ff;box-shadow:0 0 8px rgba(200,160,255,0.4);" : `border:1px solid ${col}44;`;
-      return `<div class="oracle-slot" style="background:${col}22;${border}">
-        <div class="slot-time">${String(p.h).padStart(2,"0")}:00</div>
-        <div class="slot-icon">${icon}</div>
-        <div class="slot-val" style="color:${col}">${displayPct !== null ? displayPct+"%" : "·"}</div>
-        ${isPast && actual !== null && p.pct !== null ? `<div style="font-size:0.6rem;color:#6a4a9a">war ${actual}%</div>` : ""}
-      </div>`;
-    }).join("");
+    fc.innerHTML = "";
+    fc.before(oracleBox);
 
-    // Genauigkeit berechnen
+    // Bad-Selector
+    setTimeout(() => {
+      const obs = document.getElementById("oracle-bad-select");
+      if (obs) obs.onchange = e => {
+        state.selectedBad = e.target.value;
+        renderBesmeralda(state.history);
+      };
+
+      // Chart
+      const wrap = document.getElementById("oracle-chart-wrap");
+      if (!wrap) return;
+      const canvas = document.createElement("canvas");
+      wrap.appendChild(canvas);
+
+      if (window._oracleChart) { window._oracleChart.destroy(); window._oracleChart = null; }
+      window._oracleChart = new Chart(canvas.getContext("2d"), {
+        data: {
+          labels: hours.map(h => h + ":00"),
+          datasets: [
+            {
+              type: "bar",
+              label: "🔮 Prognose (Personen)",
+              data: predPersons,
+              backgroundColor: hours.map((h,i) => {
+                const v = predPersons[i];
+                if (v === null) return "transparent";
+                return occupancyColor(v/maxSpace) + (h <= currentHour ? "55" : "99");
+              }),
+              borderColor: hours.map((h,i) => {
+                const v = predPersons[i];
+                if (v === null) return "transparent";
+                return occupancyColor(v/maxSpace) + (h === currentHour ? "ff" : "88");
+              }),
+              borderWidth: hours.map(h => h === currentHour ? 2 : 1),
+              borderRadius: 4,
+              order: 2,
+            },
+            {
+              type: "line",
+              label: "✓ Tatsächlich",
+              data: actualPersons,
+              borderColor: "#4a9eff",
+              backgroundColor: "rgba(74,158,255,0.12)",
+              pointRadius: 4,
+              pointHoverRadius: 6,
+              borderWidth: 2,
+              tension: 0.3,
+              fill: false,
+              order: 1,
+            }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: true, labels: { color: "#c9a0ff", boxWidth: 12, font: {size:11} } },
+            tooltip: { callbacks: {
+              label: c => `${c.dataset.label}: ${c.raw !== null ? c.raw + " P" : "—"}`,
+            }}
+          },
+          scales: {
+            x: { ticks: { color: "#6a4a9a", font:{size:10} }, grid: { display: false } },
+            y: {
+              min: 0, suggestedMax: maxSpace,
+              ticks: { callback: v => v + " P", color: "#6a4a9a", font:{size:10} },
+              grid: { color: "rgba(255,255,255,0.05)" }
+            }
+          }
+        }
+      });
+    }, 50);
+
+    // Genauigkeit
     let maeSum = 0, maeCount = 0;
     predictions.forEach(p => {
       if (p.pct === null) return;
-      const h = p.h;
-      if (!actualByHour[h]) return;
-      const actual = Math.round(actualByHour[h].reduce((s,v)=>s+v,0)/actualByHour[h].length*100);
+      const vals = actualByHour[p.h];
+      if (!vals) return;
+      const actual = Math.round(vals.reduce((s,v)=>s+v,0)/vals.length*100);
       maeSum += Math.abs(p.pct - actual);
       maeCount++;
     });
-    const acc = $("oracle-accuracy");
-    const context = [
+    const ctx = [
       isHoliday ? "Feiertag" : null,
       isBruecke ? "Brückentag" : null,
       isSchool ? "Schulferien" : null,
-      weatherFactor !== 1.0 && tempC !== null ? `${tempC.toFixed(0)}°C` : null,
+      tempC !== null ? `${tempC.toFixed(0)}°C` : null,
       rainMm > 0.5 ? `🌧 ${rainMm.toFixed(1)}mm` : null,
     ].filter(Boolean).join(" · ");
-    if (maeCount > 0) {
-      const mae = (maeSum/maeCount).toFixed(1);
-      acc.textContent = `✦ ±${mae}% Abweichung heute · ${similar.length} Referenztage${context ? " · " + context : ""}`;
-    } else {
-      acc.textContent = `✦ ${similar.length} ähnliche Referenztage${context ? " · " + context : ""}`;
-    }
-
-    // Kugel-Animation beim Klick
-    const ball = $("oracle-ball");
-    ball.style.animation = "none";
-    setTimeout(() => ball.style.animation = "", 50);
+    const acc = $("oracle-accuracy");
+    acc.textContent = maeCount > 0
+      ? `✦ Tagesgenauigkeit bisher: ±${(maeSum/maeCount).toFixed(1)}% · ${ctx || "normaler Tag"}`
+      : `✦ ${topN} ähnliche Referenztage · ${ctx || "normaler Tag"}`;
   }
 
   function renderOracle(data) {
