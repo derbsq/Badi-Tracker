@@ -139,7 +139,53 @@ def fetch_weather() -> dict:
     return r.json().get("current", {})
 
 
-# ---- Wassertemperaturen ----
+def fetch_weather_forecast() -> list:
+    """Holt 7-Tage-Forecast von Open-Meteo, gibt Liste von Tages-Dicts zurück."""
+    url = (
+        "https://api.open-meteo.com/v1/forecast"
+        f"?latitude={ZURICH_LAT}&longitude={ZURICH_LON}"
+        "&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,"
+        "precipitation_probability_max,weather_code,wind_speed_10m_max"
+        "&hourly=temperature_2m,precipitation_probability,precipitation,weather_code"
+        "&forecast_days=7"
+        "&timezone=Europe%2FZurich"
+    )
+    r = httpx.get(url, timeout=15)
+    r.raise_for_status()
+    data = r.json()
+
+    daily = data.get("daily", {})
+    hourly = data.get("hourly", {})
+
+    # Stündliche Daten nach Datum gruppieren
+    hourly_by_date = {}
+    for i, t in enumerate(hourly.get("time", [])):
+        date = t[:10]
+        if date not in hourly_by_date:
+            hourly_by_date[date] = []
+        hourly_by_date[date].append({
+            "hour": int(t[11:13]),
+            "temp": hourly["temperature_2m"][i] if i < len(hourly.get("temperature_2m", [])) else None,
+            "precip_prob": hourly["precipitation_probability"][i] if i < len(hourly.get("precipitation_probability", [])) else None,
+            "precip": hourly["precipitation"][i] if i < len(hourly.get("precipitation", [])) else None,
+            "weather_code": hourly["weather_code"][i] if i < len(hourly.get("weather_code", [])) else None,
+        })
+
+    days = []
+    for i, date in enumerate(daily.get("time", [])):
+        days.append({
+            "date": date,
+            "temp_max": daily["temperature_2m_max"][i] if i < len(daily.get("temperature_2m_max", [])) else None,
+            "temp_min": daily["temperature_2m_min"][i] if i < len(daily.get("temperature_2m_min", [])) else None,
+            "precip_sum": daily["precipitation_sum"][i] if i < len(daily.get("precipitation_sum", [])) else None,
+            "precip_prob_max": daily["precipitation_probability_max"][i] if i < len(daily.get("precipitation_probability_max", [])) else None,
+            "weather_code": daily["weather_code"][i] if i < len(daily.get("weather_code", [])) else None,
+            "wind_max": daily["wind_speed_10m_max"][i] if i < len(daily.get("wind_speed_10m_max", [])) else None,
+            "hourly": hourly_by_date.get(date, []),
+        })
+    return days
+
+
 
 def fetch_temp_letzigraben() -> dict:
     r = httpx.get(
@@ -374,6 +420,26 @@ def main() -> None:
         append_to_csv_in_repo("data/weather.csv", list(weather_row.keys()), [weather_row])
     except Exception as e:
         print(f"WARN Wetter: {e}")
+
+    # 2b. Wettervorhersage (alle 30 Min – ändert sich nicht schneller)
+    if now_local.minute in (0, 30):
+        try:
+            forecast = fetch_weather_forecast()
+            forecast_json = json.dumps({
+                "updated_at": timestamp_iso,
+                "days": forecast,
+            }, ensure_ascii=False, indent=2)
+            existing, sha = gh_get_file("data/weather_forecast.json")
+            gh_put_file(
+                "data/weather_forecast.json",
+                forecast_json,
+                sha,
+                f"forecast: update {now_local.strftime('%H:%M')} CH-Zeit"
+            )
+            print(f"OK weather_forecast.json ({len(forecast)} Tage)")
+        except Exception as e:
+            print(f"WARN Forecast: {e}")
+
 
     # 3. Temperaturen (nur alle 30 Min aktualisieren um API-Rate zu schonen)
     if now_local.minute in (0, 30):
