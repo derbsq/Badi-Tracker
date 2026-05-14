@@ -334,17 +334,6 @@
     <div class="chart-wrap"><canvas id="histChart"></canvas></div>
   </div>
 
-  <details id="lane-section" class="hidden" style="margin-bottom:1.5rem;">
-    <summary>Bahnen-Belegung Hallenbad City</summary>
-    <div class="panel-body">
-      <div style="font-size: 12px; color: var(--text-muted); margin-bottom: 8px;">
-        Zahl = öffentliche Bahnen von 6. Heute links. 🎉 Feiertag · 🏖 Schulferien (Schul-Belegungen ausgeblendet).
-      </div>
-      <div class="lane-table-wrap"><div id="lane-grid"></div></div>
-      <div id="lane-legend" class="legend-pills"></div>
-    </div>
-  </details>
-
   <details id="oracle-details" style="margin-bottom:1.5rem;">
     <summary style="cursor:pointer;padding:1rem 1.25rem;background:linear-gradient(135deg,#0d0d1a,#1a0a2e,#0d1a1a);border:1px solid #3a1f6e;border-radius:14px;list-style:none;display:flex;align-items:center;gap:0.5rem;font-weight:600;color:#c9a0ff;font-size:0.95rem;">
       <span style="font-size:1.2rem;">🔮</span> Bésmeralda's Kleine Kristallkugel
@@ -358,6 +347,21 @@
       <div class="oracle-message" id="oracle-message">Die Kugel erwacht…</div>
       <div class="oracle-forecast" id="oracle-forecast"></div>
       <div class="oracle-accuracy" id="oracle-accuracy"></div>
+    </div>
+  </details>
+
+  <details id="lane-section" class="hidden" style="margin-bottom:1.5rem;">
+    <summary>Bahnen-Belegung Hallenbad City</summary>
+    <div class="panel-body">
+      <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:8px;flex-wrap:wrap;">
+        <select id="lane-pool-select" style="font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--border-strong);background:var(--bg-card);color:var(--text);font-family:inherit;">
+          <option value="schwimmer">Schwimmerbecken (6 Bahnen)</option>
+          <option value="vario">Variobecken (4 Bahnen)</option>
+        </select>
+        <span style="font-size:11px;color:var(--text-muted);">🎉 Feiertag · 🏖 Schulferien · Hover für Belegungsdetails</span>
+      </div>
+      <div class="lane-table-wrap"><div id="lane-grid"></div></div>
+      <div id="lane-legend" class="legend-pills"></div>
     </div>
   </details>
 
@@ -881,17 +885,18 @@
           const ctx2 = chart.ctx;
           const yPos = yScale.getPixelForValue(todayIdx);
           const rowH = yScale.getPixelForValue(1) - yScale.getPixelForValue(0);
-          // Highlight-Streifen
           ctx2.save();
-          ctx2.fillStyle = "rgba(74,158,255,0.07)";
-          ctx2.fillRect(xScale.left, yPos - rowH/2, xScale.width, rowH);
-          // Label blau + fett
+          // Weisser Rahmen um die aktuelle Zeile
+          ctx2.strokeStyle = "rgba(255,255,255,0.5)";
+          ctx2.lineWidth = 1.5;
+          ctx2.strokeRect(xScale.left + 1, yPos - rowH/2 + 1, xScale.width - 2, rowH - 2);
+          // Label weiss + fett
           const days = ["Mo","Di","Mi","Do","Fr","Sa","So"];
-          ctx2.fillStyle = "#4a9eff";
+          ctx2.fillStyle = "rgba(255,255,255,0.9)";
           ctx2.font = "bold 11px sans-serif";
           ctx2.textAlign = "right";
           ctx2.textBaseline = "middle";
-          ctx2.fillText("▶ " + days[todayIdx], xScale.left - 4, yPos);
+          ctx2.fillText(days[todayIdx], xScale.left - 4, yPos);
           ctx2.restore();
         }
       }]
@@ -1052,9 +1057,9 @@
       }
     });
 
-    // Ähnlichkeits-Score pro historischem Tag
+    // Ähnlichkeits-Score pro historischem Tag (kNN + Recency)
     const scored = Object.entries(allDays).map(([date, day]) => {
-      // Wochentag-Score
+      // --- Merkmal-Scores ---
       let s_weekday = 0;
       if (isHoliday || isBruecke) {
         s_weekday = (day.holiday || day.weekday === "Sunday") ? 1.0 : 0.2;
@@ -1062,36 +1067,40 @@
         s_weekday = day.weekday === todayKey ? 1.0 :
           (["Saturday","Sunday"].includes(day.weekday) === isWeekend) ? 0.4 : 0.1;
       }
-      // Feiertag-Score
       const s_holiday = (day.holiday === (isHoliday || isBruecke)) ? 1.0 : 0.2;
-      // Schulferien-Score
-      const s_school = (day.school === isSchool) ? 1.0 : 0.3;
-      // Temp-Score (aus weather.csv wenn vorhanden, sonst neutral)
-      const s_temp = tempC !== null ? Math.max(0, 1 - Math.abs(tempC - 15) / 20) : 0.5;
-      // Regen-Score
-      const s_rain = (rainMm > 1) === (day.holiday) ? 0.5 : 0.8; // Näherung
+      const s_school  = (day.school === isSchool) ? 1.0 : 0.3;
+      const s_temp    = tempC !== null ? Math.max(0, 1 - Math.abs(tempC - 15) / 20) : 0.5;
+      const s_rain    = rainMm > 1 === day.holiday ? 0.5 : 0.8;
 
-      const score = W_WEEKDAY * s_weekday + W_HOLIDAY * s_holiday +
-                    W_SCHOOL * s_school + W_TEMP * s_temp + W_RAIN * s_rain;
-      return { date, day, score };
-    }).filter(d => d.date !== todayStr) // Heute ausschliessen
+      const similarity = W_WEEKDAY * s_weekday + W_HOLIDAY * s_holiday +
+                         W_SCHOOL * s_school + W_TEMP * s_temp + W_RAIN * s_rain;
+
+      // --- Recency-Score: neuere Tage bekommen Bonus ---
+      // Exponentielle Abnahme: daysDiff=0 (heute-1) → bonus=1.0, daysDiff=7 → ~0.5, daysDiff=30 → ~0.06
+      const daysDiff = Math.max(0, (new Date(todayStr) - new Date(date)) / 86400000);
+      const recency = Math.exp(-daysDiff * 0.023); // λ=0.023 → Halbwertszeit ≈ 30 Tage
+
+      // Kombinierter Score: 70% Ähnlichkeit, 30% Recency
+      const score = 0.70 * similarity + 0.30 * recency;
+
+      return { date, day, score, similarity, recency, daysDiff };
+    }).filter(d => d.date !== todayStr)
       .sort((a,b) => b.score - a.score);
 
-    // Top-N ähnlichste Tage (exponentiell gewichtet)
+    // Top-20 ähnlichste Tage
     const topN = Math.min(scored.length, 20);
     const top = scored.slice(0, topN);
 
-    // Gewichteten Erwartungswert pro Stunde berechnen
+    // Gewichteter Erwartungswert: w = score (bereits recency-gewichtet)
     const hours = Array.from({length: 16}, (_, i) => i + 6);
     const predictions = hours.map(h => {
       let wSum = 0, wValSum = 0, n = 0;
-      top.forEach((item, rank) => {
+      top.forEach(item => {
         const vals = item.day.hours[h];
         if (!vals || vals.length === 0) return;
         const mean = vals.reduce((s,v) => s+v, 0) / vals.length;
-        const w = item.score * Math.exp(-rank * 0.15); // höherer Rank = weniger Gewicht
-        wSum += w;
-        wValSum += w * mean;
+        wSum += item.score;
+        wValSum += item.score * mean;
         n++;
       });
       if (n === 0) return { h, pct: null, n: 0 };
@@ -1337,9 +1346,34 @@
       rainMm > 0.5 ? `🌧 ${rainMm.toFixed(1)}mm` : null,
     ].filter(Boolean).join(" · ");
     const acc = $("oracle-accuracy");
-    acc.textContent = maeCount > 0
-      ? `✦ Tagesgenauigkeit bisher: ±${(maeSum/maeCount).toFixed(1)}% · ${ctx || "normaler Tag"}`
-      : `✦ ${topN} ähnliche Referenztage · ${ctx || "normaler Tag"}`;
+    acc.innerHTML = (maeCount > 0
+      ? `✦ Tagesgenauigkeit bisher: ±${(maeSum/maeCount).toFixed(1)}% · ${topN} Referenztage · ${ctx || "normaler Tag"}`
+      : `✦ ${topN} ähnliche Referenztage · ${ctx || "normaler Tag"}`)
+      + ` &nbsp;<span id="algo-toggle" style="cursor:pointer;color:#3a1f6e;font-size:0.7rem;" title="Algorithmus anzeigen">ℹ︎ Algorithmus</span>`;
+    const toggle = document.getElementById("algo-toggle");
+    const algoBox = document.getElementById("algo-box") || (() => {
+      const el = document.createElement("div");
+      el.id = "algo-box";
+      el.style.cssText = "display:none;margin-top:0.75rem;padding:0.75rem 1rem;background:rgba(0,0,0,0.3);border-radius:8px;font-size:0.72rem;line-height:1.7;color:#8870aa;text-align:left;";
+      el.innerHTML = \`<strong style="color:#c9a0ff">Bésmeralda's Prognose-Algorithmus</strong><br>
+<strong>1. Merkmals-Scores (Ähnlichkeit)</strong><br>
+&nbsp;· Wochentag-Match: ${isOutdoor ? "38%" : "48%"} Gewicht (stärkster Predictor)<br>
+&nbsp;· Feiertag/Brückentag: 22% (verändert Muster fundamental)<br>
+&nbsp;· Schulferien: 14% (signifikanter Effekt)<br>
+&nbsp;· Lufttemperatur: ${isOutdoor ? "16%" : "6%"} (${isOutdoor ? "Freibad: stark wetterabhängig" : "Hallenbad: Wetter wirkt invertiert"})<br>
+&nbsp;· Niederschlag: ${isOutdoor ? "10%" : "4%"}<br>
+<strong>2. Recency-Gewichtung (neu → wichtiger)</strong><br>
+&nbsp;· w = 0.70 × Ähnlichkeit + 0.30 × e^(−0.023 × Tage)<br>
+&nbsp;· Halbwertszeit ≈ 30 Tage (letzter Monat zählt doppelt so viel wie vor 2 Monaten)<br>
+<strong>3. Wetterkorrektur</strong><br>
+&nbsp;· ${isOutdoor ? "Freibad: <12°C → 20% Auslastung, Regen >2mm → 30%" : "Hallenbad: Schönwetter reduziert (draussen), Regen 1-5mm erhöht, Starkregen senkt wieder"}<br>
+<strong>4. Top-${topN} ähnlichste Tage</strong> als gewichteter Mittelwert\`;
+      acc.parentElement.appendChild(el);
+      return el;
+    })();
+    if (toggle) toggle.onclick = () => {
+      algoBox.style.display = algoBox.style.display === "none" ? "block" : "none";
+    };
   }
 
   function renderOracle(data) {
@@ -1553,7 +1587,17 @@
 
   function renderLaneGrid() {
     if (!state.bahnen) return;
-    const sched = state.bahnen.schedule;
+    // Pool-Selector Event
+    const poolSel = $("lane-pool-select");
+    if (poolSel && !poolSel._init) {
+      poolSel._init = true;
+      poolSel.onchange = () => renderLaneGrid();
+    }
+    const useVario = poolSel?.value === "vario";
+    const schedSource = useVario ? state.vario : state.bahnen;
+    if (!schedSource) return;
+    const sched = schedSource.schedule;
+    const totalLanes = useVario ? 4 : 6;
     const today = new Date();
     const ordered = [];
     for (let i = 0; i < 7; i++) {
@@ -1588,10 +1632,12 @@
         const raw = sched[d.key][slot];
         const adj = adjustedLaneEntry(raw, d.date);
         const occ = Object.entries(adj.occupants || {}).map(([n,c]) => `${c}× ${n}`).join(", ");
-        const title = `${d.label} ${slot}: ${adj.public_lanes}/6 öffentlich${occ ? " · " + occ : ""}`;
+        const holidayNote = getHolidayName(d.date) ? " · 🎉 Schulbel. entfällt" : (isSchoolHoliday(d.date) ? " · 🏖 Schulferien" : "");
+        const occupantNote = occ ? ` · Belegt: ${occ}` : " · Keine Dauerbelegung";
+        const title = `${d.label} ${slot}: ${adj.public_lanes}/${totalLanes} öffentlich${holidayNote}${occupantNote}`;
         const todayClass = d.isToday ? " today" : "";
         const nowClass = (d.isToday && isNowSlot) ? " now-row" : "";
-        html += `<td class="l-${adj.public_lanes}${todayClass}${nowClass}" title="${title}">${adj.public_lanes}</td>`;
+        html += `<td class="l-${adj.public_lanes}${todayClass}${nowClass}" title="${title}" style="cursor:default">${adj.public_lanes}</td>`;
       });
       html += `</tr>`;
     });
