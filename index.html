@@ -1355,19 +1355,19 @@
       const el = document.createElement("div");
       el.id = "algo-box";
       el.style.cssText = "display:none;margin-top:0.75rem;padding:0.75rem 1rem;background:rgba(0,0,0,0.3);border-radius:8px;font-size:0.72rem;line-height:1.7;color:#8870aa;text-align:left;";
-      el.innerHTML = \`<strong style="color:#c9a0ff">Bésmeralda's Prognose-Algorithmus</strong><br>
-<strong>1. Merkmals-Scores (Ähnlichkeit)</strong><br>
-&nbsp;· Wochentag-Match: ${isOutdoor ? "38%" : "48%"} Gewicht (stärkster Predictor)<br>
-&nbsp;· Feiertag/Brückentag: 22% (verändert Muster fundamental)<br>
-&nbsp;· Schulferien: 14% (signifikanter Effekt)<br>
-&nbsp;· Lufttemperatur: ${isOutdoor ? "16%" : "6%"} (${isOutdoor ? "Freibad: stark wetterabhängig" : "Hallenbad: Wetter wirkt invertiert"})<br>
-&nbsp;· Niederschlag: ${isOutdoor ? "10%" : "4%"}<br>
-<strong>2. Recency-Gewichtung (neu → wichtiger)</strong><br>
-&nbsp;· w = 0.70 × Ähnlichkeit + 0.30 × e^(−0.023 × Tage)<br>
-&nbsp;· Halbwertszeit ≈ 30 Tage (letzter Monat zählt doppelt so viel wie vor 2 Monaten)<br>
-<strong>3. Wetterkorrektur</strong><br>
-&nbsp;· ${isOutdoor ? "Freibad: <12°C → 20% Auslastung, Regen >2mm → 30%" : "Hallenbad: Schönwetter reduziert (draussen), Regen 1-5mm erhöht, Starkregen senkt wieder"}<br>
-<strong>4. Top-${topN} ähnlichste Tage</strong> als gewichteter Mittelwert\`;
+      el.innerHTML = "<strong style='color:#c9a0ff'>Bésmeralda's Prognose-Algorithmus</strong><br>"
+        + "<strong>1. Merkmals-Scores (Ähnlichkeit)</strong><br>"
+        + "&nbsp;· Wochentag-Match: " + (isOutdoor ? "38%" : "48%") + " Gewicht (stärkster Predictor)<br>"
+        + "&nbsp;· Feiertag/Brückentag: 22% (verändert Muster fundamental)<br>"
+        + "&nbsp;· Schulferien: 14% (signifikanter Effekt)<br>"
+        + "&nbsp;· Lufttemperatur: " + (isOutdoor ? "16%" : "6%") + " (" + (isOutdoor ? "Freibad: stark wetterabhängig" : "Hallenbad: Wetter wirkt invertiert") + ")<br>"
+        + "&nbsp;· Niederschlag: " + (isOutdoor ? "10%" : "4%") + "<br>"
+        + "<strong>2. Recency-Gewichtung (neu → wichtiger)</strong><br>"
+        + "&nbsp;· w = 0.70 × Ähnlichkeit + 0.30 × e^(−0.023 × Tage)<br>"
+        + "&nbsp;· Halbwertszeit ≈ 30 Tage (letzter Monat zählt doppelt so viel wie vor 2 Monaten)<br>"
+        + "<strong>3. Wetterkorrektur</strong><br>"
+        + "&nbsp;· " + (isOutdoor ? "Freibad: &lt;12°C → 20% Auslastung, Regen &gt;2mm → 30%" : "Hallenbad: Schönwetter reduziert, Regen 1–5mm erhöht, Starkregen senkt wieder") + "<br>"
+        + "<strong>4. Top-" + topN + " ähnlichste Tage</strong> als gewichteter Mittelwert";
       acc.parentElement.appendChild(el);
       return el;
     })();
