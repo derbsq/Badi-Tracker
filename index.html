@@ -871,7 +871,7 @@
         scales: {
           x: { type: "linear", min: 6, max: 21, ticks: { stepSize: 1, callback: v => v + ":00", color: "rgba(180,180,180,0.7)", font: {size:10} }, grid: { display: false } },
           y: { type: "linear", min: -0.5, max: 6.5, reverse: true,
-            ticks: { stepSize: 1, callback: v => ["Mo","Di","Mi","Do","Fr","Sa","So"][Math.round(v)] ?? "", color: "rgba(180,180,180,0.7)", font: {size:11} },
+            ticks: { stepSize: 1, callback: () => "" },
             grid: { display: false }
           }
         }
@@ -883,20 +883,26 @@
           const yScale = chart.scales.y;
           const xScale = chart.scales.x;
           const ctx2 = chart.ctx;
-          const yPos = yScale.getPixelForValue(todayIdx);
+          const days = ["Mo","Di","Mi","Do","Fr","Sa","So"];
           const rowH = yScale.getPixelForValue(1) - yScale.getPixelForValue(0);
+
           ctx2.save();
+          // Alle Wochentags-Labels mittig zu den Kacheln
+          days.forEach((label, i) => {
+            const yPos = yScale.getPixelForValue(i);
+            const isToday = i === todayIdx;
+            ctx2.fillStyle = isToday ? "rgba(255,255,255,0.9)" : "rgba(180,180,180,0.7)";
+            ctx2.font = (isToday ? "bold " : "") + "11px sans-serif";
+            ctx2.textAlign = "right";
+            ctx2.textBaseline = "middle";
+            ctx2.fillText(label, xScale.left - 6, yPos);
+          });
+
           // Weisser Rahmen um die aktuelle Zeile
+          const yPos = yScale.getPixelForValue(todayIdx);
           ctx2.strokeStyle = "rgba(255,255,255,0.5)";
           ctx2.lineWidth = 1.5;
           ctx2.strokeRect(xScale.left + 1, yPos - rowH/2 + 1, xScale.width - 2, rowH - 2);
-          // Label weiss + fett
-          const days = ["Mo","Di","Mi","Do","Fr","Sa","So"];
-          ctx2.fillStyle = "rgba(255,255,255,0.9)";
-          ctx2.font = "bold 11px sans-serif";
-          ctx2.textAlign = "right";
-          ctx2.textBaseline = "middle";
-          ctx2.fillText(days[todayIdx], xScale.left - 4, yPos);
           ctx2.restore();
         }
       }]
