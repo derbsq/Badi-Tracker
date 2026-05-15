@@ -871,7 +871,7 @@
         scales: {
           x: { type: "linear", min: 6, max: 21, ticks: { stepSize: 1, callback: v => v + ":00", color: "rgba(180,180,180,0.7)", font: {size:10} }, grid: { display: false } },
           y: { type: "linear", min: -0.5, max: 6.5, reverse: true,
-            ticks: { stepSize: 1, callback: () => "" },
+            ticks: { stepSize: 1, callback: () => "", padding: 30 },
             grid: { display: false }
           }
         }
