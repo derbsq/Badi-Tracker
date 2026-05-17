@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-05-17T06:00:33+00:00",
-  "updated_at_local": "08:00",
+  "updated_at": "2026-05-17T06:30:37+00:00",
+  "updated_at_local": "08:30",
   "city": {
     "temp": 28.0,
     "unit": "C",
@@ -9,7 +9,7 @@
   },
   "letzigraben": {
     "temp": 18.0,
-    "measured_at": "Sa, 16.05. um 20:01",
+    "measured_at": "So, 17.05. um 07:06",
     "source": "badi-info.ch",
     "unit": "C"
   },
@@ -20,10 +20,10 @@
     "unit": "C"
   },
   "letten": {
-    "water_temp": 11.0,
-    "abfluss_m3s": 77.9,
-    "temp_measured_at": "2026-05-17T05:50:00+00:00",
-    "flow_measured_at": "2026-05-17T05:50:00+00:00",
+    "water_temp": 11.1,
+    "abfluss_m3s": 77.8,
+    "temp_measured_at": "2026-05-17T06:20:00+00:00",
+    "flow_measured_at": "2026-05-17T06:20:00+00:00",
     "source": "hydroproweb.zh.ch / Limmat KW Letten"
   }
 }
