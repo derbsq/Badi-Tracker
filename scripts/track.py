@@ -1,8 +1,5 @@
 """
 Badi-Tracker: Laeuft auf Railway als Cron-Job alle 10 Min.
-Holt Auslastung via WebSocket, Wetter via Open-Meteo,
-Temperaturen via badi-info.ch / tecson-data.ch,
-und committet alles via GitHub API ins Repo.
 """
 import asyncio
 import base64
@@ -25,14 +22,8 @@ TIMEOUT_SECONDS = 15
 TZ = ZoneInfo("Europe/Zurich")
 
 TRACKED_UIDS = {
-    "flb6939",  # Flussbad Oberer Letten
-    "flb6940",  # Flussbad Unterer Letten
-    "fb012",    # Freibad Heuried
-    "LETZI-1",  # Freibad Letzigraben
-    "SSD-11",   # Freibad Seebach
-    "SSD-4",    # Hallenbad City
-    "SSD-7",    # Hallenbad Oerlikon
-    "SSD-10",   # Seebad Utoquai
+    "flb6939", "flb6940", "fb012", "LETZI-1",
+    "SSD-11", "SSD-4", "SSD-7", "SSD-10",
 }
 
 ZURICH_LAT = 47.3739
@@ -57,7 +48,10 @@ HEADERS_WEB = {
 # ---- GitHub API Helpers ----
 
 def gh_get_file(path: str) -> tuple[str, str]:
-    """Gibt (content_decoded, sha) zurueck. content_decoded ist leerer String wenn Datei neu."""
+    """
+    Gibt (content_decoded, sha) zurück.
+    Unterstützt Dateien >1MB via Git Blob API.
+    """
     r = httpx.get(
         f"{GITHUB_API}/repos/{GITHUB_REPO}/contents/{path}",
         headers=HEADERS_GH, params={"ref": GITHUB_BRANCH}, timeout=15
@@ -66,12 +60,25 @@ def gh_get_file(path: str) -> tuple[str, str]:
         return "", ""
     r.raise_for_status()
     data = r.json()
+
+    sha = data.get("sha", "")
+
+    # Datei zu gross für Contents API (>1MB) → content ist leer/null
+    if not data.get("content") or data.get("content", "").strip() == "":
+        print(f"  Datei {path} zu gross (>{data.get('size',0)//1024}KB), nutze Git Blob API")
+        r2 = httpx.get(
+            f"{GITHUB_API}/repos/{GITHUB_REPO}/git/blobs/{sha}",
+            headers={**HEADERS_GH, "Accept": "application/vnd.github.raw+json"},
+            timeout=60
+        )
+        r2.raise_for_status()
+        return r2.text, sha
+
     content = base64.b64decode(data["content"]).decode("utf-8")
-    return content, data["sha"]
+    return content, sha
 
 
 def gh_put_file(path: str, content: str, sha: str, message: str) -> None:
-    """Erstellt oder updated eine Datei im Repo."""
     payload = {
         "message": message,
         "content": base64.b64encode(content.encode("utf-8")).decode("ascii"),
@@ -87,20 +94,16 @@ def gh_put_file(path: str, content: str, sha: str, message: str) -> None:
 
 
 def append_to_csv_in_repo(repo_path: str, fieldnames: list[str], new_rows: list[dict]) -> None:
-    """Laedt bestehende CSV aus Repo, haengt Zeilen an, schreibt zurueck."""
     existing, sha = gh_get_file(repo_path)
 
-    # CSV parsen
     if existing.strip():
         reader = csv.DictReader(io.StringIO(existing))
         rows = list(reader)
     else:
         rows = []
 
-    # Neue Zeilen anhaengen
     rows.extend(new_rows)
 
-    # CSV neu schreiben
     buf = io.StringIO()
     writer = csv.DictWriter(buf, fieldnames=fieldnames, lineterminator="\n")
     writer.writeheader()
@@ -140,7 +143,6 @@ def fetch_weather() -> dict:
 
 
 def fetch_weather_forecast() -> list:
-    """Holt 7-Tage-Forecast von Open-Meteo, gibt Liste von Tages-Dicts zurück."""
     url = (
         "https://api.open-meteo.com/v1/forecast"
         f"?latitude={ZURICH_LAT}&longitude={ZURICH_LON}"
@@ -153,11 +155,8 @@ def fetch_weather_forecast() -> list:
     r = httpx.get(url, timeout=15)
     r.raise_for_status()
     data = r.json()
-
     daily = data.get("daily", {})
     hourly = data.get("hourly", {})
-
-    # Stündliche Daten nach Datum gruppieren
     hourly_by_date = {}
     for i, t in enumerate(hourly.get("time", [])):
         date = t[:10]
@@ -170,7 +169,6 @@ def fetch_weather_forecast() -> list:
             "precip": hourly["precipitation"][i] if i < len(hourly.get("precipitation", [])) else None,
             "weather_code": hourly["weather_code"][i] if i < len(hourly.get("weather_code", [])) else None,
         })
-
     days = []
     for i, date in enumerate(daily.get("time", [])):
         days.append({
@@ -184,7 +182,6 @@ def fetch_weather_forecast() -> list:
             "hourly": hourly_by_date.get(date, []),
         })
     return days
-
 
 
 def fetch_temp_letzigraben() -> dict:
@@ -206,8 +203,6 @@ def fetch_temp_letzigraben() -> dict:
 
 
 def fetch_temp_utoquai() -> dict:
-    """Versucht tecson-data.ch direkt, dann OGD CSV als Fallback."""
-    # Versuch 1: tecson-data.ch direkt
     try:
         r = httpx.get(
             "https://www.tecson-data.ch/zurich/tiefenbrunnen/index.php",
@@ -217,12 +212,10 @@ def fetch_temp_utoquai() -> dict:
             m = re.search(r"(\d{1,2}[.,]\d)\s*°?\s*C", r.text)
             if m:
                 val = float(m.group(1).replace(",", "."))
-                print(f"  Utoquai via tecson-data.ch: {val}°C")
                 return {"temp": val, "measured_at": "aktuell", "source": "tecson-data.ch"}
     except Exception as e:
         print(f"  tecson-data.ch nicht erreichbar: {e}")
 
-    # Versuch 2: OGD CSV (letzte 5KB)
     url = "https://data.stadt-zuerich.ch/dataset/sid_wapo_wetterstationen/download/messwerte_tiefenbrunnen_seit2007-heute.csv"
     r = httpx.get(url, timeout=30, follow_redirects=True,
                   headers={**HEADERS_WEB, "Range": "bytes=-5000"})
@@ -244,52 +237,36 @@ def fetch_temp_utoquai() -> dict:
     return {"temp": None, "measured_at": None, "source": "OGD Stadt Zürich"}
 
 
-
-
 def fetch_limmat_letten() -> dict:
-    """
-    Temperatur: hydroproweb.zh.ch, Station 'Limmat-Zch. KW Letten'
-                (vor der Sihl-Mündung, direkt beim Flussbad Oberer Letten)
-    Abfluss:    api.existenz.ch, BAFU Station 2099 Limmat-Zürich Unterhard
-                (nach der Sihl-Mündung – beste verfügbare Quelle, BAFU)
-    """
     result = {"water_temp": None, "abfluss_m3s": None,
               "temp_measured_at": None, "flow_measured_at": None}
 
-    # Temperatur von hydroproweb.zh.ch
     try:
         r = httpx.get(
             "https://hydroproweb.zh.ch/Listen/AktuelleWerte/AktWassertemp.html",
             timeout=15, follow_redirects=True, headers=HEADERS_WEB
         )
         r.raise_for_status()
-        # Prüfe ob Daten aktuell sind (Datum im letzten Update)
         update_m = re.search(r"Letztes Update:\s*(\d{2}\.\d{2}\.\d{4})", r.text)
         if update_m:
             from datetime import date
             update_date = update_m.group(1)
             today_str = date.today().strftime("%d.%m.%Y")
             if update_date != today_str:
-                print(f"  WARN hydroproweb veraltet: {update_date}, heute: {today_str}")
                 raise ValueError(f"Daten veraltet: {update_date}")
-        # Zeile mit KW Letten parsen
         idx = r.text.find("KW Letten")
         if idx < 0:
-            raise ValueError("KW Letten nicht in Seite gefunden")
+            raise ValueError("KW Letten nicht gefunden")
         snippet = r.text[idx:idx+400]
-        # Aktueller Wert steht nach Uhrzeit und Datum in **fett**
         nums = re.findall(r"\*\*(\d{1,2}[.,]\d)\*\*", snippet)
         if nums:
             result["water_temp"] = float(nums[0].replace(",", "."))
-            # Uhrzeit
             time_m = re.search(r"\*\*(\d{2}:\d{2})\*\*", snippet)
             result["temp_measured_at"] = time_m.group(1) if time_m else None
-            print(f"  Limmat Temp (KW Letten): {result['water_temp']}°C")
         else:
-            raise ValueError("Kein Temperaturwert gefunden")
+            raise ValueError("Kein Wert")
     except Exception as e:
-        print(f"  WARN hydroproweb: {e} – versuche existenz.ch Stationen")
-        # Fallback: existenz.ch mit mehreren möglichen Stationsnummern testen
+        print(f"  WARN hydroproweb: {e} – versuche existenz.ch")
         for station in ["2135", "2030", "2011"]:
             try:
                 r2 = httpx.get(
@@ -303,18 +280,16 @@ def fetch_limmat_letten() -> dict:
                         result["water_temp"] = round(float(entry["val"]), 1)
                         raw_ts = entry.get("timestamp") or entry.get("dt")
                         if isinstance(raw_ts, (int, float)):
-                            from datetime import timezone
                             result["temp_measured_at"] = datetime.fromtimestamp(raw_ts, tz=timezone.utc).isoformat()
                         else:
                             result["temp_measured_at"] = raw_ts
-                        print(f"  Limmat Temp Station {station}: {result['water_temp']}°C ts={result['temp_measured_at']}")
+                        print(f"  Limmat Temp (existenz.ch Station {station}): {result['water_temp']}°C")
                         break
                 if result["water_temp"] is not None:
                     break
             except Exception as e2:
                 print(f"  WARN existenz.ch {station}: {e2}")
 
-    # Abfluss von existenz.ch (BAFU Station 2099, nach Sihl-Mündung)
     try:
         r = httpx.get(
             "https://api.existenz.ch/apiv1/hydro/latest"
@@ -327,18 +302,16 @@ def fetch_limmat_letten() -> dict:
                 result["abfluss_m3s"] = round(float(entry["val"]), 1)
                 raw_ts = entry.get("timestamp") or entry.get("dt")
                 if isinstance(raw_ts, (int, float)):
-                    from datetime import timezone
                     result["flow_measured_at"] = datetime.fromtimestamp(raw_ts, tz=timezone.utc).isoformat()
                 else:
                     result["flow_measured_at"] = raw_ts
-                print(f"  Limmat Abfluss: {result['abfluss_m3s']} m³/s ts={result['flow_measured_at']}")
+                print(f"  Limmat Abfluss: {result['abfluss_m3s']} m³/s")
                 break
     except Exception as e:
         print(f"  WARN Limmat-Abfluss: {e}")
 
     return result
 
-# ---- Feiertage / Schulferien ----
 
 def is_swiss_holiday(d: datetime) -> bool:
     try:
@@ -361,8 +334,6 @@ def is_zh_school_holiday(d: datetime) -> bool:
     return any(s <= today <= e for s, e in ferien)
 
 
-# ---- Main ----
-
 def main() -> None:
     if not GITHUB_TOKEN:
         raise RuntimeError("GITHUB_TOKEN nicht gesetzt!")
@@ -373,7 +344,7 @@ def main() -> None:
 
     print(f"=== Badi-Tracker {timestamp_iso} ===")
 
-    # 1. Auslastung via WebSocket
+    # 1. Auslastung
     snapshot = asyncio.run(fetch_snapshot())
     context = {
         "timestamp_utc": timestamp_iso,
@@ -421,18 +392,15 @@ def main() -> None:
     except Exception as e:
         print(f"WARN Wetter: {e}")
 
-    # 2b. Wettervorhersage (alle 30 Min – ändert sich nicht schneller)
+    # 2b. Wettervorhersage alle 30 Min
     if now_local.minute in (0, 30):
         try:
             forecast = fetch_weather_forecast()
-            forecast_json = json.dumps({
-                "updated_at": timestamp_iso,
-                "days": forecast,
-            }, ensure_ascii=False, indent=2)
             existing, sha = gh_get_file("data/weather_forecast.json")
             gh_put_file(
                 "data/weather_forecast.json",
-                forecast_json,
+                json.dumps({"updated_at": timestamp_iso, "days": forecast},
+                           ensure_ascii=False, indent=2),
                 sha,
                 f"forecast: update {now_local.strftime('%H:%M')} CH-Zeit"
             )
@@ -440,8 +408,7 @@ def main() -> None:
         except Exception as e:
             print(f"WARN Forecast: {e}")
 
-
-    # 3. Temperaturen (nur alle 30 Min aktualisieren um API-Rate zu schonen)
+    # 3. Temperaturen alle 30 Min
     if now_local.minute in (0, 30):
         try:
             letzi = fetch_temp_letzigraben()
@@ -458,6 +425,7 @@ def main() -> None:
 
         letten = fetch_limmat_letten()
         print(f"OK Letten: {letten['water_temp']}°C, {letten['abfluss_m3s']} m³/s")
+
         temps = {
             "updated_at": timestamp_iso,
             "updated_at_local": now_local.strftime("%H:%M"),
