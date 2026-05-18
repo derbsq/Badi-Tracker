@@ -31,7 +31,7 @@ def get_all_commits():
             timeout=30
         )
         r.raise_for_status()
-        batch = r.json()
+        batch = r.json() 
         if not batch:
             break
         commits.extend(batch)
