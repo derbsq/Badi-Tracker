@@ -1,11 +1,11 @@
 {
-  "updated_at": "2026-05-31T07:00:09+00:00",
+  "updated_at": "2026-05-31T07:30:35+00:00",
   "days": [
     {
       "date": "2026-05-31",
       "temp_max": 28.6,
       "temp_min": 18.1,
-      "precip_sum": 8.3,
+      "precip_sum": 21.8,
       "precip_prob_max": 95,
       "weather_code": 95,
       "wind_max": 22.3,
@@ -133,21 +133,21 @@
           "hour": 17,
           "temp": 27.8,
           "precip_prob": 75,
-          "precip": 0.0,
+          "precip": 14.8,
           "weather_code": 2
         },
         {
           "hour": 18,
           "temp": 23.7,
           "precip_prob": 90,
-          "precip": 0.2,
+          "precip": 1.7,
           "weather_code": 80
         },
         {
           "hour": 19,
           "temp": 22.8,
           "precip_prob": 95,
-          "precip": 0.0,
+          "precip": 0.1,
           "weather_code": 3
         },
         {
@@ -168,14 +168,14 @@
           "hour": 22,
           "temp": 19.2,
           "precip_prob": 68,
-          "precip": 1.7,
+          "precip": 0.6,
           "weather_code": 95
         },
         {
           "hour": 23,
           "temp": 18.5,
           "precip_prob": 85,
-          "precip": 6.4,
+          "precip": 4.6,
           "weather_code": 95
         }
       ]
@@ -184,7 +184,7 @@
       "date": "2026-06-01",
       "temp_max": 24.1,
       "temp_min": 16.5,
-      "precip_sum": 0.7,
+      "precip_sum": 0.6,
       "precip_prob_max": 68,
       "weather_code": 61,
       "wind_max": 8.0,
@@ -193,21 +193,21 @@
           "hour": 0,
           "temp": 18.5,
           "precip_prob": 68,
-          "precip": 0.6,
+          "precip": 0.4,
           "weather_code": 61
         },
         {
           "hour": 1,
           "temp": 18.4,
           "precip_prob": 55,
-          "precip": 0.0,
+          "precip": 0.1,
           "weather_code": 3
         },
         {
           "hour": 2,
           "temp": 18.1,
           "precip_prob": 50,
-          "precip": 0.0,
+          "precip": 0.1,
           "weather_code": 3
         },
         {
@@ -235,7 +235,7 @@
           "hour": 6,
           "temp": 16.5,
           "precip_prob": 25,
-          "precip": 0.1,
+          "precip": 0.0,
           "weather_code": 61
         },
         {
