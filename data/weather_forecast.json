@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-12T09:30:54+00:00",
+  "updated_at": "2026-06-12T10:00:13+00:00",
   "days": [
     {
       "date": "2026-06-12",
@@ -899,11 +899,11 @@
     {
       "date": "2026-06-17",
       "temp_max": 27.1,
-      "temp_min": 12.5,
+      "temp_min": 13.2,
       "precip_sum": 0.0,
       "precip_prob_max": 3,
       "weather_code": 2,
-      "wind_max": 4.3,
+      "wind_max": 4.2,
       "hourly": [
         {
           "hour": 0,
@@ -914,59 +914,59 @@
         },
         {
           "hour": 1,
-          "temp": 14.9,
+          "temp": 15.1,
           "precip_prob": 3,
           "precip": 0.0,
           "weather_code": 0
         },
         {
           "hour": 2,
-          "temp": 14.1,
+          "temp": 14.4,
           "precip_prob": 3,
           "precip": 0.0,
           "weather_code": 0
         },
         {
           "hour": 3,
-          "temp": 13.4,
+          "temp": 13.8,
           "precip_prob": 3,
           "precip": 0.0,
           "weather_code": 0
         },
         {
           "hour": 4,
-          "temp": 12.8,
+          "temp": 13.3,
           "precip_prob": 2,
           "precip": 0.0,
           "weather_code": 0
         },
         {
           "hour": 5,
-          "temp": 12.5,
+          "temp": 13.2,
           "precip_prob": 2,
           "precip": 0.0,
           "weather_code": 0
         },
         {
           "hour": 6,
-          "temp": 12.9,
+          "temp": 13.9,
           "precip_prob": 2,
           "precip": 0.0,
-          "weather_code": 0
+          "weather_code": 2
         },
         {
           "hour": 7,
-          "temp": 13.6,
+          "temp": 15.0,
           "precip_prob": 3,
           "precip": 0.0,
-          "weather_code": 0
+          "weather_code": 2
         },
         {
           "hour": 8,
-          "temp": 14.7,
+          "temp": 15.8,
           "precip_prob": 3,
           "precip": 0.0,
-          "weather_code": 0
+          "weather_code": 2
         },
         {
           "hour": 9,
