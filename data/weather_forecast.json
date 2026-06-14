@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-14T10:00:30+00:00",
+  "updated_at": "2026-06-14T10:30:09+00:00",
   "days": [
     {
       "date": "2026-06-14",
@@ -899,7 +899,7 @@
     {
       "date": "2026-06-19",
       "temp_max": 33.1,
-      "temp_min": 21.2,
+      "temp_min": 20.6,
       "precip_sum": 0.3,
       "precip_prob_max": 2,
       "weather_code": 3,
@@ -907,66 +907,66 @@
       "hourly": [
         {
           "hour": 0,
-          "temp": 23.2,
+          "temp": 23.3,
           "precip_prob": 0,
           "precip": 0.0,
           "weather_code": 3
         },
         {
           "hour": 1,
-          "temp": 22.4,
+          "temp": 22.5,
           "precip_prob": 0,
           "precip": 0.0,
           "weather_code": 3
         },
         {
           "hour": 2,
-          "temp": 21.9,
+          "temp": 22.0,
           "precip_prob": 0,
           "precip": 0.0,
           "weather_code": 3
         },
         {
           "hour": 3,
-          "temp": 21.4,
+          "temp": 21.3,
           "precip_prob": 0,
           "precip": 0.0,
-          "weather_code": 1
+          "weather_code": 2
         },
         {
           "hour": 4,
-          "temp": 21.2,
+          "temp": 20.8,
           "precip_prob": 0,
           "precip": 0.0,
-          "weather_code": 1
+          "weather_code": 2
         },
         {
           "hour": 5,
-          "temp": 21.2,
+          "temp": 20.6,
           "precip_prob": 0,
           "precip": 0.0,
-          "weather_code": 1
+          "weather_code": 2
         },
         {
           "hour": 6,
-          "temp": 21.7,
+          "temp": 21.1,
           "precip_prob": 0,
           "precip": 0.0,
-          "weather_code": 2
+          "weather_code": 3
         },
         {
           "hour": 7,
-          "temp": 22.4,
+          "temp": 21.9,
           "precip_prob": 0,
           "precip": 0.0,
-          "weather_code": 2
+          "weather_code": 3
         },
         {
           "hour": 8,
-          "temp": 23.5,
+          "temp": 22.6,
           "precip_prob": 0,
           "precip": 0.0,
-          "weather_code": 2
+          "weather_code": 3
         },
         {
           "hour": 9,
