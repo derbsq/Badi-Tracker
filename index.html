@@ -119,7 +119,117 @@
     @media (max-width: 600px) { .chart-wrap { height: 280px; } .cards { grid-template-columns: repeat(2, 1fr); } }
     #oracle-details > summary::-webkit-details-marker { display: none; }
     #oracle-details > summary::after { display: none; }
+    .oracle-section { padding: 1.5rem 1.25rem 1.25rem; background: linear-gradient(135deg,#0d0d1a,#1a0a2e,#0d1a1a); border: 1px solid #3a1f6e; border-top: none; border-radius: 0 0 14px 14px; }
     #oracle-details[open] > summary { border-radius: 14px 14px 0 0; }
+
+    /* Bésmeralda */
+    .oracle-section {
+      background: linear-gradient(135deg, #0d0d1a 0%, #1a0a2e 50%, #0d1a1a 100%);
+      border: 1px solid #3a1f6e;
+      border-radius: 16px;
+      padding: 2rem 1.5rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .oracle-section::before {
+      content: "";
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(120,60,220,0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .oracle-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #c9a0ff;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+    .oracle-subtitle {
+      font-size: 0.75rem;
+      color: #6a4a9a;
+      margin-bottom: 1.5rem;
+      font-style: italic;
+    }
+    .oracle-ball-wrap {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      margin: 0 auto 1.5rem;
+    }
+    .oracle-ball {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%,
+        rgba(255,255,255,0.9) 0%,
+        rgba(180,140,255,0.6) 20%,
+        rgba(80,40,160,0.8) 50%,
+        rgba(20,10,60,0.95) 80%,
+        rgba(10,5,30,1) 100%);
+      box-shadow:
+        0 0 40px rgba(140,80,255,0.5),
+        0 0 80px rgba(100,50,200,0.3),
+        inset 0 0 30px rgba(0,0,0,0.5);
+      animation: pulse-ball 3s ease-in-out infinite;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .oracle-ball:hover { transform: scale(1.05); }
+    .oracle-ball:active { transform: scale(0.97); }
+    @keyframes pulse-ball {
+      0%, 100% { box-shadow: 0 0 40px rgba(140,80,255,0.5), 0 0 80px rgba(100,50,200,0.3), inset 0 0 30px rgba(0,0,0,0.5); }
+      50% { box-shadow: 0 0 60px rgba(160,100,255,0.7), 0 0 120px rgba(120,60,220,0.5), inset 0 0 30px rgba(0,0,0,0.5); }
+    }
+    .oracle-stars {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .oracle-star {
+      position: absolute;
+      width: 3px; height: 3px;
+      border-radius: 50%;
+      background: white;
+      animation: twinkle 2s ease-in-out infinite;
+    }
+    @keyframes twinkle {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 1; }
+    }
+    .oracle-message {
+      font-size: 1rem;
+      color: #e0c8ff;
+      line-height: 1.6;
+      margin-bottom: 1.5rem;
+      min-height: 3rem;
+      font-style: italic;
+    }
+    .oracle-forecast {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+      gap: 6px;
+      margin-top: 1rem;
+    }
+    .oracle-slot {
+      border-radius: 8px;
+      padding: 6px 4px;
+      font-size: 0.72rem;
+      text-align: center;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.08);
+      transition: transform 0.15s;
+    }
+    .oracle-slot:hover { transform: translateY(-2px); }
+    .oracle-slot .slot-time { color: #8870aa; font-size: 0.65rem; margin-bottom: 2px; }
+    .oracle-slot .slot-val { font-weight: 600; }
+    .oracle-slot .slot-icon { font-size: 0.85rem; }
+    .oracle-accuracy {
+      margin-top: 1rem;
+      font-size: 0.75rem;
+      color: #6a4a9a;
+    }
 
     details summary {
       cursor: pointer; list-style: none;
@@ -211,8 +321,8 @@
     <div class="controls">
       <select id="bad-select"></select>
       <select id="view-select">
-        <option value="today">Tagesverlauf</option>
         <option value="heatmap">Heatmap (Wochentag × Stunde)</option>
+        <option value="today">Tagesverlauf</option>
         <option value="weekday">Mittel pro Wochentag</option>
       </select>
       <select id="month-select" style="font-size:13px; padding:6px 10px; border-radius:8px; border:1px solid var(--border-strong); background:var(--bg-card); color:var(--text); font-family:inherit;">
@@ -225,14 +335,18 @@
   </div>
 
   <details id="oracle-details" style="margin-bottom:1.5rem;">
-    <summary style="cursor:pointer;padding:.85rem 1rem;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;list-style:none;display:flex;align-items:center;gap:0.5rem;font-weight:500;font-size:15px;">
-      <span style="font-size:1.1rem;">📊</span> Forecast
-      <span style="margin-left:auto;font-size:0.7rem;color:var(--text-muted);font-style:italic;">The Funky Badi Fortune Teller</span>
+    <summary style="cursor:pointer;padding:1rem 1.25rem;background:linear-gradient(135deg,#0d0d1a,#1a0a2e,#0d1a1a);border:1px solid #3a1f6e;border-radius:14px;list-style:none;display:flex;align-items:center;gap:0.5rem;font-weight:600;color:#c9a0ff;font-size:0.95rem;">
+      <span style="font-size:1.2rem;">🔮</span> Bésmeralda's Kleine Kristallkugel
+      <span style="margin-left:auto;font-size:0.7rem;color:#6a4a9a;font-style:italic;">Sie sieht alles. Meistens. Ungefähr.</span>
     </summary>
-    <div class="panel-body" id="oracle-section">
-      <div style="font-size:12px;color:var(--text-muted);margin-bottom:.75rem" id="oracle-accuracy"></div>
-      <div class="chart-wrap" style="height:240px"><canvas id="forecast-chart"></canvas></div>
-      <div id="oracle-forecast" style="font-size:11px;color:var(--text-muted);margin-top:.5rem"></div>
+    <div class="oracle-section" id="oracle-section">
+      <div class="oracle-ball-wrap">
+        <div class="oracle-stars" id="oracle-stars"></div>
+        <div class="oracle-ball" id="oracle-ball" title="Klick für neuen Spruch"></div>
+      </div>
+      <div class="oracle-message" id="oracle-message">Die Kugel erwacht…</div>
+      <div class="oracle-forecast" id="oracle-forecast"></div>
+      <div class="oracle-accuracy" id="oracle-accuracy"></div>
     </div>
   </details>
 
@@ -266,14 +380,12 @@
 <script>
 (function() {
   const TARGETS = [
-    { key: "city", uid: "SSD-4", label: "Hallenbad City", short: "City", match: ["city"], hasLanes: true,
+    { key: "city", uid: "SSD-4", label: "Hallenbad City", match: ["city"], hasLanes: true,
       tempInfo: "🌡 28°C / 32°C / 29°C" },
-    { key: "letzigraben", uid: "LETZI-1", label: "Freibad Letzigraben", short: "Letzi", match: ["letzigraben"], hasLanes: false,
+    { key: "letzigraben", uid: "LETZI-1", label: "Freibad Letzigraben", match: ["letzigraben"], hasLanes: false,
       tempInfo: "🌡 saisonal, ~20–25°C" },
-    { key: "utoquai", uid: "SSD-10", label: "Seebad Utoquai", short: "Uto", match: ["utoquai"], hasLanes: false,
-      tempInfo: "🌡 Seewasser, saisonal" },
-    { key: "heuried", uid: "fb012", label: "Freibad Heuried", short: "Hüried", match: ["heuried"], hasLanes: false,
-      tempInfo: "🌡 saisonal" }
+    { key: "utoquai", uid: "SSD-10", label: "Seebad Utoquai", match: ["utoquai"], hasLanes: false,
+      tempInfo: "🌡 Seewasser, saisonal" }
   ];
   const WS_URL = "wss://badi-public.crowdmonitor.ch:9591/api";
   const DATA_BASE = "data/";
@@ -315,7 +427,7 @@
   const state = {
     live: {}, history: [], bahnen: null, vario: null, temperatures: null, latestWeather: null, weatherForecast: null, selectedMonth: 'all', oracleDayOffset: 0,
     selectedBad: localStorage.getItem("badi:bad") || "city",
-    selectedView: localStorage.getItem("badi:view") || "today"
+    selectedView: localStorage.getItem("badi:view") || "heatmap"
   };
   const $ = id => document.getElementById(id);
 
@@ -360,8 +472,8 @@
     $("cards").innerHTML = TARGETS.map(t => {
       const e = state.live[t.key];
       if (!e) return `<div class="card">
-        <div class="card-label">${t.short||t.label}</div>
-        <div class="card-num"><span class="big" style="color:var(--text-muted)">—</span></div>
+        <div class="card-label">${t.label}</div>
+        <div class="card-num"><span class="small">—</span></div>
         <div class="card-temp">${t.tempInfo}</div>
       </div>`;
       const fill = parseInt(e.currentfill) || 0;
@@ -380,11 +492,16 @@
           if (td.measured_at) {
             let ts = td.measured_at;
             if (ts && ts.includes('T')) {
+              // ISO UTC Timestamp → Wochentag + Datum + Uhrzeit
               const d = new Date(ts);
+              const wt = d.toLocaleDateString('de-CH', {weekday:'long'});
+              const dat = d.toLocaleDateString('de-CH', {day:'2-digit', month:'2-digit', year:'numeric'});
               const zeit = d.toLocaleTimeString('de-CH', {hour:'2-digit', minute:'2-digit'});
-              ts = zeit + ' Uhr';
+              ts = `${wt}, ${dat}, ${zeit} Uhr`;
             } else if (ts && ts.match(/^(Mo|Di|Mi|Do|Fr|Sa|So)/)) {
+              // badi-info Format: "Sa, 02.05. um 06:48" → Samstag, 02.05.2026, 06:48 Uhr
               const tage = {Mo:'Montag',Di:'Dienstag',Mi:'Mittwoch',Do:'Donnerstag',Fr:'Freitag',Sa:'Samstag',So:'Sonntag'};
+              // "Sa, 02.05. um 06:48" → "Samstag, 02.05.2026, 06:48 Uhr"
               ts = ts
                 .replace(/^(Mo|Di|Mi|Do|Fr|Sa|So),?\s*/, m => tage[m.trim().replace(',','')] + ', ')
                 .replace(/(\d{2}\.\d{2}\.)\s*um\s*/, '$12026, ')
@@ -395,12 +512,12 @@
         }
       }
       const col = occupancyColor(ratio);
-      return `<div class="card" style="background:${col}22;border:1px solid ${col}66">
-        <div class="card-label">${t.short||t.label}</div>
-        <div style="font-size:2rem;font-weight:600;line-height:1.1;color:${col}">${fill}</div>
-        <div class="card-bar" style="margin:6px 0 4px"><span style="width:${Math.min(pct,100)}%;background:${col}"></span></div>
-        <div style="font-size:11px;color:var(--text-muted)">${pct}% · ${c.label}</div>
-        <div class="card-temp" style="font-size:10px;margin-top:3px;color:var(--text-dim)">${tempStr}</div>
+      return `<div class="card" style="background:${col}44;border-color:${col}cc">
+        <div class="card-label">${t.label}</div>
+        <div class="card-num"><span class="big">${fill}</span><span class="small">/ ${max}</span></div>
+        <div class="card-bar"><span style="width:${Math.min(pct,100)}%;background:${col}"></span></div>
+        <div class="card-meta">${pct}% · ${c.label}</div>
+        <div class="card-temp">${tempStr}</div>
       </div>`;
     }).join("");
 
@@ -445,7 +562,7 @@
       }
       const cls = l ? "" : "hidden";
       return `<div class="card ${cls}" style="background:#1a7fa844;border-color:#1a7fa8cc" id="letten-card">
-        <div class="card-label">Letten</div>
+        <div class="card-label" style="color:var(--text-muted)">Flussbad Oberer Letten</div>
         <div class="card-num"><span class="big">${tempStr}</span></div>
         <div class="card-temp">${tempSubStr}</div>
         <div class="card-meta" style="font-size:0.8rem;color:var(--text-muted)">${flowStr}</div>
@@ -621,13 +738,13 @@
     } catch (e) {}
     populateBadSelector();
     renderChart();
-    initForecast();
-    renderForecast(state.history);
+    initBesmeralda();
+    renderBesmeralda(state.history);
   }
 
   function populateBadSelector() {
     const bs = $("bad-select");
-    bs.innerHTML = TARGETS.map(t => `<option value="${t.key}">${t.short||t.label}</option>`).join("");
+    bs.innerHTML = TARGETS.map(t => `<option value="${t.key}">${t.label}</option>`).join("");
     bs.value = state.selectedBad;
     bs.onchange = () => {
       state.selectedBad = bs.value;
@@ -642,7 +759,7 @@
       const dp = $("date-picker");
       const ms = $("month-select");
       dp.style.display = (vs.value === "today") ? "inline-block" : "none";
-      ms.style.display = (vs.value === "today" || false) ? "none" : "inline-block";
+      ms.style.display = (vs.value === "today" || vs.value === "oracle") ? "none" : "inline-block";
       renderChart();
     };
     // Monats-Dropdown befüllen
@@ -654,13 +771,8 @@
         const label = new Date(y, mo-1, 1).toLocaleDateString("de-CH", {month:"long", year:"numeric"});
         return `<option value="${m}">${label}</option>`;
       }).join("");
-    // Default to current month if not explicitly saved
-    const curMonth = new Date().toLocaleDateString("sv").slice(0,7);
-    if (!state.selectedMonth || state.selectedMonth === 'all') {
-      if (months.includes(curMonth)) { state.selectedMonth = curMonth; }
-    }
     ms.value = state.selectedMonth;
-    ms.style.display = (state.selectedView === "today" || false) ? "none" : "inline-block";
+    ms.style.display = (state.selectedView === "today" || state.selectedView === "oracle") ? "none" : "inline-block";
     ms.onchange = () => {
       state.selectedMonth = ms.value;
       renderChart();
@@ -699,7 +811,7 @@
     }
     if (state.selectedView === "heatmap") renderHeatmap(data);
     else if (state.selectedView === "today") renderToday(data);
-
+    else if (state.selectedView === "oracle") renderOracle(data);
     else renderWeekday(data);
   }
 
@@ -850,41 +962,36 @@
 
 
 
-  function initForecast() {
-    const section = $("oracle-section");
-    if (!section) return;
-    const ctrl = document.createElement("div");
-    ctrl.id = "forecast-controls";
-    ctrl.style.cssText = "display:flex;gap:8px;flex-wrap:wrap;margin-bottom:.75rem;";
-    ctrl.innerHTML = `
-      <select id="fc-bad-select" style="font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid var(--border-strong);background:var(--bg-card);color:var(--text);font-family:inherit;">
-        ${TARGETS.map(t => `<option value="${t.key}"${t.key===state.selectedBad?" selected":""}>${t.short||t.label}</option>`).join("")}
-      </select>
-      <select id="fc-day-select" style="font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid var(--border-strong);background:var(--bg-card);color:var(--text);font-family:inherit;">
-        <option value="-1">Gestern</option>
-        <option value="0" selected>Heute</option>
-        <option value="1">Morgen</option>
-      </select>`;
-    section.prepend(ctrl);
-    document.getElementById("fc-bad-select").onchange = e => {
-      state.selectedBad = e.target.value;
-      renderForecast(state.history);
-    };
-    document.getElementById("fc-day-select").onchange = e => {
-      state.oracleDayOffset = parseInt(e.target.value);
-      renderForecast(state.history);
-    };
+  function initBesmeralda() {
+    // Sterne erzeugen
+    const starsEl = $("oracle-stars");
+    for (let i = 0; i < 12; i++) {
+      const s = document.createElement("div");
+      s.className = "oracle-star";
+      s.style.left = Math.random() * 100 + "%";
+      s.style.top = Math.random() * 100 + "%";
+      s.style.animationDelay = (Math.random() * 2) + "s";
+      s.style.animationDuration = (1.5 + Math.random() * 2) + "s";
+      starsEl.appendChild(s);
+    }
+    // Klick auf Kugel = neue Botschaft
+    $("oracle-ball").onclick = () => renderBesmeralda(state.history);
   }
 
   function isBrueckentag(d) {
-    const day = d.getDay();
+    // Brückentag = Mo oder Fr zwischen Wochenende und Feiertag
+    const day = d.getDay(); // 0=So, 1=Mo...5=Fr, 6=Sa
     if (day !== 1 && day !== 5) return false;
+    const check = new Date(d);
+    if (day === 1) check.setDate(d.getDate() - 1); // Sonntag davor
+    else check.setDate(d.getDate() + 1); // Samstag danach
+    // Prüfe ob benachbarter Tag Feiertag ist (vereinfacht: Feiertag-Liste)
     const neighbor = new Date(d);
     neighbor.setDate(d.getDate() + (day === 1 ? -2 : 1));
     return !!getHolidayName(neighbor);
   }
 
-  function renderForecast(data) {
+  function renderBesmeralda(data) {
     if (!data || data.length === 0) return;
 
     const nowReal = new Date();
@@ -1041,7 +1148,72 @@
           actualByHour[h].push(parseFloat(r.fill_ratio));
         });
 
-    // Chart — Prognose vs Tatsächlich
+    // Spruch
+    const curPred = predictions.find(p => p.h === currentHour);
+    const pct = curPred?.pct;
+    // Barnum-Aussagen die immer passen + Badi-Kontext
+    const barnumGesamt = [
+      "Ich spüre, dass Sie in letzter Zeit eine große Veränderung in sich tragen. Das Wasser wird sie klären.",
+      "Die Sterne zeigen: Sie sind jemand, der mehr gibt als er nimmt – auch auf der Bahn.",
+      "Das Pendel schlägt deutlich aus: Heute ist ein Tag der Entscheidungen. Treffen Sie die richtige.",
+      "Ich sehe eine Person in Ihrem Umfeld, die Sie unterschätzt. Das Wasser weiss es längst.",
+      "In letzter Zeit fühlten Sie sich oft missverstanden. Die Bahn ist Ihr Ort der Wahrheit.",
+      "Die Kugel zeigt eine Reise – nicht nur durch das Wasser, sondern auch durch sich selbst.",
+      "Jemand denkt öfter an Sie als Sie ahnen. Vielleicht sogar in der Nachbarbahn.",
+      "Die Handlinien deuten auf Ausdauer und einen starken Willen. Beides brauchen Sie heute.",
+      "Ein unerwartetes Ereignis kündigt sich an. Die Kugel empfiehlt: Seien Sie bereit.",
+      "Sie tragen etwas mit sich, das Sie noch nicht ganz loslassen konnten. Das Wasser hilft.",
+    ];
+
+    const sprueche = pct === null ? [
+      "Die Nebel über dem Becken lichten sich noch nicht. Kommen Sie später wieder, wenn die Sterne günstiger stehen.",
+      "Bésmeralda benötigt mehr Zeichen aus dem Jenseits. Und vielleicht auch mehr Daten.",
+      "Die Kugel schweigt. Manchmal ist das Schweigen selbst die Antwort.",
+    ] : pct < 15 ? [
+      "Die Bahnen liegen frei vor Ihnen wie ein unbeschriebenes Blatt. Schreiben Sie Ihre Geschichte.",
+      "Ich sehe stilles Wasser. Stilles Wasser aber gründet tief – und heute gehört die Tiefe Ihnen.",
+      "Das Pendel schlägt weit in Richtung Einsamkeit – aber heute ist das eine Gabe, keine Last.",
+      "Die Kugel flüstert: Es gibt Momente im Leben, die man allein erleben muss. Dies ist einer.",
+      "Bésmeralda sieht niemanden ausser Ihnen und Ihren Gedanken. Perfekt für die grossen Fragen.",
+    ] : pct < 35 ? [
+      "Die Sterne stehen günstig. Sie werden Menschen begegnen, aber der Raum gehört noch Ihnen.",
+      "Ich sehe ruhige Wasser und ein vertrautes Nicken. Die Kugel sagt: Heute ist ein guter Tag.",
+      "Das Pendel schlägt leicht – aber bestimmt. Eine angenehme Begegnung kündigt sich an.",
+      "Die Kugel zeigt: Genug Platz für Ihr Ego und Ihr Kraulen. Beides darf heute gross sein.",
+      "Jemand aus Ihrer Vergangenheit denkt an Sie. Aber heute – heute schwimmen Sie voraus.",
+    ] : pct < 55 ? [
+      "Die Karten zeigen eine Mischung aus Licht und Schatten. Anpassungsfähigkeit ist Ihre Stärke.",
+      "Ich sehe Bahnteilung in Ihrer Zukunft. Die Kugel rät: Lächeln Sie zuerst.",
+      "Das Pendel schlägt in die Mitte. Weder Stille noch Chaos – sondern das wahre Leben.",
+      "Bésmeralda sieht Menschen. Viele Menschen. Sie alle tragen ihre eigene Last. Und Badekappe.",
+      "Die Sterne zeigen: Heute brauchen Sie Geduld. Jene Tugend, die grösste aller Bahntugenden.",
+    ] : pct < 75 ? [
+      "Ich spüre eine Blockade – nicht in Ihrer Karriere, aber in Ihrer Bahn. Eine Lösung naht.",
+      "Die Kugel leuchtet bernsteinfarben. Voll genug um genervt zu sein. Zen ist Ihre einzige Rettung.",
+      "Das Pendel warnt vor einer Person, die langsamer schwimmt als sie vorgibt. Weichen Sie aus.",
+      "Bésmeralda sieht Gedränge. Und jemanden, der die Wende falsch timed. Geduld, mein Kind.",
+      "Die Handlinien deuten auf Stärke – aber auch auf die Fähigkeit, loszulassen. Heute: die Bahn.",
+    ] : pct < 90 ? [
+      "Die Kugel leuchtet rot. Ein Zeichen. Die Sterne raten: Warten Sie eine Stunde. Oder eine Ewigkeit.",
+      "Ich sehe viele Körper, wenig Bahnen, und eine grosse Prüfung Ihrer inneren Ruhe.",
+      "Das Pendel schlägt weit aus. Bésmeralda warnt: Heute begegnen Sie sich selbst auf engem Raum.",
+      "Ein unerwarteter Geldsegen kündigt sich an – aber erst nachdem Sie dieses Bad überlebt haben.",
+      "Die Karte zeigt den Turm. Manchmal muss etwas zusammenbrechen, damit Neues entsteht. Heute: Ihr Nerv.",
+    ] : [
+      "CHAOS. Die Kugel zeigt nur Schulterblätter, Wassernudeln und Unentschlossenheit.",
+      "Nicht heute. Bésmeralda hat gesprochen. Die Sterne haben gesprochen. Alle haben gesprochen.",
+      "Ich sehe eine grosse Reise in Ihrer Zukunft – weg von diesem Bad, zumindest heute.",
+      "Das Pendel schlägt so weit aus, dass es die Wand trifft. Kehren Sie um.",
+      "Die Karten zeigen: Manchmal ist das mutigste, was man tun kann, nach Hause zu gehen.",
+    ];
+
+    // Barnum-Satz mit 30% Wahrscheinlichkeit anhängen
+    const allSprueche = [...sprueche];
+    const spruch = allSprueche[Math.floor(Math.random() * allSprueche.length)];
+    const barnum = Math.random() < 0.3 ? " " + barnumGesamt[Math.floor(Math.random() * barnumGesamt.length)] : "";
+    $("oracle-message").textContent = `"${spruch}${barnum}"`;
+
+    // Chart (wie Tagesverlauf)
     const maxSpace = parseInt(data.find(r=>r.uid===uid)?.maxspace) || 220;
     const predPersons = predictions.map(p => p.pct !== null ? Math.round(p.pct/100*maxSpace) : null);
     const actualPersons = hours.map(h => {
@@ -1050,16 +1222,61 @@
       return Math.round(vals.reduce((s,v)=>s+v,0)/vals.length * maxSpace);
     });
 
-    if (window._forecastChart) { window._forecastChart.destroy(); window._forecastChart = null; }
-    const fcCanvas = $("forecast-chart");
-    if (fcCanvas) {
-      window._forecastChart = new Chart(fcCanvas.getContext("2d"), {
+    // Oracle-Box
+    const oracleBox = document.createElement("div");
+    oracleBox.style.cssText = "padding:0 0 1rem;";
+    oracleBox.innerHTML = `
+      <div style="display:flex;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;">
+        <select id="oracle-bad-select" style="font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid #3a1f6e;background:#0d0d1a;color:#c9a0ff;font-family:inherit;">
+          ${TARGETS.map(t2 => `<option value="${t2.key}"${t2.key===state.selectedBad?" selected":""}>${t2.label}</option>`).join("")}
+        </select>
+        <select id="oracle-day-select" style="font-size:13px;padding:6px 10px;border-radius:8px;border:1px solid #3a1f6e;background:#0d0d1a;color:#c9a0ff;font-family:inherit;">
+          <option value="-1">Gestern</option>
+          <option value="0" selected>Heute</option>
+          <option value="1">Morgen</option>
+        </select>
+        <span style="font-size:0.75rem;color:#6a4a9a;">${topN} Referenztage · kNN-Algorithmus</span>
+      </div>
+      <div id="oracle-chart-wrap" style="height:220px;position:relative;"></div>`;
+
+    const existing = $("oracle-section").querySelector("[data-oracle-content]");
+    if (existing) existing.remove();
+    oracleBox.dataset.oracleContent = "1";
+
+    const fc = $("oracle-forecast");
+    fc.innerHTML = "";
+    fc.before(oracleBox);
+
+    // Bad-Selector
+    setTimeout(() => {
+      const obs = document.getElementById("oracle-bad-select");
+      if (obs) obs.onchange = e => {
+        state.selectedBad = e.target.value;
+        renderBesmeralda(state.history);
+      };
+      const ods = document.getElementById("oracle-day-select");
+      if (ods) {
+        ods.value = String(state.oracleDayOffset);
+        ods.onchange = e => {
+          state.oracleDayOffset = parseInt(e.target.value);
+          renderBesmeralda(state.history);
+        };
+      }
+
+      // Chart
+      const wrap = document.getElementById("oracle-chart-wrap");
+      if (!wrap) return;
+      const canvas = document.createElement("canvas");
+      wrap.appendChild(canvas);
+
+      if (window._oracleChart) { window._oracleChart.destroy(); window._oracleChart = null; }
+      window._oracleChart = new Chart(canvas.getContext("2d"), {
         data: {
           labels: hours.map(h => h + ":00"),
           datasets: [
             {
               type: "bar",
-              label: "Prognose (Personen)",
+              label: "🔮 Prognose (Personen)",
               data: predPersons,
               backgroundColor: hours.map((h,i) => {
                 const v = predPersons[i];
@@ -1077,7 +1294,7 @@
             },
             {
               type: "line",
-              label: "Tatsächlich",
+              label: "✓ Tatsächlich",
               data: actualPersons,
               borderColor: "#4a9eff",
               backgroundColor: "rgba(74,158,255,0.12)",
@@ -1093,22 +1310,22 @@
         options: {
           responsive: true, maintainAspectRatio: false,
           plugins: {
-            legend: { display: true, labels: { color: "var(--text)", boxWidth: 12, font:{size:11} } },
+            legend: { display: true, labels: { color: "#c9a0ff", boxWidth: 12, font: {size:11} } },
             tooltip: { callbacks: {
               label: c => `${c.dataset.label}: ${c.raw !== null ? c.raw + " P" : "—"}`,
-            }},
+            }}
           },
           scales: {
-            x: { ticks: { color: "var(--text-muted)", font:{size:10} }, grid: { display: false } },
+            x: { ticks: { color: "#6a4a9a", font:{size:10} }, grid: { display: false } },
             y: {
               min: 0, suggestedMax: maxSpace,
-              ticks: { callback: v => v + " P", color: "var(--text-muted)", font:{size:10} },
-              grid: { color: "rgba(128,128,128,0.1)" }
+              ticks: { callback: v => v + " P", color: "#6a4a9a", font:{size:10} },
+              grid: { color: "rgba(255,255,255,0.05)" }
             }
           }
         }
       });
-    }
+    }, 50);
 
     // Genauigkeit
     let maeSum = 0, maeCount = 0;
@@ -1128,15 +1345,216 @@
       tempC !== null ? `${tempC.toFixed(0)}°C${forecastNote}` : null,
       rainMm > 0.5 ? `🌧 ${rainMm.toFixed(1)}mm` : null,
     ].filter(Boolean).join(" · ");
-    $("oracle-accuracy").textContent = maeCount > 0
-      ? `Tagesgenauigkeit bisher: ±${(maeSum/maeCount).toFixed(1)}% · ${topN} Referenztage · ${ctx || "normaler Tag"}`
-      : `${topN} ähnliche Referenztage · ${ctx || "normaler Tag"}`;
-    $("oracle-forecast").textContent = `kNN-Algorithmus · ${dayLabel}`;
+    const acc = $("oracle-accuracy");
+    acc.innerHTML = (maeCount > 0
+      ? `✦ Tagesgenauigkeit bisher: ±${(maeSum/maeCount).toFixed(1)}% · ${topN} Referenztage · ${ctx || "normaler Tag"}`
+      : `✦ ${topN} ähnliche Referenztage · ${ctx || "normaler Tag"}`)
+      + ` &nbsp;<span id="algo-toggle" style="cursor:pointer;color:#3a1f6e;font-size:0.7rem;" title="Algorithmus anzeigen">ℹ︎ Algorithmus</span>`;
+    const toggle = document.getElementById("algo-toggle");
+    const algoBox = document.getElementById("algo-box") || (() => {
+      const el = document.createElement("div");
+      el.id = "algo-box";
+      el.style.cssText = "display:none;margin-top:0.75rem;padding:0.75rem 1rem;background:rgba(0,0,0,0.3);border-radius:8px;font-size:0.72rem;line-height:1.7;color:#8870aa;text-align:left;";
+      el.innerHTML = "<strong style='color:#c9a0ff'>Bésmeralda's Prognose-Algorithmus</strong><br>"
+        + "<strong>1. Merkmals-Scores (Ähnlichkeit)</strong><br>"
+        + "&nbsp;· Wochentag-Match: " + (isOutdoor ? "38%" : "48%") + " Gewicht (stärkster Predictor)<br>"
+        + "&nbsp;· Feiertag/Brückentag: 22% (verändert Muster fundamental)<br>"
+        + "&nbsp;· Schulferien: 14% (signifikanter Effekt)<br>"
+        + "&nbsp;· Lufttemperatur: " + (isOutdoor ? "16%" : "6%") + " (" + (isOutdoor ? "Freibad: stark wetterabhängig" : "Hallenbad: Wetter wirkt invertiert") + ")<br>"
+        + "&nbsp;· Niederschlag: " + (isOutdoor ? "10%" : "4%") + "<br>"
+        + "<strong>2. Recency-Gewichtung (neu → wichtiger)</strong><br>"
+        + "&nbsp;· w = 0.70 × Ähnlichkeit + 0.30 × e^(−0.023 × Tage)<br>"
+        + "&nbsp;· Halbwertszeit ≈ 30 Tage (letzter Monat zählt doppelt so viel wie vor 2 Monaten)<br>"
+        + "<strong>3. Wetterkorrektur</strong><br>"
+        + "&nbsp;· " + (isOutdoor ? "Freibad: &lt;12°C → 20% Auslastung, Regen &gt;2mm → 30%" : "Hallenbad: Schönwetter reduziert, Regen 1–5mm erhöht, Starkregen senkt wieder") + "<br>"
+        + "<strong>4. Top-" + topN + " ähnlichste Tage</strong> als gewichteter Mittelwert";
+      acc.parentElement.appendChild(el);
+      return el;
+    })();
+    if (toggle) toggle.onclick = () => {
+      algoBox.style.display = algoBox.style.display === "none" ? "block" : "none";
+    };
+  }
 
-    const ds = $("fc-day-select");
-    if (ds) ds.value = String(state.oracleDayOffset);
-    const bs2 = $("fc-bad-select");
-    if (bs2) bs2.value = state.selectedBad;
+  function renderOracle(data) {
+    if (chart) { chart.destroy(); chart = null; }
+
+    const now = new Date();
+    const todayKey = DAY_KEYS[now.getDay()];
+    const isHoliday = !!getHolidayName(now);
+    const isSchool = isSchoolHoliday(now);
+    const weather = state.latestWeather;
+    const tempC = weather ? parseFloat(weather.temperature_c) : null;
+    const rainMm = weather ? parseFloat(weather.precipitation_mm) : 0;
+
+    const t = TARGETS.find(t => t.key === state.selectedBad);
+    const uid = t?.uid || state.selectedBad;
+
+    // Historische Mittelwerte pro Stunde für diesen Wochentag
+    const similar = data.filter(r => {
+      if (r.uid !== uid) return false;
+      if (r.weekday !== todayKey) return false;
+      // Feiertage/Schulferien matchen
+      const rHoliday = r.is_holiday === "True";
+      const rSchool = r.is_school_holiday === "True";
+      if (isHoliday !== rHoliday) return false;
+      return true;
+    });
+
+    // Stunden-Buckets
+    const buckets = {};
+    similar.forEach(r => {
+      const h = parseInt(r.hour);
+      const ratio = parseFloat(r.fill_ratio);
+      if (isNaN(h) || isNaN(ratio)) return;
+      if (!buckets[h]) buckets[h] = { sum: 0, count: 0, vals: [] };
+      buckets[h].sum += ratio;
+      buckets[h].count++;
+      buckets[h].vals.push(ratio);
+    });
+
+    // Wetter-Korrekturfaktor (nur für Freibäder)
+    let weatherFactor = 1.0;
+    const isOutdoor = uid !== "SSD-4";
+    if (isOutdoor && tempC !== null) {
+      if (tempC < 15) weatherFactor = 0.3;
+      else if (tempC < 20) weatherFactor = 0.6;
+      else if (tempC < 25) weatherFactor = 0.85;
+      else weatherFactor = 1.1;
+      if (rainMm > 2) weatherFactor *= 0.4;
+      else if (rainMm > 0.5) weatherFactor *= 0.7;
+    }
+
+    const hours = Array.from({length: 16}, (_, i) => i + 6); // 6-21
+    const predictions = hours.map(h => {
+      const b = buckets[h];
+      if (!b || b.count === 0) return null;
+      const mean = b.sum / b.count;
+      // Standardabweichung für Konfidenz
+      const variance = b.vals.reduce((s, v) => s + (v - mean)**2, 0) / b.vals.length;
+      const std = Math.sqrt(variance);
+      const adjusted = Math.min(1, Math.max(0, mean * weatherFactor));
+      return { h, mean: adjusted, std, count: b.count };
+    });
+
+    // Tatsächliche Werte heute (für Backtesting)
+    const todayStr = now.toLocaleDateString("sv");
+    const actualToday = data.filter(r =>
+      r.uid === uid && r.timestamp_local?.slice(0,10) === todayStr
+    );
+    const actualByHour = {};
+    actualToday.forEach(r => {
+      const h = parseInt(r.hour);
+      if (!actualByHour[h]) actualByHour[h] = [];
+      actualByHour[h].push(parseFloat(r.fill_ratio));
+    });
+
+    const predVals = predictions.map(p => p ? Math.round(p.mean * 100) : null);
+    const actualVals = hours.map(h => {
+      const vals = actualByHour[h];
+      if (!vals || vals.length === 0) return null;
+      return Math.round(vals.reduce((s,v) => s+v, 0) / vals.length * 100);
+    });
+
+    // Oracle-Spruch
+    const currentHour = now.getHours();
+    const currentPred = predictions.find(p => p && p.h === currentHour);
+    const oracleMsg = (() => {
+      if (!currentPred) return "Die Kugel schweigt zu dieser Stunde…";
+      const pct = Math.round(currentPred.mean * 100);
+      const conf = currentPred.count >= 5 ? "Die Kugel ist sich sicher" : "Die Kugel ahnt";
+      if (pct < 15) return `${conf}: Jetzt ist es so leer wie dein Kopf nach der langen Bahn. 🧘`;
+      if (pct < 35) return `${conf}: Angenehm ruhig. Du musst niemanden überholen. 🏊`;
+      if (pct < 55) return `${conf}: Mittelfeld. Bahnteilung könnte nötig werden. 🤝`;
+      if (pct < 75) return `${conf}: Voll genug um genervt zu sein. Plane entsprechend. 😤`;
+      if (pct < 90) return `${conf}: Die Kugel rät: Warte eine Stunde. Oder nicht. Du weisst es selbst. 🔮`;
+      return `${conf}: Absolutes Chaos. Nicht mal die Kristallkugel will da rein. 🚫`;
+    })();
+
+    // Backtesting: MAE berechnen
+    let maeSum = 0, maeCount = 0;
+    hours.forEach((h, i) => {
+      if (predVals[i] !== null && actualVals[i] !== null) {
+        maeSum += Math.abs(predVals[i] - actualVals[i]);
+        maeCount++;
+      }
+    });
+    const mae = maeCount > 0 ? (maeSum / maeCount).toFixed(1) : null;
+
+    const sampleCount = similar.length;
+    $("hist-status").textContent = `🔮 Basiert auf ${sampleCount} ähnlichen ${todayKey}-Messungen${isHoliday ? " (Feiertag)" : ""}${isSchool ? " (Schulferien)" : ""}${isOutdoor && weatherFactor !== 1 ? " · Wetter-korrigiert" : ""}${mae ? ` · Tagesgenauigkeit bisher: ±${mae}%` : ""}`;
+
+    chart = new Chart($("histChart").getContext("2d"), {
+      type: "bar",
+      data: {
+        labels: hours.map(h => h + ":00"),
+        datasets: [
+          {
+            label: "🔮 Prognose",
+            data: predVals,
+            backgroundColor: hours.map((h,i) => {
+              const v = predVals[i];
+              if (v === null) return "transparent";
+              return occupancyColor(v/100) + "99";
+            }),
+            borderColor: hours.map((h,i) => {
+              const v = predVals[i];
+              if (v === null) return "transparent";
+              return occupancyColor(v/100);
+            }),
+            borderWidth: 1,
+            borderRadius: 4,
+          },
+          {
+            label: "✓ Tatsächlich",
+            data: actualVals,
+            type: "line",
+            borderColor: "#4a9eff",
+            backgroundColor: "rgba(74,158,255,0.15)",
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            borderWidth: 2,
+            tension: 0.3,
+            fill: false,
+          }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true, labels: { color: "var(--text)" } },
+          tooltip: { callbacks: {
+            label: c => `${c.dataset.label}: ${c.raw !== null ? c.raw + "%" : "—"}`
+          }},
+          annotation: {
+            annotations: {
+              now: {
+                type: "line",
+                xMin: currentHour - 6,
+                xMax: currentHour - 6,
+                borderColor: "rgba(255,255,255,0.3)",
+                borderWidth: 1,
+                borderDash: [4,4],
+              }
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: "var(--text-muted)" }, grid: { display: false } },
+          y: { min: 0, max: 100, ticks: { callback: v => v + "%", color: "var(--text-muted)" } }
+        }
+      }
+    });
+
+    // Oracle-Box über dem Chart
+    const oracleBox = document.createElement("div");
+    oracleBox.style.cssText = "text-align:center;padding:0.75rem;margin-bottom:0.75rem;background:rgba(255,255,255,0.04);border-radius:10px;font-size:0.9rem;line-height:1.5;";
+    oracleBox.textContent = oracleMsg;
+    const chartWrap = $("histChart").parentElement;
+    const existing = chartWrap.previousElementSibling;
+    if (existing && existing.dataset.oracle) existing.remove();
+    oracleBox.dataset.oracle = "1";
+    chartWrap.before(oracleBox);
   }
 
   function renderWeekday(data) {
