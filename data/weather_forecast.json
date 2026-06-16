@@ -1,11 +1,11 @@
 {
-  "updated_at": "2026-06-16T06:30:28+00:00",
+  "updated_at": "2026-06-16T07:30:21+00:00",
   "days": [
     {
       "date": "2026-06-16",
       "temp_max": 27.1,
       "temp_min": 17.0,
-      "precip_sum": 0.0,
+      "precip_sum": 0.1,
       "precip_prob_max": 8,
       "weather_code": 3,
       "wind_max": 11.2,
@@ -133,7 +133,7 @@
           "hour": 17,
           "temp": 26.9,
           "precip_prob": 3,
-          "precip": 0.0,
+          "precip": 0.1,
           "weather_code": 3
         },
         {
