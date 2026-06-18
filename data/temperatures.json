@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-06-18T06:00:38+00:00",
-  "updated_at_local": "08:00",
+  "updated_at": "2026-06-18T06:30:51+00:00",
+  "updated_at_local": "08:30",
   "city": {
     "temp": 28.0,
     "unit": "C",
@@ -8,8 +8,8 @@
     "note": "Schwimmerbecken 28°C / Nichtschwimmer 32°C"
   },
   "letzigraben": {
-    "temp": 24.0,
-    "measured_at": "Mi., 17.06. um 21:21",
+    "temp": 23.0,
+    "measured_at": "Do., 18.06. um 06:50",
     "source": "badi-info.ch",
     "unit": "C"
   },
@@ -21,9 +21,9 @@
   },
   "letten": {
     "water_temp": 18.6,
-    "abfluss_m3s": 67.4,
-    "temp_measured_at": "2026-06-18T05:50:00+00:00",
-    "flow_measured_at": "2026-06-18T05:50:00+00:00",
+    "abfluss_m3s": 67.0,
+    "temp_measured_at": "2026-06-18T06:20:00+00:00",
+    "flow_measured_at": "2026-06-18T06:20:00+00:00",
     "source": "hydroproweb.zh.ch / Limmat KW Letten"
   }
 }
