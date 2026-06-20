@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-06-20T04:30:25+00:00",
-  "updated_at_local": "06:30",
+  "updated_at": "2026-06-20T05:00:41+00:00",
+  "updated_at_local": "07:00",
   "city": {
     "temp": 28.0,
     "unit": "C",
@@ -14,16 +14,16 @@
     "unit": "C"
   },
   "utoquai": {
-    "temp": 23.5,
-    "measured_at": "2026-06-20T02:20:00+00:00",
+    "temp": 23.3,
+    "measured_at": "2026-06-20T04:10:00+00:00",
     "source": "OGD Stadt Zürich / Tiefenbrunnen",
     "unit": "C"
   },
   "letten": {
     "water_temp": 18.6,
-    "abfluss_m3s": 70.0,
-    "temp_measured_at": "2026-06-20T04:20:00+00:00",
-    "flow_measured_at": "2026-06-20T04:20:00+00:00",
+    "abfluss_m3s": 71.7,
+    "temp_measured_at": "2026-06-20T04:50:00+00:00",
+    "flow_measured_at": "2026-06-20T04:50:00+00:00",
     "source": "hydroproweb.zh.ch / Limmat KW Letten"
   }
 }
