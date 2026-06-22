@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-06-22T05:00:18+00:00",
-  "updated_at_local": "07:00",
+  "updated_at": "2026-06-22T05:30:55+00:00",
+  "updated_at_local": "07:30",
   "city": {
     "temp": 28.0,
     "unit": "C",
@@ -22,8 +22,8 @@
   "letten": {
     "water_temp": 19.6,
     "abfluss_m3s": 42.6,
-    "temp_measured_at": "2026-06-22T04:50:00+00:00",
-    "flow_measured_at": "2026-06-22T04:50:00+00:00",
+    "temp_measured_at": "2026-06-22T05:20:00+00:00",
+    "flow_measured_at": "2026-06-22T05:20:00+00:00",
     "source": "hydroproweb.zh.ch / Limmat KW Letten"
   }
 }
