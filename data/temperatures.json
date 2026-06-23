@@ -1,23 +1,29 @@
 {
-  "updated_at": "2026-06-23T09:25:33+00:00",
-  "updated_at_local": "11:25",
+  "updated_at": "2026-06-23T09:30:25+00:00",
+  "updated_at_local": "11:30",
   "city": {
     "temp": 28.0,
     "unit": "C",
     "source": "static",
-    "note": "Schwimmerbecken 28°C / Nichtschwimmer 32°C",
-    "measured_at": null
+    "note": "Schwimmerbecken 28°C / Nichtschwimmer 32°C"
   },
   "letzigraben": {
     "temp": 26.0,
-    "unit": "C",
+    "measured_at": "Di., 23.06. um 07:04",
     "source": "badi-info.ch",
-    "measured_at": "Di., 23.06. um 07:04"
+    "unit": "C"
   },
   "utoquai": {
     "temp": 25.6,
-    "unit": "C",
+    "measured_at": "2026-06-23T08:20:00+00:00",
     "source": "OGD Stadt Zürich / Tiefenbrunnen",
-    "measured_at": "2026-06-23T08:20:00+00:00"
+    "unit": "C"
+  },
+  "letten": {
+    "water_temp": 21.1,
+    "abfluss_m3s": 43.4,
+    "temp_measured_at": "2026-06-23T09:20:00+00:00",
+    "flow_measured_at": "2026-06-23T09:20:00+00:00",
+    "source": "hydroproweb.zh.ch / Limmat KW Letten"
   }
 }
