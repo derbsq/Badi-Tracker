@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-06-26T10:30:28+00:00",
+  "updated_at": "2026-06-26T11:00:53+00:00",
   "days": [
     {
       "date": "2026-06-26",
@@ -8,7 +8,7 @@
       "precip_sum": 0.0,
       "precip_prob_max": 0,
       "weather_code": 3,
-      "wind_max": 8.7,
+      "wind_max": 8.6,
       "hourly": [
         {
           "hour": 0,
@@ -187,7 +187,7 @@
       "precip_sum": 0.0,
       "precip_prob_max": 8,
       "weather_code": 3,
-      "wind_max": 14.2,
+      "wind_max": 10.1,
       "hourly": [
         {
           "hour": 0,
@@ -366,7 +366,7 @@
       "precip_sum": 0.23,
       "precip_prob_max": 15,
       "weather_code": 3,
-      "wind_max": 13.7,
+      "wind_max": 12.8,
       "hourly": [
         {
           "hour": 0,
