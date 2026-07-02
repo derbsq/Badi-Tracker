@@ -44599,3 +44599,11 @@ timestamp_utc,timestamp_local,weekday,hour,minute,is_holiday,is_school_holiday,u
 2026-07-02T18:30:34+00:00,2026-07-02T20:30:34+02:00,Thursday,20,30,False,False,SSD-4,Hallenbad City,76,144,220,0.3455
 2026-07-02T18:30:34+00:00,2026-07-02T20:30:34+02:00,Thursday,20,30,False,False,SSD-7,Hallenbad Oerlikon,39,161,200,0.195
 2026-07-02T18:30:34+00:00,2026-07-02T20:30:34+02:00,Thursday,20,30,False,False,SSD-10,Seebad Utoquai,467,333,800,0.5837
+2026-07-02T18:40:16+00:00,2026-07-02T20:40:16+02:00,Thursday,20,40,False,False,flb6939,Flussbad Oberer Letten,282,718,1000,0.282
+2026-07-02T18:40:16+00:00,2026-07-02T20:40:16+02:00,Thursday,20,40,False,False,flb6940,Flussbad Unterer Letten,146,654,800,0.1825
+2026-07-02T18:40:16+00:00,2026-07-02T20:40:16+02:00,Thursday,20,40,False,False,fb012,Freibad Heuried,192,2408,2600,0.0738
+2026-07-02T18:40:16+00:00,2026-07-02T20:40:16+02:00,Thursday,20,40,False,False,LETZI-1,Freibad Letzigraben,128,3672,3800,0.0337
+2026-07-02T18:40:16+00:00,2026-07-02T20:40:16+02:00,Thursday,20,40,False,False,SSD-11,Freibad Seebach,87,1913,2000,0.0435
+2026-07-02T18:40:16+00:00,2026-07-02T20:40:16+02:00,Thursday,20,40,False,False,SSD-4,Hallenbad City,85,135,220,0.3864
+2026-07-02T18:40:16+00:00,2026-07-02T20:40:16+02:00,Thursday,20,40,False,False,SSD-7,Hallenbad Oerlikon,40,160,200,0.2
+2026-07-02T18:40:16+00:00,2026-07-02T20:40:16+02:00,Thursday,20,40,False,False,SSD-10,Seebad Utoquai,369,431,800,0.4612
