@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-02T07:30:37+00:00",
+  "updated_at": "2026-07-02T08:00:12+00:00",
   "days": [
     {
       "date": "2026-07-02",
@@ -8,7 +8,7 @@
       "precip_sum": 0.0,
       "precip_prob_max": 0,
       "weather_code": 3,
-      "wind_max": 10.8,
+      "wind_max": 10.4,
       "hourly": [
         {
           "hour": 0,
@@ -187,7 +187,7 @@
       "precip_sum": 0.0,
       "precip_prob_max": 18,
       "weather_code": 3,
-      "wind_max": 11.8,
+      "wind_max": 9.6,
       "hourly": [
         {
           "hour": 0,
