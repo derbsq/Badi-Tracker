@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-06T09:00:30+00:00",
+  "updated_at": "2026-07-06T09:30:57+00:00",
   "days": [
     {
       "date": "2026-07-06",
@@ -722,7 +722,7 @@
       "temp_max": 34.7,
       "temp_min": 19.0,
       "precip_sum": 0.0,
-      "precip_prob_max": 0,
+      "precip_prob_max": 2,
       "weather_code": 3,
       "wind_max": 10.0,
       "hourly": [
@@ -883,14 +883,14 @@
         {
           "hour": 22,
           "temp": 28.7,
-          "precip_prob": 0,
+          "precip_prob": 1,
           "precip": 0.0,
           "weather_code": 3
         },
         {
           "hour": 23,
           "temp": 26.7,
-          "precip_prob": 0,
+          "precip_prob": 2,
           "precip": 0.0,
           "weather_code": 3
         }
@@ -908,49 +908,49 @@
         {
           "hour": 0,
           "temp": 25.3,
-          "precip_prob": 0,
+          "precip_prob": 2,
           "precip": 0.0,
           "weather_code": 2
         },
         {
           "hour": 1,
           "temp": 24.2,
-          "precip_prob": 0,
+          "precip_prob": 3,
           "precip": 0.0,
           "weather_code": 2
         },
         {
           "hour": 2,
           "temp": 23.5,
-          "precip_prob": 0,
+          "precip_prob": 3,
           "precip": 0.0,
           "weather_code": 2
         },
         {
           "hour": 3,
           "temp": 23.1,
-          "precip_prob": 0,
+          "precip_prob": 3,
           "precip": 0.0,
           "weather_code": 3
         },
         {
           "hour": 4,
           "temp": 22.8,
-          "precip_prob": 1,
+          "precip_prob": 3,
           "precip": 0.0,
           "weather_code": 3
         },
         {
           "hour": 5,
           "temp": 22.9,
-          "precip_prob": 2,
+          "precip_prob": 3,
           "precip": 0.0,
           "weather_code": 3
         },
         {
           "hour": 6,
           "temp": 23.1,
-          "precip_prob": 2,
+          "precip_prob": 3,
           "precip": 0.0,
           "weather_code": 3
         },
