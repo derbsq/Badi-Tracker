@@ -1,5 +1,5 @@
 {
-  "updated_at": "2026-07-06T10:00:30+00:00",
+  "updated_at": "2026-07-06T10:30:29+00:00",
   "days": [
     {
       "date": "2026-07-06",
@@ -949,21 +949,21 @@
         },
         {
           "hour": 6,
-          "temp": 21.2,
+          "temp": 20.6,
           "precip_prob": 3,
           "precip": 0.0,
           "weather_code": 3
         },
         {
           "hour": 7,
-          "temp": 22.6,
+          "temp": 21.7,
           "precip_prob": 3,
           "precip": 0.0,
           "weather_code": 3
         },
         {
           "hour": 8,
-          "temp": 23.9,
+          "temp": 22.4,
           "precip_prob": 4,
           "precip": 0.0,
           "weather_code": 3
