@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-07-18T07:37:14+00:00",
-  "updated_at_local": "09:37",
+  "updated_at": "2026-07-18T11:04:49+00:00",
+  "updated_at_local": "13:04",
   "city": {
     "temp": 28.0,
     "unit": "C",
@@ -9,15 +9,15 @@
     "measured_at": null
   },
   "letzigraben": {
-    "temp": 25.0,
+    "temp": 24.6,
     "unit": "C",
     "source": "badi-info.ch",
-    "measured_at": "Sa., 18.07. um 06:48"
+    "measured_at": "Sa., 18.07. um 09:44"
   },
   "utoquai": {
-    "temp": 26.0,
+    "temp": 26.2,
     "unit": "C",
     "source": "OGD Stadt Zürich / Tiefenbrunnen",
-    "measured_at": "2026-07-18T07:00:00+00:00"
+    "measured_at": "2026-07-18T09:50:00+00:00"
   }
 }
