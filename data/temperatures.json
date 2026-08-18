@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-08-18T06:28:59+00:00",
-  "updated_at_local": "08:28",
+  "updated_at": "2026-08-18T10:28:54+00:00",
+  "updated_at_local": "12:28",
   "city": {
     "temp": 28.0,
     "unit": "C",
@@ -15,9 +15,9 @@
     "measured_at": "Di., 18.08. um 07:24"
   },
   "utoquai": {
-    "temp": 26.0,
+    "temp": 25.9,
     "unit": "C",
     "source": "OGD Stadt Zürich / Tiefenbrunnen",
-    "measured_at": "2026-08-18T04:50:00+00:00"
+    "measured_at": "2026-08-18T08:30:00+00:00"
   }
 }
