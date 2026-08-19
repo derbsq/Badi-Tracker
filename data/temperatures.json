@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-08-18T16:20:28+00:00",
-  "updated_at_local": "18:20",
+  "updated_at": "2026-08-19T06:29:33+00:00",
+  "updated_at_local": "08:29",
   "city": {
     "temp": 28.0,
     "unit": "C",
@@ -12,7 +12,7 @@
     "temp": 25.0,
     "unit": "C",
     "source": "badi-info.ch",
-    "measured_at": "Di., 18.08. um 07:24"
+    "measured_at": "Mi., 19.08. um 06:30"
   },
   "utoquai": {
     "temp": 26.0,
