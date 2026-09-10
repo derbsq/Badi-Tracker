@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-09T18:57:11+00:00",
-  "updated_at_local": "20:57",
+  "updated_at": "2026-09-10T10:20:15+00:00",
+  "updated_at_local": "12:20",
   "city": {
     "temp": 28.0,
     "unit": "C",
@@ -12,12 +12,12 @@
     "temp": 24.0,
     "unit": "C",
     "source": "badi-info.ch",
-    "measured_at": "Mi., 09.09. um 12:48"
+    "measured_at": "Do., 10.09. um 06:57"
   },
   "utoquai": {
-    "temp": 23.8,
+    "temp": 23.4,
     "unit": "C",
     "source": "OGD Stadt Zürich / Tiefenbrunnen",
-    "measured_at": "2026-09-09T17:00:00+00:00"
+    "measured_at": "2026-09-10T07:40:00+00:00"
   }
 }
