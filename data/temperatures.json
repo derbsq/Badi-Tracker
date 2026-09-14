@@ -1,6 +1,6 @@
 {
-  "updated_at": "2026-09-14T11:22:08+00:00",
-  "updated_at_local": "13:22",
+  "updated_at": "2026-09-14T16:11:59+00:00",
+  "updated_at_local": "18:11",
   "city": {
     "temp": 28.0,
     "unit": "C",
@@ -9,10 +9,10 @@
     "measured_at": null
   },
   "letzigraben": {
-    "temp": 23.0,
+    "temp": 24.0,
     "unit": "C",
     "source": "badi-info.ch",
-    "measured_at": "Mo., 14.09. um 10:32"
+    "measured_at": "Mo., 14.09. um 16:33"
   },
   "utoquai": {
     "temp": 22.9,
